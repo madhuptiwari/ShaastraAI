@@ -1,0 +1,14 @@
+# Secret API Keys (NEVER push to GitHub)
+.env
+
+# Large Training PDF Folders & Local Vector Cache
+training_pdfs/
+training_pdf/
+faiss_index.bin
+chunks_metadata.json
+
+# Python & PyCharm Environment
+.venv/
+venv/
+__pycache__/
+.idea/
