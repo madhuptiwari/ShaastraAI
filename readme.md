@@ -1,6 +1,24 @@
 # ShaashtraAI — Custom Multi-Turn Multimodal PDF RAG Assistant
 
-**ShaashtraAI** is a custom multi-turn, multimodal Retrieval-Augmented Generation (RAG) AI assistant built in Python with [Amazon Bedrock](https://docs.aws.amazon.com/bedrock/latest/userguide/what-is-bedrock.html), [FAISS](https://pypi.org/project/faiss-cpu/), [PyMuPDF](https://pypi.org/project/pymupdf/), and [Streamlit](https://docs.streamlit.io/). It automatically indexes collections of reference PDFs—including Sanskrit, Hindi, and English texts—and answers user questions across multi-turn conversations using text, video, audio, image, and document inputs.
+[![Netlify Status](https://api.netlify.com/api/v1/badges/e95758d2-b464-4afb-99ec-f6dc1d649bc5/deploy-status)](https://shaastraai.netlify.app/)
+[![Live Web Portal](https://img.shields.io/badge/Netlify_Edge-Live_Portal-00c7b7?style=flat&logo=netlify)](https://shaastraai.netlify.app/)
+[![Python](https://img.shields.io/badge/Python-3.10+-3776ab?style=flat&logo=python)](https://python.org)
+[![Streamlit](https://img.shields.io/badge/Streamlit-1.40+-ff4b4b?style=flat&logo=streamlit)](https://streamlit.io)
+[![AWS Bedrock](https://img.shields.io/badge/AWS-Bedrock_Nova-ff9900?style=flat&logo=amazon-aws)](https://aws.amazon.com/bedrock/)
+
+**ShaashtraAI** is a custom multi-turn, multimodal Retrieval-Augmented Generation (RAG) AI assistant built with [Amazon Bedrock](https://docs.aws.amazon.com/bedrock/latest/userguide/what-is-bedrock.html), [Google Gemini](https://ai.google.dev/), [FAISS](https://pypi.org/project/faiss-cpu/), [PyMuPDF](https://pypi.org/project/pymupdf/), and [Streamlit](https://docs.streamlit.io/). It automatically indexes collections of reference PDFs—including ancient Sanskrit manuscripts, Hindi texts, and English scholarship—and answers user questions across multi-turn conversations using text, video, audio, image, and document inputs.
+
+🌐 **Live Netlify Web Portal**: [https://shaastraai.netlify.app/](https://shaastraai.netlify.app/)
+
+## Deployments & Access
+
+ShaastraAI provides two deployment modalities:
+
+1. **Netlify Edge Web Portal ([https://shaastraai.netlify.app/](https://shaastraai.netlify.app/))**:
+   - Hosted globally on Netlify Edge CDN.
+   - Interactive chat assistant with multi-turn query simulation, direct Google Gemini API integration (client-side or via Netlify Serverless Functions), architecture visualizers, and project diagnostics.
+2. **Full Local / Cloud Python Streamlit Backend (`app.py`)**:
+   - Runs the complete deep RAG engine with local FAISS vector search, PyMuPDF, OpenCV video keyframe extraction, Amazon Bedrock Converse API, and Amazon Transcribe.
 
 ## Key Features
 
@@ -38,6 +56,15 @@
 
 ```text
 ShaastraAI/
+├── public/                  # Netlify Edge web application & portal
+│   ├── index.html           # Modern interactive UI & documentation portal
+│   ├── styles.css           # Responsive obsidian & saffron theme
+│   ├── app.js               # Multi-turn chat assistant, API router, and RAG knowledge client
+│   └── favicon.svg          # Vector favicon
+├── netlify/
+│   └── functions/
+│       └── chat.js          # Optional Netlify serverless Gemini API proxy
+├── netlify.toml             # Netlify deployment and Edge routing configuration
 ├── training_pdfs/           # Place your training PDFs (or subfolders of PDFs) here
 ├── app.py                   # Main Streamlit application, RAG engine, and multi-tier model router
 ├── requirements.txt         # Python package dependencies
