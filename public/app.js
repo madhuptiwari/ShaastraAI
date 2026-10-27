@@ -309,6 +309,16 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  // Close drawer or modal on Escape key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeMobileDrawer();
+      if (settingsModal && !settingsModal.classList.contains('hidden')) {
+        settingsModal.classList.add('hidden');
+      }
+    }
+  });
+
   // Virtual keyboard layout adjustment for mobile browsers
   if (window.visualViewport && userInput) {
     window.visualViewport.addEventListener('resize', () => {
@@ -417,21 +427,37 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function openMobileDrawer() {
-  if (mobileDrawer && drawerOverlay) {
+  if (mobileDrawer) {
     mobileDrawer.classList.add('open');
-    drawerOverlay.classList.add('open');
-    if (mobileMenuBtn) mobileMenuBtn.setAttribute('aria-expanded', 'true');
-    document.body.style.overflow = 'hidden';
+    mobileDrawer.setAttribute('aria-hidden', 'false');
   }
+  if (drawerOverlay) {
+    drawerOverlay.classList.add('open');
+    drawerOverlay.classList.add('active');
+    drawerOverlay.setAttribute('aria-hidden', 'false');
+  }
+  if (mobileMenuBtn) {
+    mobileMenuBtn.classList.add('open');
+    mobileMenuBtn.setAttribute('aria-expanded', 'true');
+  }
+  document.body.style.overflow = 'hidden';
 }
 
 function closeMobileDrawer() {
-  if (mobileDrawer && drawerOverlay) {
+  if (mobileDrawer) {
     mobileDrawer.classList.remove('open');
-    drawerOverlay.classList.remove('open');
-    if (mobileMenuBtn) mobileMenuBtn.setAttribute('aria-expanded', 'false');
-    document.body.style.overflow = '';
+    mobileDrawer.setAttribute('aria-hidden', 'true');
   }
+  if (drawerOverlay) {
+    drawerOverlay.classList.remove('open');
+    drawerOverlay.classList.remove('active');
+    drawerOverlay.setAttribute('aria-hidden', 'true');
+  }
+  if (mobileMenuBtn) {
+    mobileMenuBtn.classList.remove('open');
+    mobileMenuBtn.setAttribute('aria-expanded', 'false');
+  }
+  document.body.style.overflow = '';
 }
 
 function updateTierBadge() {
