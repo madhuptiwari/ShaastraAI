@@ -1141,6 +1141,124 @@ a:hover {
   margin-top: auto;
 }
 
+/* Vedic Dinacharya & Rich Schedule Components */
+.routine-container {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.routine-header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 10px;
+}
+
+.routine-header h3 {
+  font-family: var(--font-serif);
+  font-size: 1.25rem;
+  color: var(--gold-light);
+  margin-bottom: 6px;
+}
+
+.routine-badges {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.timeline-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 10px 0;
+}
+
+.timeline-item {
+  display: flex;
+  gap: 12px;
+  background: rgba(0, 0, 0, 0.25);
+  border-left: 3px solid var(--gold-primary);
+  border-radius: 4px var(--radius-sm) var(--radius-sm) 4px;
+  padding: 10px 14px;
+  align-items: flex-start;
+}
+
+.timeline-time {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--cyan-light);
+  font-size: 0.8rem;
+  min-width: 135px;
+  flex-shrink: 0;
+  padding-top: 2px;
+}
+
+.timeline-content {
+  font-size: 0.88rem;
+  color: #e2e8f0;
+  line-height: 1.5;
+}
+
+.timeline-content strong {
+  color: var(--gold-light);
+}
+
+.tatva-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 12px 0;
+  font-size: 0.82rem;
+}
+
+.tatva-table th, .tatva-table td {
+  padding: 8px 10px;
+  border: 1px solid var(--border-color);
+  text-align: left;
+}
+
+.tatva-table th {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--gold-light);
+}
+
+.quick-prompt-btn {
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  color: var(--gold-light);
+  padding: 5px 12px;
+  border-radius: var(--radius-full);
+  font-size: 0.78rem;
+  font-weight: 500;
+  cursor: pointer;
+  margin: 3px;
+  transition: all 0.2s ease;
+  display: inline-block;
+}
+
+.quick-prompt-btn:hover {
+  background: rgba(245, 158, 11, 0.25);
+  transform: translateY(-1px);
+  border-color: var(--gold-primary);
+  color: #fff;
+}
+
+.quick-prompts-wrapper {
+  margin-top: 10px;
+  padding: 10px 14px;
+  background: rgba(15, 23, 42, 0.6);
+  border-radius: var(--radius-sm);
+  border: 1px dashed rgba(245, 158, 11, 0.3);
+}
+
+.quick-prompts-label {
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--cyan-light);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  display: block;
+}
+
 .footer-content {
   display: flex;
   flex-direction: column;

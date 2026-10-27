@@ -7,7 +7,65 @@ let conversationHistory = [];
 let currentAttachment = null;
 let activeMode = 'auto'; // 'auto', 'bedrock', 'gemini', 'faiss'
 
-// Knowledge Base for instant high-quality grounding
+// Classical Indic Astrological & Ayurvedic Knowledge Data
+const RASHI_DATA = {
+  aries: { sanskrit: "मेष (Mesha)", element: "Agni (Fire)", ruler: "Mangala (Mars)", dosha: "Pitta-Vata", nature: "Dynamic, pioneering, high energy", oil: "Cooling coconut or Chandanadi oil", exercise: "Moderate strength training & flow; avoid midday heat exhaustion", pranayama: "Sheetali and Nadi Shodhana (calming the nervous system)" },
+  mesha: { sanskrit: "मेष (Mesha)", element: "Agni (Fire)", ruler: "Mangala (Mars)", dosha: "Pitta-Vata", nature: "Dynamic, pioneering, high energy", oil: "Cooling coconut or Chandanadi oil", exercise: "Moderate strength training & flow; avoid midday heat exhaustion", pranayama: "Sheetali and Nadi Shodhana (calming the nervous system)" },
+  taurus: { sanskrit: "वृषभ (Vrishabha)", element: "Prithvi (Earth)", ruler: "Shukra (Venus)", dosha: "Kapha", nature: "Grounded, steady, sensory, persevering", oil: "Warm sesame oil or dry herbal powder (Udvartana)", exercise: "Vigorous aerobic exercise & dynamic Surya Namaskar", pranayama: "Bhastrika & Kapalabhati (warming & stimulating)" },
+  vrishabha: { sanskrit: "वृषभ (Vrishabha)", element: "Prithvi (Earth)", ruler: "Shukra (Venus)", dosha: "Kapha", nature: "Grounded, steady, sensory, persevering", oil: "Warm sesame oil or dry herbal powder (Udvartana)", exercise: "Vigorous aerobic exercise & dynamic Surya Namaskar", pranayama: "Bhastrika & Kapalabhati (warming & stimulating)" },
+  gemini: { sanskrit: "मिथुन (Mithuna)", element: "Vayu (Air)", ruler: "Budha (Mercury)", dosha: "Vata", nature: "Intellectual, communicative, adaptable, fast-moving", oil: "Warm unrefined Sesame (Tila) oil or Mahanarayana oil", exercise: "Grounding, restorative Hatha yoga; avoid over-exhaustion", pranayama: "Nadi Shodhana & Anulom Vilom (balancing the nervous system)" },
+  mithuna: { sanskrit: "मिथुन (Mithuna)", element: "Vayu (Air)", ruler: "Budha (Mercury)", dosha: "Vata", nature: "Intellectual, communicative, adaptable, fast-moving", oil: "Warm unrefined Sesame (Tila) oil or Mahanarayana oil", exercise: "Grounding, restorative Hatha yoga; avoid over-exhaustion", pranayama: "Nadi Shodhana & Anulom Vilom (balancing the nervous system)" },
+  cancer: { sanskrit: "कर्क (Karka)", element: "Jala (Water)", ruler: "Chandra (Moon)", dosha: "Kapha-Pitta", nature: "Intuitive, nurturing, empathetic, rhythmic", oil: "Warm sesame or gentle almond oil", exercise: "Swimming, rhythmic flow yoga, walking near natural water", pranayama: "Chandra Bhedana & Bhramari (soothing mind & emotions)" },
+  karka: { sanskrit: "कर्क (Karka)", element: "Jala (Water)", ruler: "Chandra (Moon)", dosha: "Kapha-Pitta", nature: "Intuitive, nurturing, empathetic, rhythmic", oil: "Warm sesame or gentle almond oil", exercise: "Swimming, rhythmic flow yoga, walking near natural water", pranayama: "Chandra Bhedana & Bhramari (soothing mind & emotions)" },
+  leo: { sanskrit: "सिंह (Simha)", element: "Agni (Fire)", ruler: "Surya (Sun)", dosha: "Pitta", nature: "Magnanimous, commanding, vibrant, solar-driven", oil: "Cooling coconut, olive, or rose-infused oil", exercise: "Early morning Surya Namaskar; avoid peak noon exertion", pranayama: "Sheetali, Sheetkari & Nadi Shodhana (taming excess Agni)" },
+  simha: { sanskrit: "सिंह (Simha)", element: "Agni (Fire)", ruler: "Surya (Sun)", dosha: "Pitta", nature: "Magnanimous, commanding, vibrant, solar-driven", oil: "Cooling coconut, olive, or rose-infused oil", exercise: "Early morning Surya Namaskar; avoid peak noon exertion", pranayama: "Sheetali, Sheetkari & Nadi Shodhana (taming excess Agni)" },
+  virgo: { sanskrit: "कन्या (Kanya)", element: "Prithvi (Earth)", ruler: "Budha (Mercury)", dosha: "Vata-Pitta", nature: "Analytical, discerning, meticulous, mindful", oil: "Warm sesame oil infused with Brahmi or Bala", exercise: "Disciplined pilates, precise asana practice, walking", pranayama: "Ujjayi & Nadi Shodhana (stabilizing mental analysis)" },
+  kanya: { sanskrit: "कन्या (Kanya)", element: "Prithvi (Earth)", ruler: "Budha (Mercury)", dosha: "Vata-Pitta", nature: "Analytical, discerning, meticulous, mindful", oil: "Warm sesame oil infused with Brahmi or Bala", exercise: "Disciplined pilates, precise asana practice, walking", pranayama: "Ujjayi & Nadi Shodhana (stabilizing mental analysis)" },
+  libra: { sanskrit: "तुला (Tula)", element: "Vayu (Air)", ruler: "Shukra (Venus)", dosha: "Vata-Kapha", nature: "Harmonious, aesthetic, balanced, relationship-oriented", oil: "Almond, jojoba, or light sesame oil", exercise: "Gentle dance, Vinyasa yoga, aesthetic outdoor recreation", pranayama: "Anulom Vilom & Bhramari (cultivating inner peace)" },
+  tula: { sanskrit: "तुला (Tula)", element: "Vayu (Air)", ruler: "Shukra (Venus)", dosha: "Vata-Kapha", nature: "Harmonious, aesthetic, balanced, relationship-oriented", oil: "Almond, jojoba, or light sesame oil", exercise: "Gentle dance, Vinyasa yoga, aesthetic outdoor recreation", pranayama: "Anulom Vilom & Bhramari (cultivating inner peace)" },
+  scorpio: { sanskrit: "वृश्चिक (Vrishchika)", element: "Jala (Water)", ruler: "Mangala / Ketu", dosha: "Pitta-Kapha", nature: "Intense, transformative, intuitive, penetrating", oil: "Neem-infused coconut oil or sesame oil", exercise: "Martial arts, Ashtanga yoga, deep core conditioning", pranayama: "Surya Bhedana & Bhastrika (directing deep prana)" },
+  vrishchika: { sanskrit: "वृश्चिक (Vrishchika)", element: "Jala (Water)", ruler: "Mangala / Ketu", dosha: "Pitta-Kapha", nature: "Intense, transformative, intuitive, penetrating", oil: "Neem-infused coconut oil or sesame oil", exercise: "Martial arts, Ashtanga yoga, deep core conditioning", pranayama: "Surya Bhedana & Bhastrika (directing deep prana)" },
+  sagittarius: { sanskrit: "धनु (Dhanu)", element: "Agni (Fire)", ruler: "Guru (Jupiter)", dosha: "Pitta-Vata", nature: "Philosophical, adventurous, expansive, scholarly", oil: "Warm sesame or herbal ashwagandha oil", exercise: "Trail running, archery, hiking, expansive outdoor sports", pranayama: "Ujjayi & Kapalabhati (boosting wisdom and vital fire)" },
+  dhanu: { sanskrit: "धनु (Dhanu)", element: "Agni (Fire)", ruler: "Guru (Jupiter)", dosha: "Pitta-Vata", nature: "Philosophical, adventurous, expansive, scholarly", oil: "Warm sesame or herbal ashwagandha oil", exercise: "Trail running, archery, hiking, expansive outdoor sports", pranayama: "Ujjayi & Kapalabhati (boosting wisdom and vital fire)" },
+  capricorn: { sanskrit: "मकर (Makara)", element: "Prithvi (Earth)", ruler: "Shani (Saturn)", dosha: "Vata-Kapha", nature: "Pragmatic, disciplined, enduring, structured", oil: "Warm sesame oil with dashamula herbs", exercise: "Structured endurance training, weight-bearing asanas", pranayama: "Bhastrika & Nadi Shodhana (releasing rigidity)" },
+  makara: { sanskrit: "मकर (Makara)", element: "Prithvi (Earth)", ruler: "Shani (Saturn)", dosha: "Vata-Kapha", nature: "Pragmatic, disciplined, enduring, structured", oil: "Warm sesame oil with dashamula herbs", exercise: "Structured endurance training, weight-bearing asanas", pranayama: "Bhastrika & Nadi Shodhana (releasing rigidity)" },
+  aquarius: { sanskrit: "कुम्भ (Kumbha)", element: "Vayu (Air)", ruler: "Shani / Rahu", dosha: "Vata", nature: "Visionary, scientific, altruistic, independent", oil: "Warm unrefined sesame or castor/sesame blend", exercise: "Calisthenics, brisk walking, nervous-system calming flows", pranayama: "Nadi Shodhana & Bhramari (anchoring restless electrical energy)" },
+  kumbha: { sanskrit: "कुम्भ (Kumbha)", element: "Vayu (Air)", ruler: "Shani / Rahu", dosha: "Vata", nature: "Visionary, scientific, altruistic, independent", oil: "Warm unrefined sesame or castor/sesame blend", exercise: "Calisthenics, brisk walking, nervous-system calming flows", pranayama: "Nadi Shodhana & Bhramari (anchoring restless electrical energy)" },
+  pisces: { sanskrit: "मीन (Meena)", element: "Jala (Water)", ruler: "Guru (Jupiter)", dosha: "Kapha", nature: "Mystical, compassionate, artistic, reflective", oil: "Light sesame, mustard, or eucalyptus-infused oil", exercise: "Swimming, gentle Yin yoga, walking in nature", pranayama: "Surya Bhedana & Anulom Vilom (warming & focusing the spirit)" },
+  meena: { sanskrit: "मीन (Meena)", element: "Jala (Water)", ruler: "Guru (Jupiter)", dosha: "Kapha", nature: "Mystical, compassionate, artistic, reflective", oil: "Light sesame, mustard, or eucalyptus-infused oil", exercise: "Swimming, gentle Yin yoga, walking in nature", pranayama: "Surya Bhedana & Anulom Vilom (warming & focusing the spirit)" }
+};
+
+const NAKSHATRA_DATA = {
+  ashwini: { dosha: "Vata", ruler: "Ketu", deity: "Ashwini Kumaras (Physicians of the Gods)", focus: "Quick healing, vital prana, early dawn rejuvenation" },
+  bharani: { dosha: "Pitta", ruler: "Shukra (Venus)", deity: "Yama (Lord of Dharma)", focus: "Transformational endurance, discipline, restraint" },
+  krittika: { dosha: "Kapha", ruler: "Surya (Sun)", deity: "Agni (God of Fire)", focus: "Digestive fire purification, sharp clarity, solar vigor" },
+  rohini: { dosha: "Kapha", ruler: "Chandra (Moon)", deity: "Brahma / Prajapati", focus: "Creative manifestation, nourishing meals, artistic development" },
+  mrigashira: { dosha: "Pitta", ruler: "Mangala (Mars)", deity: "Soma (Moon God)", focus: "Searching intellect, walking in green nature, research" },
+  ardra: { dosha: "Vata", ruler: "Rahu", deity: "Rudra (Storm God)", focus: "Emotional release, detoxifying pranayama, intellectual breakthrough" },
+  punarvasu: { dosha: "Vata", ruler: "Guru (Jupiter)", deity: "Aditi (Mother of Gods)", focus: "Restoration of prana, benevolent contemplation, home harmony" },
+  pushya: { dosha: "Pitta", ruler: "Shani (Saturn)", deity: "Brihaspati", focus: "Spiritual nourishment, disciplined study, selfless charity" },
+  ashlesha: { dosha: "Kapha", ruler: "Budha (Mercury)", deity: "Sarpas (Nagas)", focus: "Deep intuition, kundalini awareness, sharp discernment" },
+  magha: { dosha: "Kapha", ruler: "Ketu", deity: "Pitris (Ancestral Guardians)", focus: "Ancestral gratitude, noble leadership, royal dignity" },
+  "purva phalguni": { dosha: "Pitta", ruler: "Shukra (Venus)", deity: "Bhaga (God of Fortune)", focus: "Recreation, aesthetic arts, healthy marital harmony" },
+  "uttara phalguni": { dosha: "Vata", ruler: "Surya (Sun)", deity: "Aryaman (God of Friendship)", focus: "Altruistic service, reliable commitments, solar alignment" },
+  hasta: { dosha: "Vata", ruler: "Chandra (Moon)", deity: "Savitr (Solar Craftsman)", focus: "Manual craftsmanship, writing, healing touch, precision" },
+  chitra: { dosha: "Pitta", ruler: "Mangala (Mars)", deity: "Tvashtar (Divine Architect)", focus: "Design, architectural clarity, visual elegance" },
+  swati: { dosha: "Vata", ruler: "Rahu", deity: "Vayu (Wind God)", focus: "Breathing practices, independence, intellectual flexibility" },
+  vishakha: { dosha: "Pitta", ruler: "Guru (Jupiter)", deity: "Indra-Agni", focus: "Goal-directed exertion, focused determination, triumph" },
+  anuradha: { dosha: "Kapha", ruler: "Shani (Saturn)", deity: "Mitra (God of Friendship)", focus: "Devotional fellowship, exploration, yogic discipline" },
+  jyeshtha: { dosha: "Kapha", ruler: "Budha (Mercury)", deity: "Indra (King of Gods)", focus: "Protective stewardship, strategic defense, seniority" },
+  mula: { dosha: "Vata", ruler: "Ketu", deity: "Nirriti (Goddess of Dissolution)", focus: "Root-cause inquiry, detachment, herbal root remedies" },
+  "purva ashadha": { dosha: "Pitta", ruler: "Shukra (Venus)", deity: "Apas (Cosmic Waters)", focus: "Invincible conviction, hydration, emotional purification" },
+  "uttara ashadha": { dosha: "Kapha", ruler: "Surya (Sun)", deity: "Vishwadevas (Universal Gods)", focus: "Enduring victory, ethical virtue, institutional leadership" },
+  shravana: { dosha: "Kapha", ruler: "Chandra (Moon)", deity: "Vishnu (Preserver)", focus: "Attentive listening (Shravana), Vedic study, meditation" },
+  dhanishta: { dosha: "Pitta", ruler: "Mangala (Mars)", deity: "Eight Vasus (Elemental Gods)", focus: "Rhythmic movement, musical attunement, material abundance" },
+  shatabhisha: { dosha: "Vata", ruler: "Rahu", deity: "Varuna (Cosmic Ocean)", focus: "Herbal medicine, quiet solitude, deep cellular healing" },
+  "purva bhadrapada": { dosha: "Vata", ruler: "Guru (Jupiter)", deity: "Aja Ekapada", focus: "Tapas (ascetic focus), radical transformation, intense study" },
+  "uttara bhadrapada": { dosha: "Pitta", ruler: "Shani (Saturn)", deity: "Ahirbudhnya", focus: "Deep peace, meditation, benevolent contemplation" },
+  revati: { dosha: "Kapha", ruler: "Budha (Mercury)", deity: "Pushan (Nourisher of Travelers)", focus: "Safe passage, compassionate nurturing, spiritual completion" }
+};
+
+// Specialized Shastric Knowledge Base
 const KNOWLEDGE_RESPONSES = {
   charaka: {
     title: "Charaka Samhita (Sutra Sthana, Ch. 1 & 28)",
@@ -54,6 +112,67 @@ const KNOWLEDGE_RESPONSES = {
       <li>Turn Complete: A background summarization task distills the attachment into a dense semantic textual summary (e.g., <em>[Attached manuscript page 43: Describes astronomical eclipse calculation]</em>).</li>
       <li>Turn 2+: Subsequent turns carry only the lightweight semantic summary, keeping context fast, cheap, and strictly within token quotas.</li>
     </ul>`
+  },
+  upanishad: {
+    title: "Advaita Vedanta & Mandukya Upanishad",
+    tier: "Tier 1: Grounded Philosophical Synthesis",
+    text: `<p>In the <strong>Mandukya Upanishad</strong> (Atharva Veda), the nature of the ultimate reality (<em>Brahman</em>) and individual soul (<em>Atman</em>) is revealed through the four states of consciousness represented by the sacred syllable <strong>AUM (ॐ)</strong>:</p>
+    <ul>
+      <li><strong>Jagrat (Waking State — 'A'):</strong> Consciousness turned outward, experiencing the gross material world (<em>Vaishvanara</em>).</li>
+      <li><strong>Swapna (Dream State — 'U'):</strong> Consciousness turned inward, experiencing the subtle mental realm (<em>Taijasa</em>).</li>
+      <li><strong>Sushupti (Deep Sleep State — 'M'):</strong> Undifferentiated unified consciousness without desire or dream, peaceful yet veiled by ignorance (<em>Prajna</em>).</li>
+      <li><strong>Turiya (The Fourth):</strong> Pure unconditioned awareness, timeless, peaceful, non-dual (<em>Advaita</em>), the true Self (<em>Atman</em>).</li>
+    </ul>
+    <div class="citation-box">
+      <div class="citation-header">📚 Citation Grounding</div>
+      <em>Mandukya Upanishad</em>, Mantra 2 & 7: "अयमात्मा ब्रह्म..." (This Self is Brahman) & "नान्तःप्रज्ञं न बहिष्प्रज्ञम्... शान्तं शिवमद्वैतं चतुर्थं मन्यन्ते स आत्मा स विज्ञेयः"
+    </div>`
+  },
+  gita: {
+    title: "Bhagavad Gita — Karma Yoga & Swadharma",
+    tier: "Tier 1: Grounded Philosophical Synthesis",
+    text: `<p>The <strong>Bhagavad Gita</strong> reconciles outward duty with spiritual liberation through <strong>Nishkama Karma</strong> (action performed without selfish attachment to the fruits):</p>
+    <ul>
+      <li><strong>Karmanye Vadhikaraste:</strong> One has the right to act, but never to the fruits of action. Do not let the fruits be your motive, nor should you succumb to inaction.</li>
+      <li><strong>Swadharma:</strong> Performing one's own natural duty, even if imperfect, is superior to copying another's duty perfectly (<em>Shreyan swadharmo vigunah paradharmat swanushthitat</em>).</li>
+      <li><strong>Yogastha Kuru Karmani:</strong> Established in yoga (equanimity of mind in success and failure), perform your actions. Equanimity is yoga (<em>Samatvam yoga uchyate</em>).</li>
+    </ul>
+    <div class="citation-box">
+      <div class="citation-header">📚 Citation Grounding</div>
+      <em>Bhagavad Gita</em>, Chapter 2, Verse 47 & 48: "कर्मण्येवाधिकारस्ते मा फलेषु कदाचन..."
+    </div>`
+  },
+  yoga: {
+    title: "Patanjali Yoga Sutras — Ashtanga Yoga",
+    tier: "Tier 1: Grounded Classical Synthesis",
+    text: `<p>According to <strong>Maharishi Patanjali</strong>, Yoga is the stilling of the fluctuations of consciousness (<em>Yogas chitta-vritti-nirodhah</em>). To achieve this, Patanjali outlines the <strong>Ashtanga (Eight Limbs)</strong>:</p>
+    <ol>
+      <li><strong>Yama:</strong> Ethical restraints (Ahimsa, Satya, Asteya, Brahmacharya, Aparigraha).</li>
+      <li><strong>Niyama:</strong> Personal observances (Shaucha, Santosha, Tapas, Svadhyaya, Ishvara Pranidhana).</li>
+      <li><strong>Asana:</strong> Steady and comfortable posture (<em>Sthira-sukham asanam</em>).</li>
+      <li><strong>Pranayama:</strong> Regulation of inhalation, exhalation, and retention of vital prana.</li>
+      <li><strong>Pratyahara:</strong> Withdrawal of the senses from external objects.</li>
+      <li><strong>Dharana:</strong> Concentration on a single point or object.</li>
+      <li><strong>Dhyana:</strong> Continuous meditative flow.</li>
+      <li><strong>Samadhi:</strong> Complete absorption in pure consciousness.</li>
+    </ol>
+    <div class="citation-box">
+      <div class="citation-header">📚 Citation Grounding</div>
+      <em>Yoga Sutras of Patanjali</em>, Chapter 1, Sutra 2 & Chapter 2, Sutra 29.
+    </div>`
+  },
+  astronomy: {
+    title: "Surya Siddhanta & Aryabhatiya — Classical Astronomy",
+    tier: "Tier 1: Grounded Mathematical Shastra",
+    text: `<p>Ancient Indian astronomy (<em>Jyotisha Vedanga</em>) synthesized spherical trigonometry, cyclical time (Yugas), and planetary orbital computations:</p>
+    <ul>
+      <li><strong>Aryabhata I (Aryabhatiya, 499 CE):</strong> First explicitly stated that the Earth rotates on its axis causing day and night, accurately estimated &pi; to 3.1416, and explained solar and lunar eclipses by planetary shadows rather than mythical demons.</li>
+      <li><strong>Surya Siddhanta:</strong> Outlines the <em>Maha-Yuga</em> of 4,320,000 solar years, calculates the sidereal year as 365.25875 days (remarkably close to modern 365.25636 days), and defines trigonometric Sine (<em>Jya</em>), Cosine (<em>Koti-jya</em>), and Versine (<em>Utkrama-jya</em>).</li>
+    </ul>
+    <div class="citation-box">
+      <div class="citation-header">📚 Citation Grounding</div>
+      <em>Surya Siddhanta</em>, Madhyamadhikara (Ch. 1) & <em>Aryabhatiya</em>, Golapada (Sphere of Earth).
+    </div>`
   }
 };
 
@@ -101,6 +220,19 @@ document.addEventListener('DOMContentLoaded', () => {
       userInput.value = chip.getAttribute('data-prompt');
       userInput.focus();
     });
+  });
+
+  // Clickable interactive buttons generated inside chat bubbles
+  chatMessages.addEventListener('click', (e) => {
+    const btn = e.target.closest('.quick-prompt-btn');
+    if (btn) {
+      const prompt = btn.getAttribute('data-fill');
+      if (prompt) {
+        userInput.value = prompt;
+        userInput.focus();
+        handleSend();
+      }
+    }
   });
 
   // Attachments
@@ -182,13 +314,13 @@ function clearAttachment() {
 function simulateVoiceInput() {
   voiceBtn.style.color = '#ef4444';
   const phrases = [
-    "What does Ayurveda say about daily routine and Ritucharya?",
-    "Summarize the key mathematical formulas in Aryabhatiya.",
-    "Explain the concept of Brahman in Mandukya Upanishad.",
-    "How does FAISS vector search index Sanskrit slokas?"
+    "Make a personalized daily routine for Madhur with Leo sun sign and Magha nakshatra",
+    "What does Charaka Samhita prescribe for Dinacharya and seasonal routine?",
+    "Summarize the key astronomical calculations in Surya Siddhanta",
+    "Explain the concept of Turiya in Mandukya Upanishad"
   ];
   const chosen = phrases[Math.floor(Math.random() * phrases.length)];
-  userInput.value = "🎙️ [Transcribed via Amazon Transcribe]: " + chosen;
+  userInput.value = chosen;
   setTimeout(() => {
     voiceBtn.style.color = '';
     userInput.focus();
@@ -267,7 +399,7 @@ async function handleSend() {
     }
 
     if (!responseData) {
-      // Intelligent grounded knowledge base response
+      // Intelligent grounded knowledge base & Dinacharya generator
       responseData = generateGroundedResponse(userQuery, attachedFile);
     }
 
@@ -347,7 +479,7 @@ function appendLoadingIndicator() {
         <span class="bubble-time">Processing</span>
       </div>
       <div class="bubble-text" style="display: flex; gap: 6px; align-items: center; padding: 12px 18px;">
-        <span class="status-dot"></span> Re-writing query & retrieving FAISS passages...
+        <span class="status-dot"></span> Re-writing query & synthesizing shastric principles...
       </div>
     </div>
   `;
@@ -361,30 +493,313 @@ function removeLoadingIndicator(id) {
   if (el) el.remove();
 }
 
+/**
+ * Checks if the user is asking for a daily routine, timetable, or astrological lifestyle schedule
+ */
+function isDinacharyaQuery(query) {
+  const q = query.toLowerCase();
+  return (
+    q.includes('routine') ||
+    q.includes('dinacharya') ||
+    q.includes('daily plan') ||
+    q.includes('schedule') ||
+    q.includes('timetable') ||
+    q.includes('nakshatra') ||
+    q.includes('sun sign') ||
+    q.includes('rashi') ||
+    (q.includes('name') && (q.includes('sign') || q.includes('daily')))
+  );
+}
+
+/**
+ * Intelligent Personalized Vedic Dinacharya (दिनचर्या) Generator
+ * Synthesizes Charaka Samhita Sutrasthana Ch. 5 & Ashtanga Hridaya Ch. 2 with Jyotisha Horas
+ */
+function generatePersonalizedDinacharya(query) {
+  const q = query.toLowerCase();
+
+  // 1. Extract Name
+  let userName = "Scholar";
+  const namePatterns = [
+    /(?:my\s+name\s+is|name\s*(?::|is)?|i\s+am)\s+([a-zA-Z]+)/i,
+    /for\s+([a-zA-Z]+)(?:\s+with|\s+whose|\s*,)/i
+  ];
+  for (const pat of namePatterns) {
+    const match = query.match(pat);
+    if (match && match[1] && !['a', 'my', 'the', 'make', 'create', 'give'].includes(match[1].toLowerCase())) {
+      userName = match[1].charAt(0).toUpperCase() + match[1].slice(1);
+      break;
+    }
+  }
+
+  // 2. Extract Sun Sign / Rashi
+  let detectedSignKey = null;
+  for (const signKey of Object.keys(RASHI_DATA)) {
+    if (q.includes(signKey)) {
+      detectedSignKey = signKey;
+      break;
+    }
+  }
+
+  // 3. Extract Nakshatra
+  let detectedNakshatraKey = null;
+  for (const nakKey of Object.keys(NAKSHATRA_DATA)) {
+    if (q.includes(nakKey)) {
+      detectedNakshatraKey = nakKey;
+      break;
+    }
+  }
+
+  const isFullyPersonalized = detectedSignKey || detectedNakshatraKey || userName !== "Scholar";
+  const rashi = detectedSignKey ? RASHI_DATA[detectedSignKey] : RASHI_DATA['leo'];
+  const nakshatra = detectedNakshatraKey ? NAKSHATRA_DATA[detectedNakshatraKey] : NAKSHATRA_DATA['magha'];
+
+  const signTitle = detectedSignKey ? rashi.sanskrit : "Surya Rashi Alignment (Solar Vitality)";
+  const element = rashi.element;
+  const dosha = rashi.dosha;
+  const oil = rashi.oil;
+  const exercise = rashi.exercise;
+  const pranayama = rashi.pranayama;
+  const nakName = detectedNakshatraKey ? detectedNakshatraKey.charAt(0).toUpperCase() + detectedNakshatraKey.slice(1) : "Nakshatra Resonance";
+  const nakDosha = nakshatra.dosha;
+  const nakDeity = nakshatra.deity;
+  const nakFocus = nakshatra.focus;
+
+  let headerHtml = "";
+  if (isFullyPersonalized) {
+    headerHtml = `
+      <div class="routine-header">
+        <h3>🌅 Personalized Vedic Dinacharya (दिनचर्या) for ${escapeHtml(userName)}</h3>
+        <div class="routine-badges">
+          <span class="badge badge-primary">Rashi: ${signTitle}</span>
+          <span class="badge badge-accent">Element: ${element}</span>
+          <span class="badge badge-offline">Nakshatra: ${nakName} (${nakDosha} Dosha)</span>
+          <span class="badge badge-primary">Deity: ${nakDeity}</span>
+        </div>
+      </div>
+      <p style="margin-top: 8px;">
+        Namaste <strong>${escapeHtml(userName)}</strong>! According to classical <em>Charaka Samhita</em> and <em>Ashtanga Hridaya</em>, 
+        your daily routine is optimized to balance your <strong>${element}</strong> tatva and pacify <strong>${dosha}</strong> dosha tendencies.
+      </p>
+    `;
+  } else {
+    headerHtml = `
+      <div class="routine-header">
+        <h3>🌅 Master Vedic Dinacharya (दिनचर्या) & Astrological Routine Framework</h3>
+        <div class="routine-badges">
+          <span class="badge badge-primary">Charaka Samhita Ch. 5</span>
+          <span class="badge badge-accent">Ashtanga Hridaya Ch. 2</span>
+          <span class="badge badge-offline">Surya Hora Aligned</span>
+        </div>
+      </div>
+      <p style="margin-top: 8px;">
+        In classical Shastra, a healthy routine (<strong>Dinacharya</strong>) syncs your biological circadian clock with the cosmic rhythms of the Sun (<em>Surya</em>) and the Five Maha-Tatvas. Below is your <strong>hour-by-hour master schedule</strong>, followed by personalized adjustments based on your <strong>Sun Sign (Rashi)</strong> and <strong>Nakshatra</strong>:
+      </p>
+    `;
+  }
+
+  const timelineHtml = `
+    <div class="timeline-list">
+      <div class="timeline-item">
+        <div class="timeline-time">04:30 AM – 05:15 AM</div>
+        <div class="timeline-content">
+          <strong>1. Brahma Muhurta (ब्राह्मे मुहूर्ते उत्तिष्ठेत्)</strong><br/>
+          Awaken 2 Muhurtas (approx. 96 minutes) before sunrise when atmospheric Sattva Guna and cellular prana are highest. 
+          <em>Personal adjustment:</em> ${element.includes("Agni") ? "Awaken gently with slow deep breathing to keep morning cortisol and Pitta balanced." : element.includes("Prithvi") ? "Rise immediately to break Kapha inertia; avoid lingering in bed." : "Sip lukewarm water and ground your restless Vata mind with silent gratitude."}
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-time">05:15 AM – 05:45 AM</div>
+        <div class="timeline-content">
+          <strong>2. Ushapan, Shaucha & Dantadhavana</strong><br/>
+          Drink 1–2 glasses of warm water (<em>Ushapan</em>) stored overnight in a copper vessel to stimulate natural peristalsis. 
+          Scrape tongue with a copper/silver scraper (<em>Jihwa Nirlekhana</em>) and clean teeth with bitter or astringent herbal tooth powder.
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-time">05:45 AM – 06:15 AM</div>
+        <div class="timeline-content">
+          <strong>3. Kavala/Gandusha & Abhyanga (Self-Oil Massage)</strong><br/>
+          Hold warm oil in mouth for 3–5 minutes (<em>Gandusha</em>) for jaw and sensory clarity. Perform full-body warm oil massage (<em>Abhyanga</em>).<br/>
+          <em>Prescribed Oil:</em> <strong>${oil}</strong> to nourish tissues and ground the nervous system.
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-time">06:15 AM – 07:15 AM</div>
+        <div class="timeline-content">
+          <strong>4. Vyayama, Asanas & Pranayama (व्यायाम व प्राणायाम)</strong><br/>
+          Exercise to half of your maximum capacity (<em>Ardha Shakti</em>) until light perspiration appears on forehead and nose.<br/>
+          <em>Prescribed Practice:</em> ${exercise}.<br/>
+          <em>Pranayama:</em> <strong>${pranayama}</strong> followed by 10 minutes of silent Dhyana meditating on <em>${nakDeity}</em>.
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-time">07:15 AM – 08:00 AM</div>
+        <div class="timeline-content">
+          <strong>5. Snana (Purifying Bath) & Sattvic Pratah-Ashana (Breakfast)</strong><br/>
+          Lukewarm bath to restore vigor. Consume a light, warm breakfast matching your Agni (e.g. stewed spiced apples, warm soaked oats with almonds and cardamom, or spiced mung broth).
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-time">08:30 AM – 12:30 PM</div>
+        <div class="timeline-content">
+          <strong>6. Surya & Budha Hora (Peak Intellectual Execution)</strong><br/>
+          The solar ascending cycle favors complex analytical work, deep research, coding, writing, and high-stakes decision making.
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-time">12:30 PM – 01:30 PM</div>
+        <div class="timeline-content">
+          <strong>7. Madhyahna Bhojana (Principal Noon Meal) & Shatapadi</strong><br/>
+          Eat your largest, most nourishing meal when the sun is at its zenith and digestive fire (<em>Pachaka Pitta</em>) is strongest. 
+          Walk 100 gentle steps (<em>Shatapadi</em>). Rest on the left side (<em>Vamakukshi</em>) for 10–15 minutes (never deep daytime sleep).
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-time">01:30 PM – 05:30 PM</div>
+        <div class="timeline-content">
+          <strong>8. Guru/Shukra Hora (Collaboration, Learning & Implementation)</strong><br/>
+          Meetings, creative ideation, organizational execution, and collaborative tasks. Hydrate with warm water or herbal cumin-coriander-fennel (CCF) tea.
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-time">05:30 PM – 06:30 PM</div>
+        <div class="timeline-content">
+          <strong>9. Sayahna Sandhya (Twilight Transition)</strong><br/>
+          Disconnect from digital screens. Take a gentle evening walk, practice Bhramari (humming bee) pranayama, and transition from outer exertion to inner reflection.
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-time">07:00 PM – 08:00 PM</div>
+        <div class="timeline-content">
+          <strong>10. Laghubhojana (Light Warm Dinner)</strong><br/>
+          Light, easily digestible meal (khichdi, vegetable soup, or steamed greens) at least 2.5 hours before bedtime.
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-time">09:30 PM – 10:00 PM</div>
+        <div class="timeline-content">
+          <strong>11. Ratricharya & Nidra (Restorative Sleep)</strong><br/>
+          Massage soles of feet with warm sesame oil or cow's ghee (<em>Padabhyanga</em>) to induce deep sleep and pacify mental Vata. Sleep before 10:00 PM to avoid entering the nocturnal Pitta cycle (10 PM – 2 AM) which triggers midnight cravings and restless wakefulness.
+        </div>
+      </div>
+    </div>
+  `;
+
+  let customizationGuideHtml = "";
+  if (!isFullyPersonalized) {
+    customizationGuideHtml = `
+      <div style="margin-top: 14px;">
+        <h4 style="color: var(--gold-light); margin-bottom: 8px;">🌌 How Your Sun Sign & Nakshatra Customize This Routine:</h4>
+        <table class="tatva-table">
+          <thead>
+            <tr>
+              <th>Tatva / Element</th>
+              <th>Sun Signs (Surya Rashi)</th>
+              <th>Dinacharya Modification</th>
+              <th>Prescribed Abhyanga Oil</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Agni (Fire)</strong></td>
+              <td>Aries, Leo, Sagittarius</td>
+              <td>Cooling morning practices, avoid noon exertion, Sheetali pranayama</td>
+              <td>Coconut or Chandanadi oil</td>
+            </tr>
+            <tr>
+              <td><strong>Prithvi (Earth)</strong></td>
+              <td>Taurus, Virgo, Capricorn</td>
+              <td>Dynamic brisk exercise, early dawn waking, Kapalabhati to reduce lethargy</td>
+              <td>Warm sesame or Udvartana powder</td>
+            </tr>
+            <tr>
+              <td><strong>Vayu (Air)</strong></td>
+              <td>Gemini, Libra, Aquarius</td>
+              <td>Grounding rhythms, strict meal and sleep times, Nadi Shodhana</td>
+              <td>Warm unrefined Sesame (Tila) oil</td>
+            </tr>
+            <tr>
+              <td><strong>Jala (Water)</strong></td>
+              <td>Cancer, Scorpio, Pisces</td>
+              <td>Lymphatic movement, Surya Bhedana, warm light non-mucous foods</td>
+              <td>Gentle almond or light sesame oil</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="quick-prompts-wrapper">
+          <span class="quick-prompts-label">✨ Click a profile below to customize instantly:</span>
+          <button class="quick-prompt-btn" data-fill="Make a daily routine for Madhur with Leo sun sign and Magha nakshatra">♌ Leo + Magha (Madhur)</button>
+          <button class="quick-prompt-btn" data-fill="Make a daily routine for Priya with Gemini sun sign and Swati nakshatra">♊ Gemini + Swati (Priya)</button>
+          <button class="quick-prompt-btn" data-fill="Make a daily routine for Amit with Taurus sun sign and Rohini nakshatra">♉ Taurus + Rohini (Amit)</button>
+          <button class="quick-prompt-btn" data-fill="Make a daily routine for Rahul with Aries sun sign and Ashwini nakshatra">♈ Aries + Ashwini (Rahul)</button>
+          <button class="quick-prompt-btn" data-fill="Make a daily routine for Ananya with Pisces sun sign and Revati nakshatra">♓ Pisces + Revati (Ananya)</button>
+        </div>
+      </div>
+    `;
+  }
+
+  const citationHtml = `
+    <div class="citation-box" style="margin-top: 14px;">
+      <div class="citation-header">📚 Classical Shastric Grounding</div>
+      <em>Charaka Samhita (Sutrasthana, Ch. 5 - Matrashiteeya)</em>: "मात्राशी स्यात् आहारमात्रा पुनरग्निबलापेक्षिणी..." (One must eat according to the measure of one's digestive fire).<br/>
+      <em>Ashtanga Hridaya (Sutrasthana, Ch. 2 - Dinacharya Adhyaya)</em>: "ब्राह्मे मुहूर्ते उत्तिष्ठेत् स्वस्थो रक्षार्थमायुषः" (To protect longevity and health, the seeker of wellness must rise during Brahma Muhurta).
+    </div>
+  `;
+
+  return {
+    tier: 'Tier 1: Vedic Shastra & Dinacharya Engine',
+    text: `<div class="routine-container">${headerHtml}${timelineHtml}${customizationGuideHtml}${citationHtml}</div>`
+  };
+}
+
+/**
+ * Intelligent Fallback & Domain Retrieval Synthesizer
+ */
 function generateGroundedResponse(query, attachment) {
   const lower = query.toLowerCase();
 
-  if (lower.includes('charaka') || lower.includes('dosha') || lower.includes('ayurveda') || lower.includes('tridosha') || lower.includes('health')) {
+  // 1. Dinacharya / Daily Routine / Nakshatra / Sun Sign / Horoscope inquiries
+  if (isDinacharyaQuery(query)) {
+    return generatePersonalizedDinacharya(query);
+  }
+
+  // 2. Charaka / Ayurveda / Tridosha
+  if (lower.includes('charaka') || lower.includes('dosha') || lower.includes('ayurveda') || lower.includes('tridosha') || lower.includes('health') || lower.includes('vata') || lower.includes('pitta') || lower.includes('kapha')) {
     return {
       tier: 'Tier 1: Amazon Nova Pro [Grounded Bedrock RAG]',
       text: KNOWLEDGE_RESPONSES.charaka.text
     };
   }
 
-  if (lower.includes('failover') || lower.includes('quota') || lower.includes('throttling') || lower.includes('0 tokens') || lower.includes('bedrock')) {
+  // 3. System Failover / Quota / Throttling / Architecture
+  if (lower.includes('failover') || lower.includes('quota') || lower.includes('throttling') || lower.includes('0 tokens') || lower.includes('bedrock') || lower.includes('3-tier')) {
     return {
       tier: 'Tier 2: System Architecture Engine',
       text: KNOWLEDGE_RESPONSES.failover.text
     };
   }
 
-  if (lower.includes('ocr') || lower.includes('scan') || lower.includes('manuscript') || lower.includes('devanagari') || lower.includes('sanskrit')) {
+  // 4. Scanned Manuscripts / Vision OCR
+  if (lower.includes('ocr') || lower.includes('scan') || lower.includes('manuscript') || lower.includes('devanagari') || (lower.includes('sanskrit') && lower.includes('read'))) {
     return {
       tier: 'Tier 1: Amazon Nova Vision OCR',
       text: KNOWLEDGE_RESPONSES.vision.text
     };
   }
 
+  // 5. Multimodal Compression
   if (lower.includes('compression') || lower.includes('multimodal') || lower.includes('turn') || lower.includes('attachment') || lower.includes('video')) {
     return {
       tier: 'Tier 1: Bedrock Converse Context Compression',
@@ -392,29 +807,72 @@ function generateGroundedResponse(query, attachment) {
     };
   }
 
-  // General grounded synthesis
+  // 6. Upanishads / Advaita / Vedanta
+  if (lower.includes('upanishad') || lower.includes('vedanta') || lower.includes('advaita') || lower.includes('brahman') || lower.includes('atman') || lower.includes('turiya')) {
+    return {
+      tier: 'Tier 1: Grounded Philosophical Synthesis',
+      text: KNOWLEDGE_RESPONSES.upanishad.text
+    };
+  }
+
+  // 7. Bhagavad Gita / Karma Yoga
+  if (lower.includes('gita') || lower.includes('bhagavad') || lower.includes('karma yoga') || lower.includes('swadharma') || lower.includes('krishna')) {
+    return {
+      tier: 'Tier 1: Grounded Philosophical Synthesis',
+      text: KNOWLEDGE_RESPONSES.gita.text
+    };
+  }
+
+  // 8. Patanjali / Yoga Sutras / Pranayama
+  if (lower.includes('patanjali') || lower.includes('yoga sutra') || lower.includes('ashtanga yoga') || lower.includes('pranayama') || lower.includes('dhyana') || lower.includes('samadhi')) {
+    return {
+      tier: 'Tier 1: Grounded Classical Synthesis',
+      text: KNOWLEDGE_RESPONSES.yoga.text
+    };
+  }
+
+  // 9. Surya Siddhanta / Aryabhata / Astronomy
+  if (lower.includes('astronomy') || lower.includes('surya siddhanta') || lower.includes('aryabhata') || lower.includes('jyotish') || lower.includes('eclipse') || lower.includes('yuga')) {
+    return {
+      tier: 'Tier 1: Grounded Mathematical Shastra',
+      text: KNOWLEDGE_RESPONSES.astronomy.text
+    };
+  }
+
+  // 10. Intelligent Shastric Synthesis for any general inquiry
   return {
     tier: activeMode === 'faiss' ? 'Tier 3: FAISS Local Vector Search' : 'Tier 1: Amazon Bedrock (Nova Pro)',
-    text: `<p>Based on retrieval from the <strong>ShaastraAI</strong> corpus:</p>
-    <p>Your query <em>"${escapeHtml(query)}"</em> was contextualized against the 1024-dimension FAISS vector store. 
-    The indexed corpus correlates classical Sanskrit/Indic epistemology with modern computational methodology.</p>
+    text: `<p>Based on retrieval and reasoning from the <strong>ShaastraAI</strong> indexed knowledge base:</p>
+    <p>Your inquiry <em>"${escapeHtml(query)}"</em> addresses classical Indic epistemology and shastric sciences. 
+    In classical tradition, knowledge is verified through four means of valid cognition (<em>Pramanas</em>): 
+    <strong>Pratyaksha</strong> (direct perception), <strong>Anumana</strong> (logical inference), <strong>Upamana</strong> (analogy), and <strong>Shabda</strong> (authoritative textual testimony).</p>
+    <p>ShaastraAI applies these epistemological standards to ground computational reasoning with fault-tolerant retrieval across Sanskrit, Hindi, and English reference texts.</p>
     <div class="citation-box">
-      <div class="citation-header">📚 FAISS Similarity Match (Score: 0.892)</div>
-      Corpus Document: <code>training_pdfs/Indic_Knowledge_Systems_Reference.pdf</code> (Passage #14, Pages 82–84).
+      <div class="citation-header">📚 Classical Epistemological Grounding</div>
+      <em>Nyaya Sutras of Akshapada Gautama</em> (1.1.3): "प्रत्यक्षानुमानोपमानशब्दाः प्रमाणानि" (Perception, inference, analogy, and authoritative testimony are the valid means of knowledge).
     </div>`
   };
 }
 
 async function callLiveGemini(prompt, apiKey) {
   try {
+    const systemInstruction = `You are ShaastraAI (शास्त्र AI), an authoritative, scholarly AI assistant specializing in classical Indian knowledge systems (Ayurveda, Jyotisha, Vedanta, Yoga, and Sanskrit shastras) and multimodal RAG.
+When users ask for personalized guidance, such as crafting a daily routine (Dinacharya) based on their name, sun sign (Surya Rashi), moon sign (Chandra Rashi), nakshatra, or dosha:
+1. Provide a detailed, chronologically structured Vedic schedule (from Brahma Muhurta 4:30 AM to Nidra 10:00 PM).
+2. Integrate classical Ayurvedic principles (Charaka Samhita Sutrasthana Ch. 5, Ashtanga Hridaya Ch. 2) including waking, Ushapan, Shaucha, Dantadhavana, Gandusha, Abhyanga, Vyayama, Snana, Bhojana vidhi, and Ratricharya.
+3. Align the routine with their Astrological element (Agni/Fire, Prithvi/Earth, Vayu/Air, Jala/Water), ruling planet, and Nakshatra dosha (Vata, Pitta, Kapha), tailoring oil types, diet, pranayama, and optimal work hours (Horas).
+4. If they have not yet provided their specific name, sun sign, or nakshatra, provide the master classical Dinacharya schedule, explain the sign/nakshatra customization rules, and invite them to share their specific details for instant personalization.
+Ground your answer with classical Sanskrit terms and shastric citations.`;
+
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
     const payload = {
+      systemInstruction: {
+        parts: [{ text: systemInstruction }]
+      },
       contents: [
         {
           role: "user",
-          parts: [
-            { text: `You are ShaastraAI, a knowledgeable scholarly AI assistant specializing in Sanskrit texts, ancient Indian knowledge systems (Ayurveda, Jyotisha, Vedanta), multimodal PDF RAG, and AI architectures. Answer clearly and ground your answer well:\n\nUser Question: ${prompt}` }
-          ]
+          parts: [{ text: prompt }]
         }
       ]
     };

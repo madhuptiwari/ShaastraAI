@@ -871,8 +871,11 @@ class ShaashtraAIChatbot:
             "(including Sanskrit, Hindi, and English texts). "
             "Use the conversation history to maintain context across turns, and carefully inspect any "
             "attached video, image, rendered scanned PDF page images, audio transcript, or document provided by the user. "
-            "Ground your answers strictly in the <pdf_knowledge_base> passages and any rendered scanned PDF "
-            "pages provided. Always cite the PDF filename and page number.\n\n"
+            "Ground your claims in the <pdf_knowledge_base> passages and any rendered scanned PDF "
+            "pages provided. For practical inquiries (such as personalized Vedic daily routines / Dinacharya, "
+            "astrological alignments, and Ayurvedic lifestyle), synthesize classical Shastras (Charaka Samhita, "
+            "Ashtanga Hridaya, Brihat Parashara Hora Shastra) to provide a complete, deeply structured daily schedule. "
+            "Always cite the PDF filename and page number when referencing the indexed corpus.\n\n"
             f"<pdf_knowledge_base>\n{context_text}\n</pdf_knowledge_base>"
         )
 
