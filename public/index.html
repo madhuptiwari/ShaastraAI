@@ -2,7 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover, interactive-widget=resizes-content" />
+  <meta name="theme-color" content="#080c14" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>ShaastraAI — Multi-Turn Multimodal Sanskrit & Multilingual Knowledge Assistant</title>
   <meta name="description" content="Custom multi-turn, multimodal Retrieval-Augmented Generation (RAG) AI assistant for ancient and modern texts with Amazon Bedrock, Gemini fallback, and FAISS." />
   
@@ -35,7 +38,7 @@
         </div>
       </a>
 
-      <nav class="nav-links">
+      <nav class="nav-links desktop-nav">
         <a href="#chat-section" class="nav-link active">Assistant</a>
         <a href="#architecture" class="nav-link">Architecture</a>
         <a href="#features" class="nav-link">Features</a>
@@ -45,23 +48,79 @@
       <div class="nav-actions">
         <span class="status-pill">
           <span class="status-dot"></span>
-          Netlify Edge Active
+          <span class="status-text">Netlify Active</span>
         </span>
-        <button id="settings-btn" class="icon-btn" title="API Settings">
+        <button id="settings-btn" class="icon-btn" title="API Settings" aria-label="API Settings">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="12" r="3"></circle>
             <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
           </svg>
         </button>
-        <a href="https://github.com/madhuptiwari/ShaastraAI" target="_blank" rel="noopener noreferrer" class="btn btn-secondary github-btn">
+        <a href="https://github.com/madhuptiwari/ShaastraAI" target="_blank" rel="noopener noreferrer" class="btn btn-secondary github-btn" title="View on GitHub">
           <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
             <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
           </svg>
-          <span>GitHub</span>
+          <span class="github-text">GitHub</span>
         </a>
+        <button id="mobile-menu-btn" class="hamburger-btn" aria-label="Toggle navigation menu" aria-expanded="false">
+          <span class="bar"></span>
+          <span class="bar"></span>
+          <span class="bar"></span>
+        </button>
       </div>
     </div>
   </header>
+
+  <!-- Mobile Navigation Drawer -->
+  <div id="mobile-drawer" class="mobile-drawer" aria-label="Mobile navigation drawer">
+    <div class="mobile-drawer-header">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+            <path d="M2 17l10 5 10-5"></path>
+            <path d="M2 12l10 5 10-5"></path>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <span class="brand-title">ShaastraAI</span>
+          <span class="brand-subtitle">शास्त्र • Navigation</span>
+        </div>
+      </div>
+      <button id="drawer-close-btn" class="close-btn" aria-label="Close navigation menu">&times;</button>
+    </div>
+    <nav class="mobile-nav-links">
+      <a href="#chat-section" class="mobile-nav-link active">
+        <span class="mobile-nav-icon">💬</span>
+        <span>Assistant Portal</span>
+      </a>
+      <a href="#architecture" class="mobile-nav-link">
+        <span class="mobile-nav-icon">🛡️</span>
+        <span>3-Tier Architecture</span>
+      </a>
+      <a href="#features" class="mobile-nav-link">
+        <span class="mobile-nav-icon">✨</span>
+        <span>System Features</span>
+      </a>
+      <a href="#deployment" class="mobile-nav-link">
+        <span class="mobile-nav-icon">🚀</span>
+        <span>Deploy Guide</span>
+      </a>
+    </nav>
+    <div class="mobile-drawer-footer">
+      <div class="status-pill full-width">
+        <span class="status-dot"></span>
+        <span>Netlify Edge Active (Global CDN)</span>
+      </div>
+      <a href="https://github.com/madhuptiwari/ShaastraAI" target="_blank" rel="noopener noreferrer" class="btn btn-secondary full-width">
+        <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
+          <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+        </svg>
+        <span>View on GitHub</span>
+      </a>
+    </div>
+  </div>
+  <div id="drawer-overlay" class="drawer-overlay" aria-hidden="true"></div>
 
   <!-- Hero Section -->
   <section id="hero" class="hero">

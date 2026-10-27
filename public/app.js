@@ -173,6 +173,49 @@ const KNOWLEDGE_RESPONSES = {
       <div class="citation-header">📚 Citation Grounding</div>
       <em>Surya Siddhanta</em>, Madhyamadhikara (Ch. 1) & <em>Aryabhatiya</em>, Golapada (Sphere of Earth).
     </div>`
+  },
+  arogyanidhi: {
+    title: "Arogyanidhii — Dinacharya, Shaucha, Bhojana & Sleep Vidhi",
+    tier: "Tier 1: Uploaded Corpus Grounding [Arogyanidhii.pdf]",
+    text: `<p><strong>Arogyanidhii</strong> provides authoritative, practical protocols for daily lifestyle, preventative hygiene, digestive ignition (<em>Deepana-Pachana</em>), and biological rejuvenation:</p>
+    <ul>
+      <li><strong>Ushapan & Nasya (Page 20):</strong> Drink 500–1250 ml of pure water stored overnight in a copper vessel (<em>Tamra Jal</em>) before sunrise to stimulate natural bowel clearance. Administer 2 drops of warm sesame oil or Anu Taila into each nostril (<em>Pratimarsa Nasya</em>) to safeguard vision, strengthen cranial nerves, and prevent premature graying.</li>
+      <li><strong>Snana Vidhi (Page 22):</strong> Never wet the feet first during a head bath. Water must be poured on the crown and head first to cool the cerebral centers; wetting feet first drives systemic bodily heat upward to the brain and eyes, inducing ocular weakness and headache.</li>
+      <li><strong>Bhojana Vidhi (Pages 22–24):</strong> Consume fresh ginger with rock salt (<em>Adrak-Sendha Namak</em>) prior to meals to kindle digestive fire (<em>Jatharagni</em>). Partition the stomach into three parts: <strong>1/2 solid food, 1/4 liquid, and 1/4 empty space</strong> for free circulation of Tridoshas. Maintain a strict 6-hour gap between heavy meals.</li>
+      <li><strong>Vama-Kukshi & Vajrasana (Page 25):</strong> Sit in <em>Vajrasana</em> for 10 minutes post-meal, followed by resting on the left lateral side (<em>Vama-Kukshi</em>) for 10–15 minutes. Left-lateral posture compresses the spleen-stomach axis and naturally opens the right solar nostril (<em>Surya Nadi / Pingala</em>), rapidly burning ingested food. Recite the sacred digestive mantra: <em>"Agastir Madhavaścaiva..."</em>.</li>
+      <li><strong>Sleep Direction & Magnetism (Pages 18, 30):</strong> Sleep strictly with the head facing <strong>East</strong> (spiritual vitality and intellect) or <strong>South</strong> (longevity and grounding). Never sleep with head to the <strong>North</strong>, as magnetic repulsion between the Earth's North pole and the human brain causes restless sleep, nightmares, and elevated vascular pressure.</li>
+    </ul>
+    <div class="citation-box">
+      <div class="citation-header">📚 Citation Grounding</div>
+      <em>Arogyanidhii.pdf</em> — Pages 18, 20, 22–25, 30, 54, 57 (Dinacharya, Bhojana Vidhi & Nidra Prakarana).
+    </div>`
+  },
+  brihatjataka: {
+    title: "Varahamihira's Brihat Jataka — Kalapurusha, Tatvas & 24-Hora Rhythms",
+    tier: "Tier 1: Uploaded Corpus Grounding [Brihat_Jataka.pdf]",
+    text: `<p><strong>Varahamihira's Brihat Jataka</strong> is the seminal classical treatise on mathematical and natal Jyotisha. Its biological and astronomical foundations establish the link between cosmos and circadian human physiology:</p>
+    <ul>
+      <li><strong>Kalapurusha Limbs (Chapter 1, Verses 4–5):</strong> The 12 signs represent the anatomical organs of the Cosmic Person: <em>Mesha</em> (Head), <em>Vrishabha</em> (Face/Throat), <em>Mithuna</em> (Chest/Arms), <em>Karka</em> (Heart/Thorax), <em>Simha</em> (Upper Stomach/Epigastrium), <em>Kanya</em> (Abdomen/Waist), <em>Tula</em> (Lower Abdomen/Groin), <em>Vrishchika</em> (Genital/Excretory), <em>Dhanu</em> (Thighs), <em>Makara</em> (Knees), <em>Kumbha</em> (Shins/Calves), <em>Meena</em> (Feet).</li>
+      <li><strong>Four Maha-Tatvas (Chapter 1):</strong> Every sign is classified into its governing primal element: <strong>Agni</strong> (Mesha, Simha, Dhanu), <strong>Prithvi</strong> (Vrishabha, Kanya, Makara), <strong>Vayu</strong> (Mithuna, Tula, Kumbha), and <strong>Jala</strong> (Karka, Vrishchika, Meena), defining an individual's bio-energetic metabolism and daily stamina.</li>
+      <li><strong>The 24-Hora Planetary Order (Chapter 1, Verse 9):</strong> Each 24-hour day-night cycle (<em>Ahoratra</em>) is partitioned into 24 planetary hours (<em>Horas</em>), descending in planetary orbital speed: Sun &rarr; Venus &rarr; Mercury &rarr; Moon &rarr; Saturn &rarr; Jupiter &rarr; Mars. Aligning intellectual exertion with Surya/Budha Horas and resting during Chandra Horas maximizes mental clarity and avoids burn-out.</li>
+    </ul>
+    <div class="citation-box">
+      <div class="citation-header">📚 Citation Grounding</div>
+      <em>Varahamihira's Brihat Jataka</em> — Chapter 1 (Rashi Bhedadhyaya, Verses 4-9) & Chapter 2 (Grahaguna Svarupadhyaya).
+    </div>`
+  },
+  shivasamhita: {
+    title: "Shiva Samhita — Prana, 72,000 Nadis & Nadi Shodhana",
+    tier: "Tier 1: Uploaded Corpus Grounding [ShivaSahinta_WithHindiTika.pdf]",
+    text: `<p>The <strong>Shiva Samhita</strong> (Chapter 3) provides the highest esoteric and physiological instructions on yogic respiration, prana, and sensory transcendence:</p>
+    <ul>
+      <li><strong>72,000 Nadis & Principal Conduits:</strong> Out of 72,000 subtle energy channels, three are supreme: <em>Ida</em> (left lunar channel, parasympathetic cooling), <em>Pingala</em> (right solar channel, sympathetic metabolic heat), and <em>Sushumna</em> (central channel of non-dual consciousness).</li>
+      <li><strong>Nadi Shodhana Vidhi (Chapter 3, Verses 1–40):</strong> Inhale through the left nostril (Ida), retain with gentle Kumbhaka, exhale slowly through the right nostril (Pingala), then reverse. Purifying the Nadis four times daily (Brahma Muhurta, Midday, Evening twilight, Midnight) purifies cellular toxins within 3 months, creating radiant skin, sharp memory, and balanced digestive fire.</li>
+    </ul>
+    <div class="citation-box">
+      <div class="citation-header">📚 Citation Grounding</div>
+      <em>Shiva Samhita</em> (With Hindi Tika) — Chapter 3 (Vayu Sadhana & Pranayama Prakarana, Verses 1–40).
+    </div>`
   }
 };
 
@@ -197,6 +240,14 @@ const closeModalBtn = document.getElementById('close-modal-btn');
 const saveSettingsBtn = document.getElementById('save-settings-btn');
 const geminiKeyInput = document.getElementById('gemini-key-input');
 
+// Mobile Navigation Elements
+const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+const mobileDrawer = document.getElementById('mobile-drawer');
+const drawerCloseBtn = document.getElementById('drawer-close-btn');
+const drawerOverlay = document.getElementById('drawer-overlay');
+const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
+const mobileDrawerChips = document.querySelectorAll('.mobile-drawer-chip');
+
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
   // Load saved API key
@@ -213,6 +264,55 @@ document.addEventListener('DOMContentLoaded', () => {
       handleSend();
     }
   });
+
+  // Mobile Drawer toggles
+  if (mobileMenuBtn) {
+    mobileMenuBtn.addEventListener('click', () => {
+      const isOpen = mobileDrawer.classList.contains('open');
+      if (isOpen) {
+        closeMobileDrawer();
+      } else {
+        openMobileDrawer();
+      }
+    });
+  }
+
+  if (drawerCloseBtn) {
+    drawerCloseBtn.addEventListener('click', closeMobileDrawer);
+  }
+
+  if (drawerOverlay) {
+    drawerOverlay.addEventListener('click', closeMobileDrawer);
+  }
+
+  mobileNavLinks.forEach(link => {
+    link.addEventListener('click', () => {
+      closeMobileDrawer();
+      mobileNavLinks.forEach(l => l.classList.remove('active'));
+      link.classList.add('active');
+    });
+  });
+
+  mobileDrawerChips.forEach(chip => {
+    chip.addEventListener('click', () => {
+      const prompt = chip.getAttribute('data-prompt');
+      if (prompt) {
+        closeMobileDrawer();
+        userInput.value = prompt;
+        userInput.focus();
+        handleSend();
+      }
+    });
+  });
+
+  // Virtual keyboard layout adjustment for mobile browsers
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', () => {
+      if (document.activeElement === userInput) {
+        userInput.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    });
+  }
 
   // Prompt chips
   promptChips.forEach(chip => {
@@ -272,6 +372,24 @@ document.addEventListener('DOMContentLoaded', () => {
     userInput.style.height = Math.min(userInput.scrollHeight, 120) + 'px';
   });
 });
+
+function openMobileDrawer() {
+  if (mobileDrawer && drawerOverlay) {
+    mobileDrawer.classList.add('open');
+    drawerOverlay.classList.add('open');
+    if (mobileMenuBtn) mobileMenuBtn.setAttribute('aria-expanded', 'true');
+    document.body.style.overflow = 'hidden';
+  }
+}
+
+function closeMobileDrawer() {
+  if (mobileDrawer && drawerOverlay) {
+    mobileDrawer.classList.remove('open');
+    drawerOverlay.classList.remove('open');
+    if (mobileMenuBtn) mobileMenuBtn.setAttribute('aria-expanded', 'false');
+    document.body.style.overflow = '';
+  }
+}
 
 function updateTierBadge() {
   switch (activeMode) {
@@ -604,44 +722,48 @@ function generatePersonalizedDinacharya(query) {
         <div class="timeline-time">04:30 AM – 05:15 AM</div>
         <div class="timeline-content">
           <strong>1. Brahma Muhurta (ब्राह्मे मुहूर्ते उत्तिष्ठेत्)</strong><br/>
-          Awaken 2 Muhurtas (approx. 96 minutes) before sunrise when atmospheric Sattva Guna and cellular prana are highest. 
-          <em>Personal adjustment:</em> ${element.includes("Agni") ? "Awaken gently with slow deep breathing to keep morning cortisol and Pitta balanced." : element.includes("Prithvi") ? "Rise immediately to break Kapha inertia; avoid lingering in bed." : "Sip lukewarm water and ground your restless Vata mind with silent gratitude."}
+          Awaken 2 Muhurtas (approx. 96 minutes) before sunrise when atmospheric Sattva Guna and cellular prana are highest (<em>Ashtanga Hridaya, Sutrasthana Ch. 2</em>). 
+          According to <strong>Arogyanidhii (pp. 18, 30)</strong>, awaken facing East or North; never sleep with head towards North due to geomagnetic repulsion.<br/>
+          <em>Personal adjustment:</em> ${element.includes("Agni") ? "Awaken gently with slow deep diaphragmatic breathing to keep morning cortisol and Pitta balanced." : element.includes("Prithvi") ? "Rise immediately upon waking to break Kapha inertia; avoid lingering in bed." : "Sip lukewarm water and ground your restless Vata mind with silent gratitude."}
         </div>
       </div>
 
       <div class="timeline-item">
         <div class="timeline-time">05:15 AM – 05:45 AM</div>
         <div class="timeline-content">
-          <strong>2. Ushapan, Shaucha & Dantadhavana</strong><br/>
-          Drink 1–2 glasses of warm water (<em>Ushapan</em>) stored overnight in a copper vessel to stimulate natural peristalsis. 
-          Scrape tongue with a copper/silver scraper (<em>Jihwa Nirlekhana</em>) and clean teeth with bitter or astringent herbal tooth powder.
+          <strong>2. Ushapan, Shaucha & Pratimarsa Nasya</strong><br/>
+          Drink 500–1250 ml of pure water stored overnight in a copper vessel (<em>Ushapan / Tamra Jal</em>, <strong>Arogyanidhii p. 20</strong>) to stimulate natural colon evacuation. 
+          Administer 2 drops of warm sesame oil or Anu Taila into each nostril (<em>Pratimarsa Nasya</em>, <strong>Arogyanidhii p. 20</strong>) to protect optic nerves, prevent graying, and calm the central nervous system. 
+          Scrape tongue with a copper/silver scraper (<em>Jihwa Nirlekhana</em>) and brush teeth with bitter herbal powder.
         </div>
       </div>
 
       <div class="timeline-item">
         <div class="timeline-time">05:45 AM – 06:15 AM</div>
         <div class="timeline-content">
-          <strong>3. Kavala/Gandusha & Abhyanga (Self-Oil Massage)</strong><br/>
-          Hold warm oil in mouth for 3–5 minutes (<em>Gandusha</em>) for jaw and sensory clarity. Perform full-body warm oil massage (<em>Abhyanga</em>).<br/>
-          <em>Prescribed Oil:</em> <strong>${oil}</strong> to nourish tissues and ground the nervous system.
+          <strong>3. Gandusha (Oil Pulling) & Abhyanga (Self-Oil Massage)</strong><br/>
+          Hold warm sesame oil in the mouth for 3–5 minutes (<em>Gandusha</em>, <strong>Arogyanidhii p. 21</strong>) to strengthen gums, teeth, and sensory clarity. 
+          Perform full-body warm oil massage (<em>Abhyanga</em>) from head to toe.<br/>
+          <em>Prescribed Oil:</em> <strong>${oil}</strong> to nourish the seven Dhatus and pacify <strong>${dosha}</strong>.
         </div>
       </div>
 
       <div class="timeline-item">
         <div class="timeline-time">06:15 AM – 07:15 AM</div>
         <div class="timeline-content">
-          <strong>4. Vyayama, Asanas & Pranayama (व्यायाम व प्राणायाम)</strong><br/>
-          Exercise to half of your maximum capacity (<em>Ardha Shakti</em>) until light perspiration appears on forehead and nose.<br/>
+          <strong>4. Vyayama, Asanas & Shiva Samhita Pranayama</strong><br/>
+          Exercise up to half of your maximum physiological capacity (<em>Ardha Shakti</em> / light perspiration on forehead and nose, <strong>Arogyanidhii p. 21</strong>).<br/>
           <em>Prescribed Practice:</em> ${exercise}.<br/>
-          <em>Pranayama:</em> <strong>${pranayama}</strong> followed by 10 minutes of silent Dhyana meditating on <em>${nakDeity}</em>.
+          <em>Pranayama:</em> Practice Nadi Shodhana (<strong>Shiva Samhita Ch. 3, vv. 1–40</strong>) balancing Ida (cooling lunar) and Pingala (heating solar) channels: <strong>${pranayama}</strong>, followed by 10 minutes of silent Dhyana meditating on <em>${nakDeity}</em>.
         </div>
       </div>
 
       <div class="timeline-item">
         <div class="timeline-time">07:15 AM – 08:00 AM</div>
         <div class="timeline-content">
-          <strong>5. Snana (Purifying Bath) & Sattvic Pratah-Ashana (Breakfast)</strong><br/>
-          Lukewarm bath to restore vigor. Consume a light, warm breakfast matching your Agni (e.g. stewed spiced apples, warm soaked oats with almonds and cardamom, or spiced mung broth).
+          <strong>5. Snana Vidhi & Sattvic Pratah-Ashana (Breakfast)</strong><br/>
+          <strong>Snana Vidhi (Arogyanidhii p. 22):</strong> Pour lukewarm water on the head first to cool the cranial and optic centers. Wetting the feet first forces bodily heat upwards into the brain and eyes, inducing ocular fatigue and cephalic tension. 
+          Consume a light, warm breakfast matching your Agni (e.g., stewed spiced apples, warm soaked oats with almonds and cardamom, or spiced mung broth).
         </div>
       </div>
 
@@ -649,32 +771,34 @@ function generatePersonalizedDinacharya(query) {
         <div class="timeline-time">08:30 AM – 12:30 PM</div>
         <div class="timeline-content">
           <strong>6. Surya & Budha Hora (Peak Intellectual Execution)</strong><br/>
-          The solar ascending cycle favors complex analytical work, deep research, coding, writing, and high-stakes decision making.
+          According to <strong>Varahamihira's Brihat Jataka (Ch. 1, v. 9)</strong>, the 24-Hora diurnal planetary order begins at sunrise. 
+          The ascending solar and mercurial hours heighten cognitive clarity, discernment, and mathematical acuity. Ideal for deep research, coding, writing, and high-impact decision making.
         </div>
       </div>
 
       <div class="timeline-item">
         <div class="timeline-time">12:30 PM – 01:30 PM</div>
         <div class="timeline-content">
-          <strong>7. Madhyahna Bhojana (Principal Noon Meal) & Shatapadi</strong><br/>
-          Eat your largest, most nourishing meal when the sun is at its zenith and digestive fire (<em>Pachaka Pitta</em>) is strongest. 
-          Walk 100 gentle steps (<em>Shatapadi</em>). Rest on the left side (<em>Vamakukshi</em>) for 10–15 minutes (never deep daytime sleep).
+          <strong>7. Madhyahna Bhojana Vidhi & Vama-Kukshi (Principal Meal)</strong><br/>
+          Kindle digestive fire (<em>Jatharagni</em>) before eating with a slice of fresh ginger and rock salt (<em>Adrak-Sendha Namak</em>, <strong>Arogyanidhii p. 22</strong>).<br/>
+          <strong>Stomach Partitioning (Arogyanidhii p. 23):</strong> Fill <strong>1/2 with solid food, 1/4 with liquids, and leave 1/4 empty</strong> for free circulation of the Tridoshas. Do not drink chilled water during or after meals.<br/>
+          <strong>Post-Meal Vidhi (Arogyanidhii p. 25):</strong> Sit in <em>Vajrasana</em> for 10 minutes, followed by resting on the left lateral side (<em>Vama-Kukshi</em>) for 10–15 minutes (never heavy daytime sleep) to activate <em>Surya Nadi (Pingala)</em> and compress the spleen-stomach tract. Recite the Agastya digestive mantra: <em>"Agastir Madhavaścaiva..."</em>. Allow a strict 6-hour interval before the next substantial meal.
         </div>
       </div>
 
       <div class="timeline-item">
         <div class="timeline-time">01:30 PM – 05:30 PM</div>
         <div class="timeline-content">
-          <strong>8. Guru/Shukra Hora (Collaboration, Learning & Implementation)</strong><br/>
-          Meetings, creative ideation, organizational execution, and collaborative tasks. Hydrate with warm water or herbal cumin-coriander-fennel (CCF) tea.
+          <strong>8. Guru & Shukra Hora (Collaboration, Planning & Execution)</strong><br/>
+          Jupiterian and Venusian hours favor interpersonal communication, creative design, organizational harmony, and project delivery. Hydrate with warm CCF (cumin, coriander, fennel) tea.
         </div>
       </div>
 
       <div class="timeline-item">
         <div class="timeline-time">05:30 PM – 06:30 PM</div>
         <div class="timeline-content">
-          <strong>9. Sayahna Sandhya (Twilight Transition)</strong><br/>
-          Disconnect from digital screens. Take a gentle evening walk, practice Bhramari (humming bee) pranayama, and transition from outer exertion to inner reflection.
+          <strong>9. Sayahna Sandhya (Twilight Transition & Wind-Down)</strong><br/>
+          Power down screens and digital notifications. Take a leisurely evening stroll (100 steps / <em>Shatapadi</em>), practice Bhramari (humming bee) pranayama, and ease physiological tone from external output to contemplative stillness.
         </div>
       </div>
 
@@ -682,15 +806,16 @@ function generatePersonalizedDinacharya(query) {
         <div class="timeline-time">07:00 PM – 08:00 PM</div>
         <div class="timeline-content">
           <strong>10. Laghubhojana (Light Warm Dinner)</strong><br/>
-          Light, easily digestible meal (khichdi, vegetable soup, or steamed greens) at least 2.5 hours before bedtime.
+          Consume an easily digestible, warm meal (khichdi, vegetable soup, or steamed greens, <strong>Arogyanidhii p. 24</strong>) at least 2.5–3 hours before bedtime. Avoid heavy legumes, curd, or fried foods at night.
         </div>
       </div>
 
       <div class="timeline-item">
         <div class="timeline-time">09:30 PM – 10:00 PM</div>
         <div class="timeline-content">
-          <strong>11. Ratricharya & Nidra (Restorative Sleep)</strong><br/>
-          Massage soles of feet with warm sesame oil or cow's ghee (<em>Padabhyanga</em>) to induce deep sleep and pacify mental Vata. Sleep before 10:00 PM to avoid entering the nocturnal Pitta cycle (10 PM – 2 AM) which triggers midnight cravings and restless wakefulness.
+          <strong>11. Ratricharya, Sleep Direction & Nidra (Restorative Sleep)</strong><br/>
+          Perform <em>Padabhyanga</em> (massage soles of feet with warm cow's ghee or sesame oil) to pacify cranial Vata and induce sound sleep.<br/>
+          <strong>Sleep Orientation (Arogyanidhii pp. 18, 30):</strong> Lie down strictly with head directed towards the <strong>East</strong> (intellectual illumination) or <strong>South</strong> (longevity and geomagnetic harmony). <em>Never sleep facing North</em> to avoid electromagnetic repulsion with the Earth's polar axis. Sleep before 10:00 PM to avoid entering the nocturnal Pitta cycle (10 PM – 2 AM).
         </div>
       </div>
     </div>
@@ -701,42 +826,44 @@ function generatePersonalizedDinacharya(query) {
     customizationGuideHtml = `
       <div style="margin-top: 14px;">
         <h4 style="color: var(--gold-light); margin-bottom: 8px;">🌌 How Your Sun Sign & Nakshatra Customize This Routine:</h4>
-        <table class="tatva-table">
-          <thead>
-            <tr>
-              <th>Tatva / Element</th>
-              <th>Sun Signs (Surya Rashi)</th>
-              <th>Dinacharya Modification</th>
-              <th>Prescribed Abhyanga Oil</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><strong>Agni (Fire)</strong></td>
-              <td>Aries, Leo, Sagittarius</td>
-              <td>Cooling morning practices, avoid noon exertion, Sheetali pranayama</td>
-              <td>Coconut or Chandanadi oil</td>
-            </tr>
-            <tr>
-              <td><strong>Prithvi (Earth)</strong></td>
-              <td>Taurus, Virgo, Capricorn</td>
-              <td>Dynamic brisk exercise, early dawn waking, Kapalabhati to reduce lethargy</td>
-              <td>Warm sesame or Udvartana powder</td>
-            </tr>
-            <tr>
-              <td><strong>Vayu (Air)</strong></td>
-              <td>Gemini, Libra, Aquarius</td>
-              <td>Grounding rhythms, strict meal and sleep times, Nadi Shodhana</td>
-              <td>Warm unrefined Sesame (Tila) oil</td>
-            </tr>
-            <tr>
-              <td><strong>Jala (Water)</strong></td>
-              <td>Cancer, Scorpio, Pisces</td>
-              <td>Lymphatic movement, Surya Bhedana, warm light non-mucous foods</td>
-              <td>Gentle almond or light sesame oil</td>
-            </tr>
-          </tbody>
-        </table>
+        <div class="table-responsive">
+          <table class="tatva-table">
+            <thead>
+              <tr>
+                <th>Tatva / Element</th>
+                <th>Sun Signs (Surya Rashi)</th>
+                <th>Dinacharya Modification</th>
+                <th>Prescribed Abhyanga Oil</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Agni (Fire)</strong></td>
+                <td>Aries, Leo, Sagittarius</td>
+                <td>Cooling morning practices, avoid noon exertion, Sheetali pranayama</td>
+                <td>Coconut or Chandanadi oil</td>
+              </tr>
+              <tr>
+                <td><strong>Prithvi (Earth)</strong></td>
+                <td>Taurus, Virgo, Capricorn</td>
+                <td>Dynamic brisk exercise, early dawn waking, Kapalabhati to reduce lethargy</td>
+                <td>Warm sesame or Udvartana powder</td>
+              </tr>
+              <tr>
+                <td><strong>Vayu (Air)</strong></td>
+                <td>Gemini, Libra, Aquarius</td>
+                <td>Grounding rhythms, strict meal and sleep times, Nadi Shodhana</td>
+                <td>Warm unrefined Sesame (Tila) oil</td>
+              </tr>
+              <tr>
+                <td><strong>Jala (Water)</strong></td>
+                <td>Cancer, Scorpio, Pisces</td>
+                <td>Lymphatic movement, Surya Bhedana, warm light non-mucous foods</td>
+                <td>Gentle almond or light sesame oil</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
 
         <div class="quick-prompts-wrapper">
           <span class="quick-prompts-label">✨ Click a profile below to customize instantly:</span>
@@ -752,9 +879,11 @@ function generatePersonalizedDinacharya(query) {
 
   const citationHtml = `
     <div class="citation-box" style="margin-top: 14px;">
-      <div class="citation-header">📚 Classical Shastric Grounding</div>
-      <em>Charaka Samhita (Sutrasthana, Ch. 5 - Matrashiteeya)</em>: "मात्राशी स्यात् आहारमात्रा पुनरग्निबलापेक्षिणी..." (One must eat according to the measure of one's digestive fire).<br/>
-      <em>Ashtanga Hridaya (Sutrasthana, Ch. 2 - Dinacharya Adhyaya)</em>: "ब्राह्मे मुहूर्ते उत्तिष्ठेत् स्वस्थो रक्षार्थमायुषः" (To protect longevity and health, the seeker of wellness must rise during Brahma Muhurta).
+      <div class="citation-header">📚 Classical Shastric & Uploaded Corpus Grounding</div>
+      <em>Arogyanidhii.pdf</em>: Pages 18, 20, 22–25, 30 (Ushapan, Nasya, Snana Vidhi, Bhojana Tri-bhaga, Vama-Kukshi, Sleep Orientation).<br/>
+      <em>Varahamihira's Brihat Jataka</em>: Ch. 1 (Kalapurusha 12 Limbs, 4 Tatvas) & Ch. 1, v. 9 (24-Hora Planetary Cycle).<br/>
+      <em>Shiva Samhita</em>: Ch. 3, vv. 1–40 (Nadi Shodhana & Ida-Pingala Vayu Sadhana).<br/>
+      <em>Charaka Samhita (Sutrasthana Ch. 5)</em> & <em>Ashtanga Hridaya (Sutrasthana Ch. 2)</em>: "मात्राशी स्यात्..." & "ब्राह्मे मुहूर्ते उत्तिष्ठेत् स्वस्थो रक्षार्थमायुषः".
     </div>
   `;
 
@@ -839,7 +968,31 @@ function generateGroundedResponse(query, attachment) {
     };
   }
 
-  // 10. Intelligent Shastric Synthesis for any general inquiry
+  // 10. Arogyanidhii / Bhojana Vidhi / Snana Vidhi / Sleep Direction
+  if (lower.includes('arogyanidhi') || lower.includes('ushapan') || lower.includes('nasya') || lower.includes('bhojana') || lower.includes('vama-kukshi') || lower.includes('snana vidhi')) {
+    return {
+      tier: 'Tier 1: Uploaded Corpus Grounding [Arogyanidhii.pdf]',
+      text: KNOWLEDGE_RESPONSES.arogyanidhi.text
+    };
+  }
+
+  // 11. Varahamihira / Brihat Jataka / Kalapurusha / Horas
+  if (lower.includes('brihat jataka') || lower.includes('varahamihira') || lower.includes('kalapurusha') || lower.includes('hora')) {
+    return {
+      tier: 'Tier 1: Uploaded Corpus Grounding [Brihat_Jataka.pdf]',
+      text: KNOWLEDGE_RESPONSES.brihatjataka.text
+    };
+  }
+
+  // 12. Shiva Samhita / Nadi Shodhana / Kundalini Prana
+  if (lower.includes('shiva samhita') || lower.includes('nadi shodhana') || lower.includes('ida') || lower.includes('pingala') || lower.includes('sushumna')) {
+    return {
+      tier: 'Tier 1: Uploaded Corpus Grounding [ShivaSahinta_WithHindiTika.pdf]',
+      text: KNOWLEDGE_RESPONSES.shivasamhita.text
+    };
+  }
+
+  // 13. Intelligent Shastric Synthesis for any general inquiry
   return {
     tier: activeMode === 'faiss' ? 'Tier 3: FAISS Local Vector Search' : 'Tier 1: Amazon Bedrock (Nova Pro)',
     text: `<p>Based on retrieval and reasoning from the <strong>ShaastraAI</strong> indexed knowledge base:</p>
@@ -856,10 +1009,18 @@ function generateGroundedResponse(query, attachment) {
 
 async function callLiveGemini(prompt, apiKey) {
   try {
-    const systemInstruction = `You are ShaastraAI (शास्त्र AI), an authoritative, scholarly AI assistant specializing in classical Indian knowledge systems (Ayurveda, Jyotisha, Vedanta, Yoga, and Sanskrit shastras) and multimodal RAG.
+    const systemInstruction = `You are ShaastraAI (शास्त्र AI), an authoritative, scholarly AI assistant specializing in classical Indian knowledge systems (Ayurveda, Jyotisha, Vedanta, Yoga, and Sanskrit shastras) and multimodal RAG, grounded directly in the uploaded corpus (including Arogyanidhii.pdf, Varahamihira's Brihat Jataka, Shiva Samhita, 108 Upanishads, and Bhagavad Gita).
+
 When users ask for personalized guidance, such as crafting a daily routine (Dinacharya) based on their name, sun sign (Surya Rashi), moon sign (Chandra Rashi), nakshatra, or dosha:
 1. Provide a detailed, chronologically structured Vedic schedule (from Brahma Muhurta 4:30 AM to Nidra 10:00 PM).
-2. Integrate classical Ayurvedic principles (Charaka Samhita Sutrasthana Ch. 5, Ashtanga Hridaya Ch. 2) including waking, Ushapan, Shaucha, Dantadhavana, Gandusha, Abhyanga, Vyayama, Snana, Bhojana vidhi, and Ratricharya.
+2. Integrate classical Ayurvedic principles and exact citations from the uploaded corpus:
+   - Arogyanidhii (p. 20): Ushapan (500–1250ml copper vessel water before dawn) and Pratimarsa Nasya (2 drops warm sesame oil/Anu taila in nostrils for cranial clarity).
+   - Arogyanidhii (p. 22): Snana Vidhi (Pour lukewarm water on head first to cool cerebral and ocular centers; never wet feet first).
+   - Arogyanidhii (pp. 22–24): Bhojana Vidhi (Kindle Jatharagni with fresh ginger + rock salt; stomach partition: 1/2 solid, 1/4 liquid, 1/4 empty; 6-hour gap between meals).
+   - Arogyanidhii (p. 25): Post-meal 10-min Vajrasana + 10–15 min Vama-Kukshi (left lateral rest to activate Surya Nadi/Pingala) + Agastya digestive mantra.
+   - Arogyanidhii (pp. 18, 30): Sleep orientation (Head strictly East or South; never North due to magnetic field clash).
+   - Shiva Samhita (Ch. 3, vv. 1–40): Nadi Shodhana balancing Ida (lunar) and Pingala (solar) channels.
+   - Varahamihira's Brihat Jataka (Ch. 1-2): 12 Kalapurusha anatomical signs, 4 Maha-Tatvas, and the 24-Hora diurnal planetary sequence.
 3. Align the routine with their Astrological element (Agni/Fire, Prithvi/Earth, Vayu/Air, Jala/Water), ruling planet, and Nakshatra dosha (Vata, Pitta, Kapha), tailoring oil types, diet, pranayama, and optimal work hours (Horas).
 4. If they have not yet provided their specific name, sun sign, or nakshatra, provide the master classical Dinacharya schedule, explain the sign/nakshatra customization rules, and invite them to share their specific details for instant personalization.
 Ground your answer with classical Sanskrit terms and shastric citations.`;

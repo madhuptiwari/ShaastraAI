@@ -868,13 +868,13 @@ class ShaashtraAIChatbot:
 
         system_prompt = (
             "You are ShaashtraAI, a custom multi-turn AI assistant trained on the user's PDF knowledge base "
-            "(including Sanskrit, Hindi, and English texts). "
+            "(including Sanskrit, Hindi, and English texts from Arogyanidhii, Brihat Jataka, Shiva Samhita, Upanishads). "
             "Use the conversation history to maintain context across turns, and carefully inspect any "
             "attached video, image, rendered scanned PDF page images, audio transcript, or document provided by the user. "
             "Ground your claims in the <pdf_knowledge_base> passages and any rendered scanned PDF "
             "pages provided. For practical inquiries (such as personalized Vedic daily routines / Dinacharya, "
-            "astrological alignments, and Ayurvedic lifestyle), synthesize classical Shastras (Charaka Samhita, "
-            "Ashtanga Hridaya, Brihat Parashara Hora Shastra) to provide a complete, deeply structured daily schedule. "
+            "astrological alignments, and Ayurvedic lifestyle), synthesize classical Shastras with exact citations from Arogyanidhii (pp. 18, 20, 22-25, 30), Varahamihira's Brihat Jataka (Ch. 1-2), and Shiva Samhita (Ch. 3) to provide a complete, deeply structured daily schedule. "
+            "Include Ushapan, Nasya, Snana Vidhi, Bhojana Tri-bhaga, Vama-Kukshi, and sleep orientation rules. "
             "Always cite the PDF filename and page number when referencing the indexed corpus.\n\n"
             f"<pdf_knowledge_base>\n{context_text}\n</pdf_knowledge_base>"
         )
@@ -952,7 +952,33 @@ def main() -> None:
     )
     st.title("ShaashtraAI")
     st.caption(
-        "Custom Multi-Turn AI Assistant Trained on Your PDFs | Amazon Bedrock (Nova) + Automatic Quota-Safe Fallback"
+        "Custom Multi-Turn AI Assistant Trained on Your PDFs | Amazon Bedrock (Nova) + Automatic Quota-Safe Fallback | Mobile Optimized"
+    )
+    st.markdown(
+        """
+        <style>
+        @media (max-width: 768px) {
+            .block-container {
+                padding-left: 0.8rem !important;
+                padding-right: 0.8rem !important;
+                padding-top: 1.5rem !important;
+            }
+            .stButton > button {
+                min-height: 44px !important;
+                font-size: 15px !important;
+            }
+            [data-testid="stChatInput"] textarea {
+                font-size: 16px !important;
+            }
+            table {
+                display: block;
+                overflow-x: auto;
+                max-width: 100%;
+            }
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
     )
 
     creds = get_clean_aws_credentials()

@@ -94,6 +94,9 @@ a:hover {
   -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border-color);
   padding: 14px 0;
+  padding-top: calc(14px + env(safe-area-inset-top, 0px));
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
 }
 
 .nav-container {
@@ -417,7 +420,8 @@ a:hover {
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  height: 680px;
+  height: min(680px, 85vh);
+  height: min(680px, 85dvh);
   max-width: 980px;
   margin: 0 auto;
   backdrop-filter: blur(16px);
@@ -709,7 +713,7 @@ a:hover {
 
 /* Input Bar */
 .chat-input-bar {
-  padding: 14px 20px;
+  padding: 14px 20px calc(14px + env(safe-area-inset-bottom, 0px));
   background: rgba(15, 23, 42, 0.95);
   border-top: 1px solid var(--border-color);
   display: flex;
@@ -1137,7 +1141,7 @@ a:hover {
 .footer {
   background: #05080f;
   border-top: 1px solid var(--border-color);
-  padding: 50px 0 30px;
+  padding: 50px 0 calc(30px + env(safe-area-inset-bottom, 0px));
   margin-top: auto;
 }
 
@@ -1201,6 +1205,20 @@ a:hover {
 
 .timeline-content strong {
   color: var(--gold-light);
+}
+
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 12px 0;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+}
+
+.table-responsive .tatva-table {
+  min-width: 500px;
+  margin: 0;
 }
 
 .tatva-table {
@@ -1300,33 +1318,393 @@ a:hover {
   margin-top: 10px;
 }
 
-/* Responsive */
+/* ==========================================================================
+   Mobile & Cross-Resolution Responsive Architecture
+   ========================================================================== */
+
+/* Hamburger Toggle Button */
+.hamburger-btn {
+  display: none;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  min-width: 44px;
+  min-height: 44px;
+  width: 44px;
+  height: 44px;
+  padding: 10px;
+  flex-direction: column;
+  justify-content: space-around;
+  z-index: 101;
+  border-radius: var(--radius-sm);
+  transition: background-color 0.2s ease;
+}
+
+.hamburger-btn:hover,
+.hamburger-btn:focus-visible {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.hamburger-btn .bar {
+  width: 24px;
+  height: 2px;
+  background-color: var(--text-primary);
+  border-radius: 2px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hamburger-btn.open .bar:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+
+.hamburger-btn.open .bar:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger-btn.open .bar:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+/* Mobile Drawer Backdrop Overlay */
+.drawer-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 198;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.drawer-overlay.active {
+  display: block;
+  opacity: 1;
+}
+
+/* Off-Canvas Slide Drawer */
+.mobile-drawer {
+  position: fixed;
+  top: 0;
+  right: -320px;
+  width: 300px;
+  max-width: 86vw;
+  height: 100vh;
+  height: 100dvh;
+  background: #0d1322;
+  border-left: 1px solid var(--border-color);
+  z-index: 199;
+  display: flex;
+  flex-direction: column;
+  padding: calc(20px + env(safe-area-inset-top, 0px)) 20px calc(24px + env(safe-area-inset-bottom, 0px));
+  box-shadow: -10px 0 35px rgba(0, 0, 0, 0.65);
+  transition: right 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.mobile-drawer.open {
+  right: 0;
+}
+
+.mobile-drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.mobile-nav-links {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 24px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.mobile-nav-link {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  padding: 14px 16px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+  transition: all 0.2s ease;
+}
+
+.mobile-nav-link:hover, .mobile-nav-link.active {
+  color: var(--gold-light);
+  background: rgba(245, 158, 11, 0.12);
+  border-left: 3px solid var(--gold-primary);
+}
+
+.mobile-drawer-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border-color);
+}
+
+.full-width {
+  width: 100%;
+  justify-content: center;
+  text-align: center;
+}
+
+/* ==========================================================================
+   Responsive Breakpoints
+   ========================================================================== */
+
+/* 1. Large Tablets & Small Laptops (992px to 1199px) */
+@media (max-width: 1199px) {
+  .hero-title {
+    font-size: 2.8rem;
+  }
+}
+
+/* 2. Tablets & Split-Screen Viewports (768px to 992px) */
 @media (max-width: 992px) {
   .hero-title {
-    font-size: 2.5rem;
+    font-size: 2.4rem;
   }
-  .tiers-grid, .features-grid, .deploy-grid {
-    grid-template-columns: 1fr;
+  .tiers-grid,
+  .features-grid,
+  .deploy-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
   }
   .metrics-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
-@media (max-width: 640px) {
-  .nav-links {
+/* 3. Mobile Viewports (<= 768px) */
+@media (max-width: 768px) {
+  .nav-links.desktop-nav {
     display: none;
   }
+  .hamburger-btn {
+    display: flex;
+  }
+
+  /* Prevent iOS input auto-zoom: Inputs must be >= 16px */
+  .chat-input,
+  .custom-select,
+  .form-input {
+    font-size: 16px !important;
+  }
+
+  /* Accessible Touch Targets (>= 44px x 44px) */
+  .icon-btn,
+  .input-action-btn,
+  .icon-btn-sm,
+  .btn-send {
+    min-width: 44px !important;
+    min-height: 44px !important;
+    width: 44px;
+    height: 44px;
+  }
+
+  .custom-select {
+    min-height: 44px;
+    padding: 8px 12px;
+  }
+
+  .chip {
+    min-height: 44px;
+    padding: 8px 14px;
+    font-size: 0.82rem;
+  }
+
+  .quick-prompt-btn {
+    min-height: 44px;
+    padding: 8px 14px;
+    margin: 4px;
+  }
+
+  .close-btn,
+  .remove-attachment-btn {
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Dynamic Viewport Chat Height */
+  .chat-card {
+    height: 75vh;
+    height: 75dvh;
+    min-height: 480px;
+    max-height: 82dvh;
+    border-radius: var(--radius-md);
+  }
+
+  .chat-messages {
+    padding: 14px 12px;
+    gap: 14px;
+  }
+
+  .chat-bubble-row {
+    max-width: 96%;
+    gap: 10px;
+  }
+
+  .bubble-text {
+    padding: 12px 14px;
+    font-size: 0.9rem;
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+
+  .avatar {
+    width: 32px;
+    height: 32px;
+  }
+
+  .bot-avatar svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  /* Modal turns into Mobile Bottom Sheet */
+  .modal-overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .modal-card {
+    border-radius: 20px 20px 0 0;
+    max-height: 85vh;
+    max-height: 85dvh;
+    overflow-y: auto;
+    padding: 24px 20px calc(20px + env(safe-area-inset-bottom, 0px));
+    animation: slideUpModal 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  @keyframes slideUpModal {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+
+  .tiers-grid,
+  .features-grid,
+  .deploy-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* 4. Compact Smartphones (<= 580px) */
+@media (max-width: 580px) {
   .hero-title {
     font-size: 2rem;
+    line-height: 1.2;
   }
+
   .hero-description {
-    font-size: 1rem;
+    font-size: 0.98rem;
+  }
+
+  .section-title {
+    font-size: 1.75rem;
+  }
+
+  /* Responsive Timeline Schedule Stacking */
+  .timeline-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    padding: 10px 12px;
+  }
+
+  .timeline-time {
+    min-width: unset;
+    font-size: 0.74rem;
+    padding: 2px 8px;
+    background: rgba(6, 182, 212, 0.15);
+    border: 1px solid rgba(6, 182, 212, 0.3);
+    border-radius: var(--radius-full);
+    display: inline-block;
+    width: fit-content;
+  }
+
+  .chat-card-header {
+    padding: 12px 14px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .chat-header-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .custom-select {
+    flex: 1;
+  }
+
+  .prompt-chips-container {
+    padding: 8px 12px;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+  }
+
+  .chip {
+    scroll-snap-align: start;
+  }
+}
+
+/* 5. Extra Small Smartphones (<= 380px: iPhone SE, Galaxy Z Fold outer) */
+@media (max-width: 380px) {
+  .brand-title {
+    font-size: 1.1rem;
+  }
+  .brand-subtitle {
+    display: none;
+  }
+  .status-text,
+  .github-text {
+    display: none;
+  }
+  .github-btn {
+    padding: 8px;
+    min-width: 44px;
+    min-height: 44px;
   }
   .metrics-grid {
     grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .hero-cta {
+    flex-direction: column;
+    width: 100%;
+  }
+  .hero-cta .btn {
+    width: 100%;
+  }
+  .chat-input-bar {
+    padding: 10px 8px calc(10px + env(safe-area-inset-bottom, 0px));
+    gap: 6px;
+  }
+}
+
+/* 6. Landscape Phone Orientation (Short Viewport Height) */
+@media (max-height: 500px) and (orientation: landscape) {
+  .hero {
+    padding: 40px 0 30px;
   }
   .chat-card {
-    height: 600px;
+    height: 85vh;
+    height: 85dvh;
+    min-height: 320px;
+  }
+  .modal-card {
+    max-height: 90vh;
+    max-height: 90dvh;
   }
 }

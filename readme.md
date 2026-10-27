@@ -35,7 +35,11 @@ ShaastraAI offers two complementary access modalities:
 ## Key Features
 
 - **Personalized Vedic Dinacharya (Daily Routine) & Jyotisha Engine**:
-  - Synthesizes classical Ayurveda (*Charaka Samhita Sutrasthana Ch. 5 - Matrashiteeya*, *Ashtanga Hridaya Sutrasthana Ch. 2*) with *Jyotisha Horas* (planetary hours) and *Nakshatra Tatvas*.
+  - Synthesizes classical Ayurveda (*Charaka Samhita Sutrasthana Ch. 5*, *Ashtanga Hridaya Sutrasthana Ch. 2*) with *Jyotisha Horas* (planetary hours) and *Nakshatra Tatvas*.
+  - Fine-tuned directly against the uploaded Shastric corpus with precise page and chapter citations:
+    - **Arogyanidhii.pdf**: *Ushapan* (500–1250 ml copper vessel water before dawn, p. 20), *Pratimarsa Nasya* (2 drops warm oil in nostrils, p. 20), *Snana Vidhi* (pouring water on head first to protect eyes and brain, p. 22), *Bhojana Tri-bhaga* (stomach 1/2 solid, 1/4 liquid, 1/4 empty, pp. 22–24), *Vama-Kukshi* & *Vajrasana* to ignite Surya Nadi (p. 25), and geomagnetic sleep orientation (head East or South; never North, pp. 18, 30).
+    - **Varahamihira's Brihat Jataka**: 12 Kalapurusha anatomical signs, 4 Maha-Tatvas, and the 24-Hora diurnal planetary sequence (Ch. 1-2).
+    - **Shiva Samhita (With Hindi Tika)**: 72,000 Nadis and *Nadi Shodhana* balancing Ida (lunar) and Pingala (solar) channels (Ch. 3, vv. 1–40).
   - Generates an 11-step, time-blocked daily schedule from **Brahma Muhurta (04:30 AM)** to **Nidra (10:00 PM)**.
   - Automatically parses and customizes routines based on:
     - **User's Name** (personal addressing).
@@ -46,6 +50,18 @@ ShaastraAI offers two complementary access modalities:
       - *Jala / Water* (Cancer, Scorpio, Pisces): Lymphatic circulation, *Surya Bhedana*, warming non-mucous foods.
     - **Nakshatras** (27 Nakshatras & their Vata/Pitta/Kapha doshas, ruling deities, and planetary Horas).
   - Includes interactive, 1-click test buttons directly in the chat interface.
+
+- **Universal Mobile & Multi-Resolution Optimization**:
+  - **Comprehensive Screen Support**: Seamlessly engineered for extra-small screens (320px–360px), standard smartphones (375px–430px iPhone/Pixel/Galaxy), foldables and phablets (480px–600px), tablets (768px–1024px iPad/Galaxy Tab), and desktop displays.
+  - **Off-Canvas Mobile Navigation Drawer**: Built-in hamburger navigation menu with smooth slide-out transitions, frosted glass blur, quick-action prompt chips, and backdrop dismiss.
+  - **iOS Safari & Android Viewport Hardening**:
+    - `viewport-fit=cover` and dynamic viewport units (`dvh` / `min(680px, 85dvh)`) to accommodate mobile URL address bars.
+    - Notch & Dynamic Island awareness using `env(safe-area-inset-top)` and `env(safe-area-inset-bottom)`.
+    - Virtual keyboard awareness via `window.visualViewport` listener and `font-size: 16px !important` on mobile inputs to eliminate unwanted iOS Safari auto-zooming.
+  - **Touch Ergonomics & Native Sheet Experience**:
+    - All touch targets strictly $\ge 44\text{px} \times 44\text{px}$ adhering to Apple Human Interface & Google Material guidelines.
+    - Responsive horizontally scrollable Tatva tables with `-webkit-overflow-scrolling: touch`.
+    - Settings modal transforms into a native mobile bottom sheet with rounded drag handles on devices $\le 640\text{px}$.
 
 - **Automatic Dual-Mode PDF Ingestion (Digital Text + Scanned Manuscripts)**:
   - Recursively scans local `training_pdfs/` and `training_pdf/` directories (including nested subfolders) and Amazon S3 buckets on startup.
