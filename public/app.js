@@ -237,6 +237,7 @@ const KNOWLEDGE_RESPONSES = {
 const chatMessages = document.getElementById('chat-messages');
 const userInput = document.getElementById('user-input');
 const sendBtn = document.getElementById('send-btn');
+const scrollBottomBtn = document.getElementById('scroll-bottom-btn');
 const attachBtn = document.getElementById('attach-btn');
 const fileInput = document.getElementById('file-input');
 const voiceBtn = document.getElementById('voice-btn');
@@ -323,8 +324,32 @@ document.addEventListener('DOMContentLoaded', () => {
   if (window.visualViewport && userInput) {
     window.visualViewport.addEventListener('resize', () => {
       if (document.activeElement === userInput) {
-        userInput.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        requestAnimationFrame(() => {
+          if (chatMessages) {
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+          }
+          userInput.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        });
       }
+    });
+  }
+
+  // Scroll to newest messages listener & handler
+  if (chatMessages && scrollBottomBtn) {
+    chatMessages.addEventListener('scroll', () => {
+      const distanceFromBottom = chatMessages.scrollHeight - chatMessages.scrollTop - chatMessages.clientHeight;
+      if (distanceFromBottom > 100) {
+        scrollBottomBtn.classList.remove('hidden');
+      } else {
+        scrollBottomBtn.classList.add('hidden');
+      }
+    }, { passive: true });
+
+    scrollBottomBtn.addEventListener('click', () => {
+      chatMessages.scrollTo({
+        top: chatMessages.scrollHeight,
+        behavior: 'smooth'
+      });
     });
   }
 
@@ -333,6 +358,8 @@ document.addEventListener('DOMContentLoaded', () => {
     chip.addEventListener('click', () => {
       if (!userInput) return;
       userInput.value = chip.getAttribute('data-prompt');
+      userInput.style.height = 'auto';
+      userInput.style.height = Math.min(userInput.scrollHeight, 100) + 'px';
       userInput.focus();
     });
   });
@@ -421,7 +448,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (userInput) {
     userInput.addEventListener('input', () => {
       userInput.style.height = 'auto';
-      userInput.style.height = Math.min(userInput.scrollHeight, 120) + 'px';
+      userInput.style.height = Math.min(userInput.scrollHeight, 100) + 'px';
     });
   }
 });
@@ -494,6 +521,8 @@ function simulateVoiceInput() {
   ];
   const chosen = phrases[Math.floor(Math.random() * phrases.length)];
   userInput.value = chosen;
+  userInput.style.height = 'auto';
+  userInput.style.height = Math.min(userInput.scrollHeight, 100) + 'px';
   setTimeout(() => {
     voiceBtn.style.color = '';
     userInput.focus();
@@ -523,6 +552,9 @@ function clearChat() {
     </div>
   `;
   conversationHistory = [];
+  if (scrollBottomBtn) {
+    scrollBottomBtn.classList.add('hidden');
+  }
 }
 
 async function handleSend() {
