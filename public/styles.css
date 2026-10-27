@@ -857,58 +857,48 @@ a:hover {
   color: #f87171;
 }
 
-/* Input Bar */
+/* Input Bar / Dedicated Full-Width Composer Card */
 
 .chat-input-bar {
-  padding: 14px 20px calc(14px + env(safe-area-inset-bottom, 0px));
-  background: rgba(15, 23, 42, 0.95);
+  padding: 12px 18px calc(14px + env(safe-area-inset-bottom, 0px));
+  background: rgba(15, 23, 42, 0.96);
   border-top: 1px solid var(--border-color);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.chat-input-card {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 10px 14px 8px;
   display: flex;
-  align-items: center;
-  gap: 10px;
+  flex-direction: column;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  box-sizing: border-box;
 }
 
-.input-action-btn {
-  background: transparent;
-  border: none;
-  color: var(--text-secondary);
-  width: 44px;
-  height: 44px;
-  min-width: 44px;
-  min-height: 44px;
-  border-radius: var(--radius-sm);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  flex-shrink: 0;
-}
-
-.input-action-btn svg {
-  width: 20px;
-  height: 20px;
-}
-
-.input-action-btn:hover {
-  color: var(--text-primary);
-  background: rgba(255, 255, 255, 0.08);
+.chat-input-card:focus-within {
+  border-color: var(--gold-primary);
+  box-shadow: 0 0 16px var(--gold-glow);
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .chat-input {
-  flex: 1;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  padding: 10px 14px;
+  width: 100%;
+  background: transparent;
+  border: none;
   font-family: inherit;
-  font-size: 0.92rem;
+  font-size: 0.94rem;
+  line-height: 1.5;
   color: var(--text-primary);
   resize: none;
   outline: none;
-  min-height: 42px;
-  max-height: 120px;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  min-height: 68px;
+  max-height: 160px;
+  padding: 2px 0 6px;
+  box-sizing: border-box;
 }
 
 .chat-input::placeholder {
@@ -917,33 +907,78 @@ a:hover {
   opacity: 0.75;
 }
 
-.chat-input:focus {
-  border-color: var(--gold-primary);
-  box-shadow: 0 0 10px var(--gold-glow);
+.chat-input-bottom-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  margin-top: 4px;
+}
+
+.chat-input-left-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chat-input-right-actions {
+  display: flex;
+  align-items: center;
+}
+
+.input-action-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--text-secondary);
+  border-radius: var(--radius-full);
+  padding: 6px 12px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.input-action-btn svg {
+  width: 15px;
+  height: 15px;
+}
+
+.input-action-btn:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.18);
 }
 
 .btn-send {
   background: linear-gradient(135deg, var(--gold-primary), #d97706);
   color: #080c14;
-  width: 44px;
-  height: 44px;
-  min-width: 44px;
-  min-height: 44px;
-  border-radius: var(--radius-md);
-  padding: 0;
-  flex-shrink: 0;
-  display: flex;
+  border: none;
+  border-radius: var(--radius-full);
+  padding: 7px 18px;
+  font-size: 0.84rem;
+  font-weight: 700;
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(245, 158, 11, 0.35);
+  transition: all 0.2s ease;
+  flex-shrink: 0;
 }
 
 .btn-send svg {
-  width: 18px;
-  height: 18px;
+  width: 15px;
+  height: 15px;
 }
 
 .btn-send:hover {
-  transform: scale(1.04);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.45);
 }
 
 /* Badges & Tags */
@@ -1991,90 +2026,74 @@ a:hover {
     border-radius: var(--radius-full);
   }
 
-  /* Chat Input Bar: Sleek thumb-friendly capsule bar with maximized typing area */
+  /* Chat Input Bar: Full-Width Prominent Message Composer */
   .chat-input-bar {
-    padding: 8px 12px calc(8px + env(safe-area-inset-bottom, 0px));
-    gap: 8px;
+    padding: 8px 10px calc(8px + env(safe-area-inset-bottom, 0px));
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
     background: rgba(15, 23, 42, 0.98);
-    display: flex;
-    align-items: flex-end;
   }
 
-  #attach-btn {
-    width: 36px !important;
-    height: 36px !important;
-    min-width: 36px !important;
-    min-height: 36px !important;
-    border-radius: 50%;
-    padding: 0;
-    flex-shrink: 0;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+  .chat-input-card {
+    width: 100%;
+    padding: 8px 12px 6px;
+    border-radius: 16px;
     background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: var(--text-secondary);
-    margin-bottom: 3px;
   }
 
-  #attach-btn svg {
-    width: 18px;
-    height: 18px;
+  .chat-input {
+    min-height: 58px;
+    max-height: 140px;
+    font-size: 0.88rem !important;
+    line-height: 1.45;
+    padding: 2px 0 4px;
+    width: 100%;
   }
 
-  /* Hide redundant voice simulation button on mobile to maximize text input area */
-  #voice-btn {
-    display: none !important;
-  }
-
-  #user-input {
-    flex: 1 1 auto;
-    min-width: 0;
-    min-height: 42px;
-    max-height: 110px;
-    padding: 10px 14px;
-    font-size: 0.88rem !important; /* Elegant, proportional font size matching bubbles */
-    border-radius: 21px;
-    line-height: 1.42;
-    box-sizing: border-box;
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-  }
-
-  #user-input::placeholder {
+  .chat-input::placeholder {
     font-size: 0.84rem;
     color: var(--text-muted);
     opacity: 0.7;
   }
 
-  #send-btn {
-    width: 38px !important;
-    height: 38px !important;
-    min-width: 38px !important;
-    min-height: 38px !important;
-    border-radius: 50% !important;
-    background: linear-gradient(135deg, var(--gold-primary), #d97706);
-    box-shadow: 0 2px 10px rgba(245, 158, 11, 0.35);
-    flex-shrink: 0;
-    padding: 0;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 2px;
+  .chat-input-bottom-bar {
+    padding-top: 6px;
+    margin-top: 2px;
   }
 
-  #send-btn svg {
-    width: 17px;
-    height: 17px;
+  .action-btn-text {
+    font-size: 0.74rem;
+  }
+
+  .input-action-btn {
+    padding: 5px 10px;
+    min-height: 34px;
+    height: 34px;
+    font-size: 0.76rem;
+  }
+
+  .input-action-btn svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  .btn-send {
+    padding: 6px 14px;
+    min-height: 34px;
+    height: 34px;
+    font-size: 0.8rem;
+  }
+
+  .btn-send svg {
+    width: 14px;
+    height: 14px;
   }
 
   /* Floating Scroll-to-Bottom Button Mobile Position */
   .scroll-bottom-btn {
     right: 14px;
-    bottom: calc(115px + env(safe-area-inset-bottom, 0px));
+    bottom: calc(145px + env(safe-area-inset-bottom, 0px));
     width: 38px;
     height: 38px;
   }
@@ -2287,50 +2306,61 @@ a:hover {
 
   .chat-input-bar {
     padding: 6px 8px calc(6px + env(safe-area-inset-bottom, 0px)) !important;
-    gap: 6px !important;
   }
 
-  #attach-btn {
+  .chat-input-card {
+    padding: 7px 10px 5px;
+    border-radius: 14px;
+  }
+
+  .chat-input {
+    min-height: 52px;
+    font-size: 0.85rem !important;
+    line-height: 1.4;
+  }
+
+  .chat-input::placeholder {
+    font-size: 0.82rem;
+  }
+
+  .action-btn-text,
+  .send-btn-text {
+    display: none;
+  }
+
+  .input-action-btn {
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    min-height: 32px !important;
+    padding: 0 !important;
+    justify-content: center;
+    border-radius: 50% !important;
+  }
+
+  .input-action-btn svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  .btn-send {
     width: 34px !important;
     height: 34px !important;
     min-width: 34px !important;
     min-height: 34px !important;
-    margin-bottom: 3px;
+    padding: 0 !important;
+    justify-content: center;
+    border-radius: 50% !important;
   }
 
-  #attach-btn svg {
-    width: 16px;
-    height: 16px;
-  }
-
-  #user-input {
-    min-height: 40px;
-    padding: 9px 12px;
-    font-size: 0.85rem !important;
-    border-radius: 20px;
-    line-height: 1.4;
-  }
-
-  #user-input::placeholder {
-    font-size: 0.82rem;
-  }
-
-  #send-btn {
-    width: 36px !important;
-    height: 36px !important;
-    min-width: 36px !important;
-    min-height: 36px !important;
-    margin-bottom: 2px;
-  }
-
-  #send-btn svg {
-    width: 16px;
-    height: 16px;
+  .btn-send svg {
+    width: 15px;
+    height: 15px;
   }
 
   .scroll-bottom-btn {
     right: 10px;
-    bottom: calc(95px + env(safe-area-inset-bottom, 0px));
+    bottom: calc(135px + env(safe-area-inset-bottom, 0px));
     width: 34px;
     height: 34px;
   }
@@ -2404,7 +2434,16 @@ a:hover {
 
   .chat-input-bar {
     padding: 6px 6px calc(6px + env(safe-area-inset-bottom, 0px)) !important;
-    gap: 5px !important;
+  }
+
+  .chat-input-card {
+    padding: 6px 8px 4px;
+    border-radius: 12px;
+  }
+
+  .chat-input {
+    min-height: 48px;
+    font-size: 0.82rem !important;
   }
 
   #voice-btn {
@@ -2412,18 +2451,18 @@ a:hover {
   }
 
   #attach-btn {
-    width: 32px !important;
-    min-width: 32px !important;
-    height: 32px !important;
-    min-height: 32px !important;
+    width: 30px !important;
+    min-width: 30px !important;
+    height: 30px !important;
+    min-height: 30px !important;
     border-radius: 50% !important;
   }
 
   #send-btn {
-    width: 34px !important;
-    min-width: 34px !important;
-    height: 34px !important;
-    min-height: 34px !important;
+    width: 32px !important;
+    min-width: 32px !important;
+    height: 32px !important;
+    min-height: 32px !important;
     border-radius: 50% !important;
   }
 

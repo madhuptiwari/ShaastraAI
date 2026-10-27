@@ -359,7 +359,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!userInput) return;
       userInput.value = chip.getAttribute('data-prompt');
       userInput.style.height = 'auto';
-      userInput.style.height = Math.min(userInput.scrollHeight, 100) + 'px';
+      userInput.style.height = Math.min(userInput.scrollHeight, 160) + 'px';
       userInput.focus();
     });
   });
@@ -448,7 +448,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (userInput) {
     userInput.addEventListener('input', () => {
       userInput.style.height = 'auto';
-      userInput.style.height = Math.min(userInput.scrollHeight, 100) + 'px';
+      userInput.style.height = Math.min(userInput.scrollHeight, 160) + 'px';
     });
   }
 });
@@ -522,7 +522,7 @@ function simulateVoiceInput() {
   const chosen = phrases[Math.floor(Math.random() * phrases.length)];
   userInput.value = chosen;
   userInput.style.height = 'auto';
-  userInput.style.height = Math.min(userInput.scrollHeight, 100) + 'px';
+  userInput.style.height = Math.min(userInput.scrollHeight, 160) + 'px';
   setTimeout(() => {
     voiceBtn.style.color = '';
     userInput.focus();
