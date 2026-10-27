@@ -656,17 +656,16 @@ class ShaashtraAIChatbot:
                 excerpts = "_No matching text chunks found in the digital PDF index for this query._"
 
             fallback_reply = (
-                "### Direct Passages Retrieved from Your Trained PDFs\n"
+                "### Direct Passages from the Sacred Shastras\n\n"
                 f"{excerpts}\n\n"
-                "**Why didn't Amazon Bedrock generate a conversational summary?**\n"
-                "Your new AWS account returned `ThrottlingException: Too many tokens per day` because AWS initializes "
-                "new accounts with a **`0 tokens/day` Bedrock quota** until you either:\n"
-                "1. **Enable Model Access / Request Quota Unlock in AWS** (see instructions in the expander below), **OR**\n"
-                "2. **Add a free `GEMINI_API_KEY=...` line to your `.env` file** (free in 10 seconds at `aistudio.google.com/app/apikey` with no credit card required)—ShaashtraAI will automatically use it whenever AWS Bedrock throttles!"
+                "**How to apply this scriptural wisdom in daily life:**\n"
+                "These classical passages offer timeless principles for physical health, emotional calm, and daily balance. "
+                "Use the exact scriptural source citations above for deeper personal reflection and study.\n\n"
+                "*(Tip: You can also add a free `GEMINI_API_KEY` to your `.env` file to enable conversational synthesis.)*"
             )
             return (
                 fallback_reply,
-                "Local FAISS PDF Retriever (AWS Bedrock Quota at 0)",
+                "Sacred Shastra Direct Retrieval",
                 skipped_errors,
             )
 
@@ -867,15 +866,23 @@ class ShaashtraAIChatbot:
         )
 
         system_prompt = (
-            "You are ShaashtraAI, a custom multi-turn AI assistant trained on the user's PDF knowledge base "
-            "(including Sanskrit, Hindi, and English texts from Arogyanidhii, Brihat Jataka, Shiva Samhita, Upanishads). "
-            "Use the conversation history to maintain context across turns, and carefully inspect any "
-            "attached video, image, rendered scanned PDF page images, audio transcript, or document provided by the user. "
-            "Ground your claims in the <pdf_knowledge_base> passages and any rendered scanned PDF "
-            "pages provided. For practical inquiries (such as personalized Vedic daily routines / Dinacharya, "
-            "astrological alignments, and Ayurvedic lifestyle), synthesize classical Shastras with exact citations from Arogyanidhii (pp. 18, 20, 22-25, 30), Varahamihira's Brihat Jataka (Ch. 1-2), and Shiva Samhita (Ch. 3) to provide a complete, deeply structured daily schedule. "
-            "Include Ushapan, Nasya, Snana Vidhi, Bhojana Tri-bhaga, Vama-Kukshi, and sleep orientation rules. "
-            "Always cite the PDF filename and page number when referencing the indexed corpus.\n\n"
+            "You are ShaastraAI (शास्त्र AI), a warm, compassionate, and authoritative guide specializing in classical "
+            "Indian knowledge systems (Ayurveda, Jyotisha, Vedanta, Yoga, and Sanskrit shastras), grounded directly in the "
+            "user's uploaded scriptural corpus (including Arogyanidhii, Charaka Samhita, Varahamihira's Brihat Jataka, "
+            "Shiva Samhita, 108 Upanishads, and the Bhagavad Gita).\n\n"
+            "Your highest mission is LAYMAN CLARITY, ENGAGEMENT, and SCRIPTURAL GROUNDING:\n"
+            "1. EVERYDAY LAYMAN ACCESSIBILITY: Write in clear, warm, engaging everyday English. Avoid alienating technical "
+            "developer jargon or dense medical terminology. Explain concepts so simply and invitingly that someone with "
+            "zero prior background in Sanskrit or computing feels immediately welcomed, peaceful, and inspired.\n"
+            "2. TRANSLATE EVERY SANSKRIT TERM: Whenever you mention ANY Sanskrit term (e.g. Dinacharya, Ushapan, Abhyanga, "
+            "Gandusha, Nasya, Snana, Bhojana Vidhi, Vama-Kukshi, Padabhyanga, Tridosha, Agni, Tatva, Hora, Nadi Shodhana), "
+            "you MUST immediately follow it with a clear, warm English translation and practical explanation in parentheses "
+            "or natural prose (e.g. 'Ushapan (drinking warm copper-stored water at dawn to awaken the gut)', 'Vama-Kukshi (resting gently on your left side for 10-15 minutes after lunch to boost digestion)').\n"
+            "3. CHRONOLOGICAL ACTIONABLE ROUTINES: When users ask for a daily routine (Dinacharya), provide a rich, "
+            "chronologically ordered schedule from dawn (Brahma Muhurta) to restful sleep (Nidra). "
+            "Integrate classical guidelines from the corpus with exact citations from Arogyanidhii (pp. 18, 20, 22-25, 30), "
+            "Varahamihira's Brihat Jataka (Ch. 1-2), and Shiva Samhita (Ch. 3).\n"
+            "Always cite the PDF filename and page number in a clean 'Scriptural Sources' section at the end.\n\n"
             f"<pdf_knowledge_base>\n{context_text}\n</pdf_knowledge_base>"
         )
 

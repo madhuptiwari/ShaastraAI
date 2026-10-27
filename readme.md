@@ -23,7 +23,7 @@ ShaastraAI offers two complementary access modalities:
    - Interactive multi-turn chat interface with live query synthesis, multimodal attachment simulation, and 1-click prompt chips.
    - **Personalized Vedic Dinacharya (दिनचर्या) & Jyotisha Engine**: Generates hour-by-hour schedules based on the user's name, Sun Sign (Surya Rashi), and Nakshatra.
    - **Netlify Serverless Function** (`netlify/functions/chat.js`): Secure serverless edge proxy calling Google Gemini 2.5 Flash when `GEMINI_API_KEY` is configured.
-   - Live architectural visualizers and status diagnostics.
+   - Clean, serene, and distraction-free interface designed for everyday users to communicate directly with ShaastraAI without developer jargon, terminal commands, or cloud infrastructure complexity.
 
 2. **Full Local / Cloud Python Streamlit Backend (`app.py`)**:
    - Runs the complete deep RAG engine with local FAISS vector search, PyMuPDF extraction, and Amazon Bedrock Converse API.

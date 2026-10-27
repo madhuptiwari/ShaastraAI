@@ -6,8 +6,8 @@
   <meta name="theme-color" content="#080c14" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <title>ShaastraAI — Multi-Turn Multimodal Sanskrit & Multilingual Knowledge Assistant</title>
-  <meta name="description" content="Custom multi-turn, multimodal Retrieval-Augmented Generation (RAG) AI assistant for ancient and modern texts with Amazon Bedrock, Gemini fallback, and FAISS." />
+  <title>ShaastraAI — Your Personal Vedic Wisdom & Daily Routine Companion</title>
+  <meta name="description" content="Consult ShaastraAI for personalized Vedic daily routines (Dinacharya), Ayurvedic lifestyle advice, yoga & pranayama, and spiritual guidance." />
   
   <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -34,29 +34,29 @@
         </div>
         <div class="brand-text">
           <span class="brand-title">ShaastraAI</span>
-          <span class="brand-subtitle">शास्त्र • AI Assistant</span>
+          <span class="brand-subtitle">शास्त्र • Vedic Wisdom Companion</span>
         </div>
       </a>
 
       <nav class="nav-links desktop-nav">
-        <a href="#chat-section" class="nav-link active">Assistant</a>
-        <a href="#architecture" class="nav-link">Architecture</a>
-        <a href="#features" class="nav-link">Features</a>
-        <a href="#deployment" class="nav-link">Deploy Guide</a>
+        <a href="#chat-section" class="nav-link active">Ask AI</a>
+        <a href="#how-it-helps" class="nav-link">How It Helps</a>
+        <a href="#daily-routine" class="nav-link">Daily Routine</a>
+        <a href="#wisdom" class="nav-link">Ayurvedic Living</a>
       </nav>
 
       <div class="nav-actions">
         <span class="status-pill">
           <span class="status-dot"></span>
-          <span class="status-text">Netlify Active</span>
+          <span class="status-text">Ready to Guide</span>
         </span>
-        <button id="settings-btn" class="icon-btn" title="API Settings" aria-label="API Settings">
+        <button id="settings-btn" class="icon-btn" title="Preferences" aria-label="Preferences">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="12" r="3"></circle>
             <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
           </svg>
         </button>
-        <a href="https://github.com/madhuptiwari/ShaastraAI" target="_blank" rel="noopener noreferrer" class="btn btn-secondary github-btn" title="View on GitHub">
+        <a href="https://github.com/madhuptiwari/ShaastraAI" target="_blank" rel="noopener noreferrer" class="btn btn-secondary github-btn" title="View Source & Docs on GitHub">
           <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
             <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
           </svg>
@@ -92,25 +92,25 @@
     <nav class="mobile-nav-links">
       <a href="#chat-section" class="mobile-nav-link active">
         <span class="mobile-nav-icon">💬</span>
-        <span>Assistant Portal</span>
+        <span>Ask AI Assistant</span>
       </a>
-      <a href="#architecture" class="mobile-nav-link">
-        <span class="mobile-nav-icon">🛡️</span>
-        <span>3-Tier Architecture</span>
+      <a href="#how-it-helps" class="mobile-nav-link">
+        <span class="mobile-nav-icon">🌿</span>
+        <span>How It Helps</span>
       </a>
-      <a href="#features" class="mobile-nav-link">
-        <span class="mobile-nav-icon">✨</span>
-        <span>System Features</span>
+      <a href="#daily-routine" class="mobile-nav-link">
+        <span class="mobile-nav-icon">🌅</span>
+        <span>Daily Routine (Dinacharya)</span>
       </a>
-      <a href="#deployment" class="mobile-nav-link">
-        <span class="mobile-nav-icon">🚀</span>
-        <span>Deploy Guide</span>
+      <a href="#wisdom" class="mobile-nav-link">
+        <span class="mobile-nav-icon">📖</span>
+        <span>Ayurvedic Living</span>
       </a>
     </nav>
     <div class="mobile-drawer-footer">
       <div class="status-pill full-width">
         <span class="status-dot"></span>
-        <span>Netlify Edge Active (Global CDN)</span>
+        <span>ShaastraAI • Online & Ready</span>
       </div>
       <a href="https://github.com/madhuptiwari/ShaastraAI" target="_blank" rel="noopener noreferrer" class="btn btn-secondary full-width">
         <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
@@ -127,40 +127,39 @@
     <div class="hero-bg-glow"></div>
     <div class="container hero-content">
       <div class="badge-row">
-        <span class="pill pill-gold">शास्त्र • Ancient Wisdom & Modern AI</span>
-        <span class="pill pill-cyan">Amazon Bedrock + Google Gemini + FAISS</span>
+        <span class="pill pill-gold">शास्त्र • Timeless Vedic Wisdom</span>
+        <span class="pill pill-cyan">Ayurveda • Dinacharya • Yoga • Inner Peace</span>
       </div>
       <h1 class="hero-title">
-        Multi-Turn Multimodal <span class="gradient-text">PDF RAG Assistant</span>
+        Your Personal <span class="gradient-text">Vedic Wisdom</span> & Daily Routine Companion
       </h1>
       <p class="hero-description">
-        ShaastraAI indexes ancient Sanskrit manuscripts, Hindi texts, and modern English research. 
-        Engineered with a resilient <strong>3-tier failover architecture</strong>, dual-mode text/vision OCR extraction, 
-        and multi-turn contextual memory across text, video, audio, and documents.
+        Harmonize your modern life with classical Indian wisdom. ShaastraAI provides personalized daily routines (Dinacharya), 
+        Ayurvedic lifestyle guidance, calming pranayama practices, and timeless insights from sacred scriptures—tailored to your unique nature.
       </p>
       
       <div class="hero-cta">
-        <a href="#chat-section" class="btn btn-primary">Try Live Web Assistant</a>
-        <a href="#deployment" class="btn btn-outline">Launch Full Streamlit App</a>
+        <a href="#chat-section" class="btn btn-primary">Consult ShaastraAI</a>
+        <a href="#how-it-helps" class="btn btn-outline">Explore How It Helps</a>
       </div>
 
-      <!-- Quick Metrics -->
+      <!-- Quick Benefit Highlights -->
       <div class="metrics-grid">
         <div class="metric-card">
-          <div class="metric-val">3-Tier</div>
-          <div class="metric-label">Resilient Model Failover</div>
+          <div class="metric-val">🌅 Dinacharya</div>
+          <div class="metric-label">Personalized Daily Routines</div>
         </div>
         <div class="metric-card">
-          <div class="metric-val">Dual-Mode</div>
-          <div class="metric-label">Digital + Scanned OCR Reader</div>
+          <div class="metric-val">🌿 Ayurveda</div>
+          <div class="metric-label">Digestion & Dosha Harmony</div>
         </div>
         <div class="metric-card">
-          <div class="metric-val">1024-Dim</div>
-          <div class="metric-label">Titan & FAISS Vector Search</div>
+          <div class="metric-val">🧘 Yoga & Prana</div>
+          <div class="metric-label">Breathwork & Inner Calm</div>
         </div>
         <div class="metric-card">
-          <div class="metric-val">5 Media</div>
-          <div class="metric-label">Text, Audio, Video, Image, PDF</div>
+          <div class="metric-val">📖 Shastras</div>
+          <div class="metric-label">Bhagavad Gita & Sacred Wisdom</div>
         </div>
       </div>
     </div>
@@ -170,11 +169,11 @@
   <section id="chat-section" class="section chat-section">
     <div class="container">
       <div class="section-header">
-        <span class="section-tag">Interactive Interface</span>
-        <h2 class="section-title">ShaastraAI Assistant Portal</h2>
+        <span class="section-tag">Personal Consultation</span>
+        <h2 class="section-title">Consult ShaastraAI</h2>
         <p class="section-subtitle">
-          Chat with the assistant below. Responses feature contextual query re-writing, 
-          retrieval-grounded citations, and transparent tier routing.
+          Ask about your daily routine, digestion and meal habits, yoga practices, or spiritual guidance. 
+          Answers are grounded in authentic Vedic and Ayurvedic knowledge.
         </p>
       </div>
 
@@ -183,17 +182,15 @@
         <!-- Chat Header -->
         <div class="chat-card-header">
           <div class="model-tier-indicator">
-            <span class="tier-badge" id="active-tier-badge">Tier 1: Amazon Bedrock (Nova Pro)</span>
-            <span class="session-info">Multi-Turn Context: Active</span>
+            <span class="peace-badge" id="active-tier-badge">🌿 ShaastraAI • Ready to guide you</span>
+            <span class="session-info">Personalized & Grounded</span>
           </div>
           <div class="chat-header-actions">
-            <select id="model-mode-select" class="custom-select" title="Routing Mode">
-              <option value="auto">Auto 3-Tier Failover (Default)</option>
-              <option value="bedrock">Tier 1: Bedrock Nova Pro</option>
-              <option value="gemini">Tier 2: Google Gemini 2.5 Flash</option>
-              <option value="faiss">Tier 3: Offline FAISS Passage Search</option>
+            <!-- Hidden routing mode select for full JS compatibility -->
+            <select id="model-mode-select" class="custom-select" style="display: none;" title="Routing Mode">
+              <option value="auto" selected>Auto</option>
             </select>
-            <button id="clear-chat-btn" class="icon-btn-sm" title="Clear Chat History">
+            <button id="clear-chat-btn" class="icon-btn-sm" title="Clear Conversation" aria-label="Clear Conversation">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <polyline points="3 6 5 6 21 6"></polyline>
                 <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
@@ -213,14 +210,14 @@
             </div>
             <div class="bubble-content">
               <div class="bubble-meta">
-                <span class="bubble-sender">ShaastraAI Core</span>
+                <span class="bubble-sender">ShaastraAI</span>
                 <span class="bubble-time">Just now</span>
-                <span class="mini-pill">Grounded RAG</span>
+                <span class="mini-pill">Vedic Wisdom</span>
               </div>
               <div class="bubble-text">
-                <p>Namaste! I am <strong>ShaastraAI</strong>, your multi-turn multimodal research assistant.</p>
-                <p>I am designed to parse, index, and reason across digital texts, manuscripts, and multimodal inputs (audio, video, documents, and images) with zero crash downtime.</p>
-                <p>Try one of the suggested inquiries below or type your own question:</p>
+                <p>Namaste! I am <strong>ShaastraAI</strong>, your personal companion for Vedic wisdom, Ayurvedic living, and daily lifestyle balance.</p>
+                <p>I can help you create a personalized daily routine (Dinacharya) aligned with your sun sign and dosha, suggest Ayurvedic wellness habits, guide you through calming pranayama, or share timeless insights from the Bhagavad Gita and sacred texts.</p>
+                <p>Select a suggested topic below or type your own question to begin:</p>
               </div>
             </div>
           </div>
@@ -229,20 +226,20 @@
         <!-- Prompt Suggestions Chips -->
         <div class="prompt-chips-container">
           <span class="chips-label">Suggested:</span>
-          <button class="chip" data-prompt="Make a daily routine based on my name, sun sign, nakshatra, etc">
-            🌅 Vedic Daily Routine (Dinacharya)
+          <button class="chip" data-prompt="Make a personalized daily routine (Dinacharya) based on my name, sun sign, and nakshatra">
+            🌅 Daily Routine (Dinacharya)
           </button>
-          <button class="chip" data-prompt="What are the foundational principles of health and Tridosha in Charaka Samhita?">
-            🌿 Charaka Samhita & Tridosha
+          <button class="chip" data-prompt="What does Ayurveda recommend for healthy digestion, eating habits, and meal timings (Bhojana Vidhi)?">
+            🌿 Digestion & Eating Habits
           </button>
-          <button class="chip" data-prompt="How does ShaastraAI solve Amazon Bedrock 0 tokens/day throttling with its 3-tier failover?">
-            🛡️ 3-Tier Bedrock Failover
+          <button class="chip" data-prompt="What yoga asanas and pranayama breathing practices are best for calming stress and balancing energy?">
+            🧘 Yoga & Pranayama for Calm
           </button>
-          <button class="chip" data-prompt="Explain the Scanned PDF Vision OCR reader workflow for archival Sanskrit manuscripts.">
-            📜 Archival Manuscript Vision OCR
+          <button class="chip" data-prompt="How do my sun sign (Rashi) and nakshatra influence my daily energy, diet, and lifestyle?">
+            🌌 Sun Sign & Nakshatra Advice
           </button>
-          <button class="chip" data-prompt="How are multimodal attachments (audio, video, images) compressed in multi-turn conversations?">
-            🎬 Multimodal Turn Compression
+          <button class="chip" data-prompt="What wisdom does the Bhagavad Gita provide on handling anxiety, work, and finding inner peace?">
+            📖 Bhagavad Gita Wisdom
           </button>
         </div>
 
@@ -250,7 +247,7 @@
         <div id="attachment-preview-bar" class="attachment-preview-bar hidden">
           <div class="attachment-file-info">
             <span class="attachment-icon" id="attachment-icon">📎</span>
-            <span class="attachment-name" id="attachment-name">manuscript_sample.pdf</span>
+            <span class="attachment-name" id="attachment-name">document.pdf</span>
             <span class="attachment-size" id="attachment-size">(240 KB)</span>
           </div>
           <button id="remove-attachment-btn" class="remove-attachment-btn" title="Remove attachment">×</button>
@@ -259,13 +256,13 @@
         <!-- Chat Input Bar -->
         <div class="chat-input-bar">
           <input type="file" id="file-input" style="display: none;" accept=".pdf,.png,.jpg,.jpeg,.mp3,.wav,.mp4,.mov,.txt,.docx" />
-          <button id="attach-btn" class="input-action-btn" title="Simulate Multimodal Attachment (PDF, Image, Audio, Video)">
+          <button id="attach-btn" class="input-action-btn" title="Attach document or image for consultation" aria-label="Attach document or image">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
             </svg>
           </button>
-          <textarea id="user-input" class="chat-input" placeholder="Ask a question about your documents, Sanskrit texts, or AI architecture..." rows="1"></textarea>
-          <button id="voice-btn" class="input-action-btn" title="Voice Input (Amazon Transcribe simulation)">
+          <textarea id="user-input" class="chat-input" placeholder="Ask for daily routines, Ayurvedic living tips, yoga practices, or spiritual wisdom..." rows="1"></textarea>
+          <button id="voice-btn" class="input-action-btn" title="Voice Input" aria-label="Voice Input">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
               <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
@@ -273,7 +270,7 @@
               <line x1="8" y1="23" x2="16" y2="23"></line>
             </svg>
           </button>
-          <button id="send-btn" class="btn btn-send" title="Send Message">
+          <button id="send-btn" class="btn btn-send" title="Send Message" aria-label="Send Message">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <line x1="22" y1="2" x2="11" y2="13"></line>
               <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
@@ -284,208 +281,92 @@
     </div>
   </section>
 
-  <!-- 3-Tier Resilient Architecture Section -->
-  <section id="architecture" class="section architecture-section">
+  <!-- How ShaastraAI Helps You Section -->
+  <section id="how-it-helps" class="section help-section">
     <div class="container">
       <div class="section-header">
-        <span class="section-tag">Zero Downtime Resilience</span>
-        <h2 class="section-title">The 3-Tier Fallover Architecture</h2>
+        <span class="section-tag">Holistic Living</span>
+        <h2 class="section-title">How ShaastraAI Helps You</h2>
         <p class="section-subtitle">
-          How ShaastraAI ensures continuous availability even when AWS limits new accounts to 0 tokens/day.
+          Bringing the profound depth of ancient Indian knowledge systems into practical, daily solutions for your modern life.
         </p>
       </div>
 
-      <div class="tiers-grid">
-        <!-- Tier 1 -->
-        <div class="tier-card primary-tier">
-          <div class="tier-header">
-            <div class="tier-number">Tier 1</div>
-            <span class="badge badge-primary">Primary AWS Chain</span>
-          </div>
-          <h3 class="tier-title">Amazon Bedrock Converse API</h3>
-          <p class="tier-desc">
-            Executes high-parameter reasoning, scanned OCR inspection, and multi-turn query rewriting across native AWS models:
+      <div class="help-grid">
+        <!-- Card 1: Daily Routine -->
+        <div id="daily-routine" class="help-card">
+          <div class="help-icon">🌅</div>
+          <h3 class="help-title">Personalized Routines (Dinacharya)</h3>
+          <p class="help-desc">
+            Sync your daily rhythm with classical Ayurvedic time-cycles (Muhurtas) and planetary hours. Get an hour-by-hour schedule from Brahma Muhurta to restful sleep, customized for your sun sign and nature.
           </p>
-          <ul class="tier-list">
-            <li><code>us.amazon.nova-pro-v1:0</code> (High capability & vision)</li>
-            <li><code>us.amazon.nova-lite-v1:0</code> (Fast multimodal inference)</li>
-            <li><code>us.amazon.nova-micro-v1:0</code> (Ultra-lightweight text)</li>
-            <li><code>amazon.titan-text-express-v1</code> (Classic Bedrock base)</li>
+          <ul class="help-list">
+            <li>Optimal morning waking & cleansing practices (Ushapan & Nasya)</li>
+            <li>Aligning deep work with peak solar and intellectual hours</li>
+            <li>Restorative evening rituals and healthy sleep orientations</li>
           </ul>
-          <div class="tier-footer">
-            <span class="pill pill-sm">AWS SDK Boto3</span>
-            <span class="pill pill-sm">Streaming Response</span>
+          <div class="help-card-footer">
+            <button class="help-try-btn" data-prompt="Make a personalized daily routine (Dinacharya) based on my name, sun sign, and nakshatra">
+              Try in Chat &rarr;
+            </button>
           </div>
         </div>
 
-        <!-- Tier 2 -->
-        <div class="tier-card secondary-tier">
-          <div class="tier-header">
-            <div class="tier-number">Tier 2</div>
-            <span class="badge badge-accent">Quota-Safe Cloud Fallback</span>
-          </div>
-          <h3 class="tier-title">Google Gemini 2.5 Flash</h3>
-          <p class="tier-desc">
-            Activated instantly when AWS returns <code>ThrottlingException</code> (common on newly created AWS accounts with 0 initial daily token allowance).
+        <!-- Card 2: Ayurvedic Wellness -->
+        <div id="wisdom" class="help-card">
+          <div class="help-icon">🌿</div>
+          <h3 class="help-title">Ayurvedic Living & Digestion</h3>
+          <p class="help-desc">
+            Empower your body with authentic principles from the Charaka Samhita and Arogyanidhii. Learn how to ignite digestion (Jatharagni), balance the Tridoshas, and practice healthy meal protocols (Bhojana Vidhi).
           </p>
-          <ul class="tier-list">
-            <li>Zero payment card needed via Google AI Studio</li>
-            <li>Pure HTTPS REST calls via <code>requests</code> without extra heavy SDKs</li>
-            <li>Full multimodal support for images, text, and documents</li>
-            <li>Seamless fallback transition invisible to the end user</li>
+          <ul class="help-list">
+            <li>Stomach partitioning rules for effortless digestion</li>
+            <li>Post-meal practices (Vajrasana & Vama-Kukshi rest)</li>
+            <li>Herbal oils and self-massage (Abhyanga) suited to your dosha</li>
           </ul>
-          <div class="tier-footer">
-            <span class="pill pill-sm">Gemini 2.5 Flash</span>
-            <span class="pill pill-sm">Zero Credit Card Req</span>
+          <div class="help-card-footer">
+            <button class="help-try-btn" data-prompt="What does Ayurveda recommend for healthy digestion, eating habits, and meal timings (Bhojana Vidhi)?">
+              Try in Chat &rarr;
+            </button>
           </div>
         </div>
 
-        <!-- Tier 3 -->
-        <div class="tier-card tertiary-tier">
-          <div class="tier-header">
-            <div class="tier-number">Tier 3</div>
-            <span class="badge badge-offline">Offline Zero-Crash</span>
-          </div>
-          <h3 class="tier-title">Offline FAISS Direct Citations</h3>
-          <p class="tier-desc">
-            Even if all cloud endpoints are throttled, unconfigured, or offline, ShaastraAI NEVER crashes:
+        <!-- Card 3: Peaceful Mind & Yoga -->
+        <div class="help-card">
+          <div class="help-icon">🧘</div>
+          <h3 class="help-title">Peaceful Mind, Yoga & Prana</h3>
+          <p class="help-desc">
+            Alleviate modern anxiety and fatigue with authentic yogic breathwork and movement grounded in Patanjali's Yoga Sutras and the Shiva Samhita.
           </p>
-          <ul class="tier-list">
-            <li>Direct local similarity search in <code>faiss_index.bin</code></li>
-            <li>Retrieves top passages from <code>chunks_metadata.json</code></li>
-            <li>Displays exact book titles, chapter names, and page numbers</li>
-            <li>Gives the user the exact answers directly from the indexed corpus</li>
+          <ul class="help-list">
+            <li>Nadi Shodhana breathwork to balance cooling and heating vital energies</li>
+            <li>Gentle asanas to release physical tension without strain</li>
+            <li>Meditative focus (Dhyana) and sensory calm (Pratyahara)</li>
           </ul>
-          <div class="tier-footer">
-            <span class="pill pill-sm">FAISS-CPU</span>
-            <span class="pill pill-sm">100% Offline Capable</span>
+          <div class="help-card-footer">
+            <button class="help-try-btn" data-prompt="What yoga asanas and pranayama breathing practices are best for calming stress and balancing energy?">
+              Try in Chat &rarr;
+            </button>
           </div>
         </div>
-      </div>
-    </div>
-  </section>
 
-  <!-- Key Features Grid -->
-  <section id="features" class="section features-section">
-    <div class="container">
-      <div class="section-header">
-        <span class="section-tag">Engineering Highlights</span>
-        <h2 class="section-title">Built for Real-World Scholarship & Data</h2>
-      </div>
-
-      <div class="features-grid">
-        <div class="feature-card">
-          <div class="feature-icon">📜</div>
-          <h3>Dual-Mode Ingestion (Text + Vision)</h3>
-          <p>
-            Standard digital PDFs are vectorized using PyMuPDF and pypdf. Ancient scanned manuscripts with no embedded text layer are automatically detected and analyzed using a 150-DPI high-res vision OCR pipeline.
+        <!-- Card 4: Scriptural Wisdom -->
+        <div class="help-card">
+          <div class="help-icon">📖</div>
+          <h3 class="help-title">Timeless Scriptural Wisdom</h3>
+          <p class="help-desc">
+            Navigate modern ethical, career, and personal dilemmas with clarity from the Bhagavad Gita, Upanishads, and classical Vedic philosophies.
           </p>
-        </div>
-
-        <div class="feature-card">
-          <div class="feature-icon">🔄</div>
-          <h3>Multi-Turn Query Rewriting</h3>
-          <p>
-            When a user asks follow-up questions like *"What did he say about that verse?"*, the system rewrites the prompt into a self-contained search query before querying the FAISS vector index.
-          </p>
-        </div>
-
-        <div class="feature-card">
-          <div class="feature-icon">🗜️</div>
-          <h3>Multimodal Attachment Compression</h3>
-          <p>
-            Large image or audio payloads in previous turns are compressed into concise semantic summaries, preventing API payload bloat and runaway token costs during long multi-turn sessions.
-          </p>
-        </div>
-
-        <div class="feature-card">
-          <div class="feature-icon">🎙️</div>
-          <h3>Amazon Transcribe Audio Pipeline</h3>
-          <p>
-            Upload spoken queries in MP3, WAV, M4A, or FLAC. ShaastraAI automatically stages audio in Amazon S3, transcribes speech with Amazon Transcribe, and cleans up temporary buckets.
-          </p>
-        </div>
-
-        <div class="feature-card">
-          <div class="feature-icon">🎥</div>
-          <h3>OpenCV Video Keyframe Sampler</h3>
-          <p>
-            Long MP4/MOV videos are parsed with OpenCV (<code>cv2</code>) into evenly spaced keyframes, enabling fine-grained visual reasoning without exceeding model context windows.
-          </p>
-        </div>
-
-        <div class="feature-card">
-          <div class="feature-icon">☁️</div>
-          <h3>Hybrid S3 + Local Storage Sync</h3>
-          <p>
-            Runs seamlessly from local directories (<code>training_pdfs/</code>) or synchronizes automatically with an Amazon S3 bucket on startup.
-          </p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Deployment & Streamlit Guide -->
-  <section id="deployment" class="section deployment-section">
-    <div class="container">
-      <div class="section-header">
-        <span class="section-tag">Deployment Guide</span>
-        <h2 class="section-title">How to Run ShaastraAI</h2>
-        <p class="section-subtitle">
-          Choose between Netlify Edge for the web portal or Python Streamlit for full local/cloud vector RAG execution.
-        </p>
-      </div>
-
-      <div class="deploy-grid">
-        <!-- Option 1: Netlify -->
-        <div class="deploy-card active-deploy">
-          <div class="deploy-badge">Current Deployment</div>
-          <h3>Netlify Edge Web Portal</h3>
-          <p>
-            This portal is hosted on Netlify Edge CDN. It provides an interactive web UI, API integration, architecture diagnostics, and documentation.
-          </p>
-          <div class="code-box">
-            <code>https://shaastraai.netlify.app/</code>
-          </div>
-          <ul class="deploy-check-list">
-            <li>✓ Global CDN deployment via Netlify</li>
-            <li>✓ Fast, zero-config static & serverless delivery</li>
-            <li>✓ Connects to Gemini API or serverless functions</li>
+          <ul class="help-list">
+            <li>Nishkama Karma: Action with purpose without paralyzing anxiety</li>
+            <li>Discovering your natural calling and duty (Swadharma)</li>
+            <li>Non-dual awareness (Advaita) for emotional stability</li>
           </ul>
-        </div>
-
-        <!-- Option 2: Streamlit Local -->
-        <div class="deploy-card">
-          <div class="deploy-badge">Full Python Engine</div>
-          <h3>Run Streamlit Locally</h3>
-          <p>
-            Run the complete RAG backend with PyMuPDF, FAISS vector search, and Amazon Bedrock / Nova models locally:
-          </p>
-          <div class="code-box">
-            <code>git clone https://github.com/madhuptiwari/ShaastraAI.git<br/>cd ShaastraAI<br/>pip install -r requirements.txt<br/>streamlit run app.py</code>
+          <div class="help-card-footer">
+            <button class="help-try-btn" data-prompt="What wisdom does the Bhagavad Gita provide on handling anxiety, work, and finding inner peace?">
+              Try in Chat &rarr;
+            </button>
           </div>
-          <ul class="deploy-check-list">
-            <li>✓ Full local FAISS vector database</li>
-            <li>✓ Direct AWS Boto3 & Bedrock Converse API</li>
-            <li>✓ Scanned PDF Vision OCR reader</li>
-          </ul>
-        </div>
-
-        <!-- Option 3: Streamlit Community Cloud -->
-        <div class="deploy-card">
-          <div class="deploy-badge">Cloud Python Hosting</div>
-          <h3>Streamlit Community Cloud</h3>
-          <p>
-            Deploy the Python <code>app.py</code> directly on Streamlit Cloud for a 100% free hosted Streamlit server:
-          </p>
-          <div class="code-box">
-            <code>1. Visit share.streamlit.io<br/>2. Select repo madhuptiwari/ShaastraAI<br/>3. Set Main file: app.py<br/>4. Add AWS/Gemini keys to Secrets</code>
-          </div>
-          <ul class="deploy-check-list">
-            <li>✓ Free 24/7 Python hosting</li>
-            <li>✓ Native Streamlit UI widgets & state</li>
-            <li>✓ Direct link can be embedded into Netlify</li>
-          </ul>
         </div>
       </div>
     </div>
@@ -495,29 +376,28 @@
   <div id="settings-modal" class="modal-overlay hidden">
     <div class="modal-card">
       <div class="modal-header">
-        <h3>API & Assistant Settings</h3>
-        <button id="close-modal-btn" class="close-btn">&times;</button>
+        <h3>Assistant Preferences</h3>
+        <button id="close-modal-btn" class="close-btn" aria-label="Close preferences">&times;</button>
       </div>
       <div class="modal-body">
         <div class="form-group">
           <label for="gemini-key-input">Optional Google Gemini API Key</label>
           <input type="password" id="gemini-key-input" placeholder="AIzaSy..." class="form-input" />
           <span class="help-text">
-            Stored only in your browser localStorage. Used to make live calls directly to Gemini 2.5 Flash from this web portal. 
-            Get a free key from <a href="https://aistudio.google.com/" target="_blank" rel="noopener">Google AI Studio</a>.
+            Stored securely only in your browser's local storage. ShaastraAI is ready to guide you immediately, but you may supply your own Google Gemini key if desired.
           </span>
         </div>
         <div class="form-group">
-          <label>Hosting Architecture</label>
+          <label>Knowledge System</label>
           <div class="status-summary">
-            <div class="status-row"><span>Web CDN:</span><strong>Netlify Edge</strong></div>
-            <div class="status-row"><span>Python App:</span><strong>Streamlit 1.40+ (app.py)</strong></div>
-            <div class="status-row"><span>Vector Store:</span><strong>FAISS-CPU (1024-dim)</strong></div>
+            <div class="status-row"><span>Status:</span><strong>Active & Ready</strong></div>
+            <div class="status-row"><span>Knowledge Corpus:</span><strong>Ayurveda, Yoga, Gita & Jyotisha</strong></div>
+            <div class="status-row"><span>Interface:</span><strong>Responsive Web Portal</strong></div>
           </div>
         </div>
       </div>
       <div class="modal-footer">
-        <button id="save-settings-btn" class="btn btn-primary">Save Settings</button>
+        <button id="save-settings-btn" class="btn btn-primary">Save Preferences</button>
       </div>
     </div>
   </div>
@@ -527,16 +407,18 @@
     <div class="container footer-content">
       <div class="footer-brand">
         <span class="brand-title">ShaastraAI</span>
-        <p>Bridging ancient Indian knowledge systems and modern AI with fault-tolerant retrieval.</p>
+        <p>Bridging ancient Indian wisdom with everyday life for health, peace, and purposeful living.</p>
       </div>
       <div class="footer-links">
-        <a href="https://github.com/madhuptiwari/ShaastraAI" target="_blank" rel="noopener">GitHub Repository</a>
-        <a href="#hero">Overview</a>
-        <a href="#architecture">3-Tier System</a>
-        <a href="#deployment">Deployment</a>
+        <a href="#hero">Home</a>
+        <a href="#chat-section">Ask AI</a>
+        <a href="#how-it-helps">How It Helps</a>
+        <a href="#daily-routine">Daily Routine</a>
+        <a href="#wisdom">Ayurvedic Living</a>
+        <a href="https://github.com/madhuptiwari/ShaastraAI" target="_blank" rel="noopener">GitHub & Technical Docs</a>
       </div>
       <div class="footer-copy">
-        <p>© 2026 ShaastraAI • Licensed under Apache 2.0 • Hosted on Netlify</p>
+        <p>© 2026 ShaastraAI • Grounded in Classical Vedic Knowledge</p>
       </div>
     </div>
   </footer>
