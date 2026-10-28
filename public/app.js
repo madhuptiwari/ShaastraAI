@@ -490,7 +490,7 @@ function closeMobileDrawer() {
 function updateTierBadge() {
   if (!activeTierBadge) return;
   activeTierBadge.textContent = '🌿 ShaastraAI • Ready to guide you';
-  activeTierBadge.style.color = '#34d399';
+  activeTierBadge.style.color = '#059669';
 }
 
 function handleFileSelected(e) {
