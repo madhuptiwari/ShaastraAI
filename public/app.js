@@ -581,25 +581,34 @@ async function handleSend() {
     const apiKey = localStorage.getItem('shaastra_gemini_key');
     let responseData = null;
 
-    // First try Netlify serverless function if available
+    // First try backend API (local python serve.py or Netlify function)
     try {
-      const netlifyRes = await fetch('/.netlify/functions/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: userQuery, history: conversationHistory })
-      });
-      if (netlifyRes.ok) {
-        const data = await netlifyRes.json();
-        if (data.reply) {
-          responseData = {
-            tier: 'Vedic Wisdom',
-            rawText: data.reply,
-            text: `<p>${data.reply.replace(/\n\n/g, '</p><p>').replace(/\n/g, '<br/>')}</p>`
-          };
-        }
+      const endpoints = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+        ? ['/api/chat', '/.netlify/functions/chat']
+        : ['/.netlify/functions/chat', '/api/chat'];
+
+      for (const endpoint of endpoints) {
+        try {
+          const apiRes = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt: userQuery, history: conversationHistory })
+          });
+          if (apiRes.ok) {
+            const data = await apiRes.json();
+            if (data.reply) {
+              responseData = {
+                tier: data.tier || 'Vedic Wisdom',
+                rawText: data.reply,
+                text: `<p>${data.reply.replace(/\n\n/g, '</p><p>').replace(/\n/g, '<br/>')}</p>`
+              };
+              break;
+            }
+          }
+        } catch (_) {}
       }
     } catch (_) {
-      // Netlify function not available or running locally
+      // Backend function not available, fallback to client methods
     }
 
     if (!responseData && apiKey) {
