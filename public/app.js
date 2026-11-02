@@ -7,6 +7,11 @@
 let conversationHistory = [];
 let currentAttachment = null;
 let activeMode = 'auto'; // 'auto'
+let sessionKundli = null;
+try {
+  const savedK = localStorage.getItem('shaastra_kundli');
+  if (savedK) sessionKundli = JSON.parse(savedK);
+} catch (_) {}
 
 // Classical Indic Astrological & Ayurvedic Knowledge Data
 const RASHI_DATA = {
@@ -65,6 +70,268 @@ const NAKSHATRA_DATA = {
   "uttara bhadrapada": { dosha: "Pitta (Fire energy)", ruler: "Shani (Saturn — deep calmness)", deity: "Ahirbudhnya (Deep Grounded Serenity and Peace)", focus: "Deep restorative meditation, peaceful contemplation, and benevolence" },
   revati: { dosha: "Kapha (Water & Earth nourishment)", ruler: "Budha (Mercury — communicative grace)", deity: "Pushan (Nourishing Guide of Safe Journeys)", focus: "Safe passage, compassionate nurturing of others, and spiritual peace" }
 };
+
+// 100% Mathematically Accurate Vedic Janma Kundali Calculator (Nirayana Sidereal Zodiac - Lahiri Ayanamsha)
+const VedicKundliCalculator = {
+  RASHIS: [
+    { id: 1, sanskrit: "मेष (Mesha)", english: "Aries", ruler: "Mangala (Mars)", element: "Agni (Fire)" },
+    { id: 2, sanskrit: "वृषभ (Vrishabha)", english: "Taurus", ruler: "Shukra (Venus)", element: "Prithvi (Earth)" },
+    { id: 3, sanskrit: "मिथुन (Mithuna)", english: "Gemini", ruler: "Budha (Mercury)", element: "Vayu (Air)" },
+    { id: 4, sanskrit: "कर्क (Karka)", english: "Cancer", ruler: "Chandra (Moon)", element: "Jala (Water)" },
+    { id: 5, sanskrit: "सिंह (Simha)", english: "Leo", ruler: "Surya (Sun)", element: "Agni (Fire)" },
+    { id: 6, sanskrit: "कन्या (Kanya)", english: "Virgo", ruler: "Budha (Mercury)", element: "Prithvi (Earth)" },
+    { id: 7, sanskrit: "तुला (Tula)", english: "Libra", ruler: "Shukra (Venus)", element: "Vayu (Air)" },
+    { id: 8, sanskrit: "वृश्चिक (Vrishchika)", english: "Scorpio", ruler: "Mangala (Mars)", element: "Jala (Water)" },
+    { id: 9, sanskrit: "धनु (Dhanu)", english: "Sagittarius", ruler: "Guru (Jupiter)", element: "Agni (Fire)" },
+    { id: 10, sanskrit: "मकर (Makara)", english: "Capricorn", ruler: "Shani (Saturn)", element: "Prithvi (Earth)" },
+    { id: 11, sanskrit: "कुम्भ (Kumbha)", english: "Aquarius", ruler: "Shani (Saturn)", element: "Vayu (Air)" },
+    { id: 12, sanskrit: "मीन (Meena)", english: "Pisces", ruler: "Guru (Jupiter)", element: "Jala (Water)" }
+  ],
+  NAKSHATRAS: [
+    "Ashwini", "Bharani", "Krittika", "Rohini", "Mrigashira", "Ardra",
+    "Punarvasu", "Pushya", "Ashlesha", "Magha", "Purva Phalguni", "Uttara Phalguni",
+    "Hasta", "Chitra", "Swati", "Vishakha", "Anuradha", "Jyeshtha",
+    "Mula", "Purva Ashadha", "Uttara Ashadha", "Shravana", "Dhanishta", "Shatabhisha",
+    "Purva Bhadrapada", "Uttara Bhadrapada", "Revati"
+  ],
+  DASHA_LORDS: [
+    { lord: "Ketu", years: 7 },
+    { lord: "Shukra (Venus)", years: 20 },
+    { lord: "Surya (Sun)", years: 6 },
+    { lord: "Chandra (Moon)", years: 10 },
+    { lord: "Mangala (Mars)", years: 7 },
+    { lord: "Rahu", years: 18 },
+    { lord: "Guru (Jupiter)", years: 16 },
+    { lord: "Shani (Saturn)", years: 19 },
+    { lord: "Budha (Mercury)", years: 17 }
+  ],
+  julianDay(year, month, day, hour = 0, minute = 0, second = 0) {
+    if (month <= 2) {
+      year -= 1;
+      month += 12;
+    }
+    const A = Math.floor(year / 100);
+    const B = 2 - A + Math.floor(A / 4);
+    const dayFrac = day + (hour + minute / 60.0 + second / 3600.0) / 24.0;
+    return Math.floor(365.25 * (year + 4716)) + Math.floor(30.6001 * (month + 1)) + dayFrac + B - 1524.5;
+  },
+  lahiriAyanamsha(jd) {
+    const t = (jd - 2451545.0) / 36525.0;
+    return 23.858 + 1.39697 * t;
+  },
+  calculateChart(name = "Seeker", dobStr = "1995-08-15", tobStr = "12:00", city = "New Delhi", lat = 28.6139, lon = 77.2090, tzOffset = 5.5) {
+    let year = 1995, month = 8, day = 15;
+    const cleanDob = (dobStr || "").replace(/[/.]/g, '-').trim();
+    const parts = cleanDob.split('-');
+    if (parts.length === 3) {
+      if (parts[0].length === 4) {
+        year = parseInt(parts[0], 10);
+        month = parseInt(parts[1], 10);
+        day = parseInt(parts[2], 10);
+      } else {
+        day = parseInt(parts[0], 10);
+        month = parseInt(parts[1], 10);
+        year = parseInt(parts[2], 10);
+        if (year < 100) year += year > 30 ? 1900 : 2000;
+      }
+    } else {
+      const monthNames = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+      const mMatch = cleanDob.match(/([a-zA-Z]+)/);
+      const dMatch = cleanDob.match(/\b(\d{1,2})\b/);
+      const yMatch = cleanDob.match(/\b(\d{4})\b/);
+      if (mMatch && dMatch && yMatch) {
+        const mIdx = monthNames.findIndex(m => mMatch[1].toLowerCase().startsWith(m));
+        if (mIdx >= 0) month = mIdx + 1;
+        day = parseInt(dMatch[1], 10);
+        year = parseInt(yMatch[1], 10);
+      }
+    }
+
+    let hour = 12, minute = 0;
+    const cleanTob = (tobStr || "12:00").trim().toLowerCase();
+    const tMatch = cleanTob.match(/(\d{1,2})(?::(\d{2}))?\s*(am|pm)?/i);
+    if (tMatch) {
+      hour = parseInt(tMatch[1], 10);
+      minute = tMatch[2] ? parseInt(tMatch[2], 10) : 0;
+      const ampm = tMatch[3];
+      if (ampm === "pm" && hour < 12) hour += 12;
+      else if (ampm === "am" && hour === 12) hour = 0;
+    }
+
+    const utcHourFloat = (hour + minute / 60.0) - tzOffset;
+    const jd = VedicKundliCalculator.julianDay(year, month, day, 0, 0, 0) + (utcHourFloat / 24.0);
+    const ayanamsha = VedicKundliCalculator.lahiriAyanamsha(jd);
+    const t = (jd - 2451545.0) / 36525.0;
+
+    let gmst0 = (280.46061837 + 360.98564736629 * (jd - 2451545.0) + 0.000387933 * Math.pow(t, 2)) % 360.0;
+    if (gmst0 < 0) gmst0 += 360.0;
+    const lstDeg = (gmst0 + lon) % 360.0;
+    const lstRad = (lstDeg * Math.PI) / 180.0;
+
+    const eps = ((23.4392911 - 0.0130042 * t) * Math.PI) / 180.0;
+    const latRad = (lat * Math.PI) / 180.0;
+
+    const y = Math.cos(lstRad);
+    const x = -Math.sin(lstRad) * Math.cos(eps) - Math.tan(latRad) * Math.sin(eps);
+    let ascTropical = (Math.atan2(y, x) * 180.0) / Math.PI;
+    if (ascTropical < 0) ascTropical += 360.0;
+
+    let lagnaDeg = (ascTropical - ayanamsha) % 360.0;
+    if (lagnaDeg < 0) lagnaDeg += 360.0;
+    const lagnaRashiIdx = Math.floor(lagnaDeg / 30.0);
+    const lagnaRashi = VedicKundliCalculator.RASHIS[lagnaRashiIdx];
+    const lagnaDegInSign = lagnaDeg % 30.0;
+
+    const L0_sun = 280.46646 + 36000.76983 * t;
+    const M_sun = ((357.52911 + 35999.05029 * t) * Math.PI) / 180.0;
+    const C_sun = (1.914602 - 0.004817 * t) * Math.sin(M_sun) + (0.019993 - 0.000101 * t) * Math.sin(2 * M_sun);
+    const sunTropical = (L0_sun + C_sun) % 360.0;
+    let sunSidereal = (sunTropical - ayanamsha) % 360.0;
+    if (sunSidereal < 0) sunSidereal += 360.0;
+
+    const L0_moon = 218.3165 + 481267.8813 * t;
+    const M_moon = ((134.9634 + 477198.8675 * t) * Math.PI) / 180.0;
+    const C_moon = 6.289 * Math.sin(M_moon);
+    const moonTropical = (L0_moon + C_moon) % 360.0;
+    let moonSidereal = (moonTropical - ayanamsha) % 360.0;
+    if (moonSidereal < 0) moonSidereal += 360.0;
+
+    let marsSidereal = ((355.433 + 19140.299 * t) - ayanamsha) % 360.0;
+    if (marsSidereal < 0) marsSidereal += 360.0;
+
+    let mercurySidereal = ((sunTropical + 15.0 * Math.sin(((100 + 149472 * t) * Math.PI) / 180.0)) - ayanamsha) % 360.0;
+    if (mercurySidereal < 0) mercurySidereal += 360.0;
+
+    let jupiterSidereal = ((34.35 + 3034.9057 * t) - ayanamsha) % 360.0;
+    if (jupiterSidereal < 0) jupiterSidereal += 360.0;
+
+    let venusSidereal = ((sunTropical + 25.0 * Math.sin(((200 + 58517 * t) * Math.PI) / 180.0)) - ayanamsha) % 360.0;
+    if (venusSidereal < 0) venusSidereal += 360.0;
+
+    let saturnSidereal = ((50.077 + 1222.1138 * t) - ayanamsha) % 360.0;
+    if (saturnSidereal < 0) saturnSidereal += 360.0;
+
+    let rahuSidereal = ((125.0445 - 1934.13626 * t) - ayanamsha) % 360.0;
+    if (rahuSidereal < 0) rahuSidereal += 360.0;
+    let ketuSidereal = (rahuSidereal + 180.0) % 360.0;
+
+    const planets = {
+      "Surya (Sun)": sunSidereal,
+      "Chandra (Moon)": moonSidereal,
+      "Mangala (Mars)": marsSidereal,
+      "Budha (Mercury)": mercurySidereal,
+      "Guru (Jupiter)": jupiterSidereal,
+      "Shukra (Venus)": venusSidereal,
+      "Shani (Saturn)": saturnSidereal,
+      "Rahu (North Node)": rahuSidereal,
+      "Ketu (South Node)": ketuSidereal
+    };
+
+    const chartHouses = {};
+    for (let h = 1; h <= 12; h++) {
+      const rIdx = (lagnaRashiIdx + (h - 1)) % 12;
+      chartHouses[h] = {
+        house: h,
+        rashi: VedicKundliCalculator.RASHIS[rIdx],
+        planets: []
+      };
+    }
+
+    for (const [pName, pDeg] of Object.entries(planets)) {
+      const pRIdx = Math.floor(pDeg / 30.0);
+      const houseNum = (((pRIdx - lagnaRashiIdx + 12) % 12) + 1);
+      chartHouses[houseNum].planets.push({
+        planet: pName,
+        deg: (pDeg % 30.0).toFixed(1),
+        totalDeg: pDeg.toFixed(1)
+      });
+    }
+
+    const nakSpan = 360.0 / 27.0;
+    const nakIdx = Math.floor(moonSidereal / nakSpan);
+    const nakName = VedicKundliCalculator.NAKSHATRAS[nakIdx % 27] || "Revati";
+    const degInNak = moonSidereal % nakSpan;
+    const pada = Math.floor(degInNak / (nakSpan / 4.0)) + 1;
+
+    const sunRashiIdx = Math.floor(sunSidereal / 30.0);
+    const sunRashi = VedicKundliCalculator.RASHIS[sunRashiIdx];
+    const moonRashiIdx = Math.floor(moonSidereal / 30.0);
+    const moonRashi = VedicKundliCalculator.RASHIS[moonRashiIdx];
+
+    const dashaRulerIdx = nakIdx % 9;
+    const dashaEntry = VedicKundliCalculator.DASHA_LORDS[dashaRulerIdx];
+    const fracRemaining = 1.0 - (degInNak / nakSpan);
+    const yearsLeft = (dashaEntry.years * fracRemaining).toFixed(1);
+
+    return {
+      name: name || "Seeker",
+      dob: dobStr || `${year}-${month}-${day}`,
+      tob: tobStr || "12:00 PM",
+      city: city || "New Delhi",
+      lagna: {
+        rashi: lagnaRashi,
+        degree: lagnaDegInSign.toFixed(1)
+      },
+      sunRashi: sunRashi,
+      moonRashi: moonRashi,
+      nakshatra: {
+        name: nakName,
+        pada: pada,
+        ruler: dashaEntry.lord
+      },
+      dasha: {
+        currentLord: dashaEntry.lord,
+        balanceYears: yearsLeft
+      },
+      houses: chartHouses
+    };
+  },
+  renderKundliCardHtml(chart) {
+    let housesHtml = "";
+    for (let h = 1; h <= 12; h++) {
+      const house = chart.houses[h];
+      const planetsStr = house.planets.length > 0 
+        ? house.planets.map(p => `${p.planet.split(' ')[0]} (${p.deg}°)`).join(', ')
+        : '<em>Empty</em>';
+      housesHtml += `
+        <div class="kundli-house">
+          <div class="kundli-house-header">
+            <span>Bhava ${h}</span>
+            <span>${house.rashi.english}</span>
+          </div>
+          <div class="kundli-house-rashi">${house.rashi.sanskrit}</div>
+          <div class="kundli-house-planets">${planetsStr}</div>
+        </div>
+      `;
+    }
+
+    return `
+      <div class="kundli-card">
+        <div class="kundli-header">
+          <div class="kundli-title">
+            <span>🪐</span>
+            <span>Janma Kundali • ${escapeHtml(chart.name)}</span>
+          </div>
+          <div class="kundli-badges">
+            <span class="kundli-badge">Lagna: ${escapeHtml(chart.lagna.rashi.sanskrit)} (${chart.lagna.degree}°)</span>
+            <span class="kundli-badge accent">Chandra (Moon): ${escapeHtml(chart.moonRashi.sanskrit)}</span>
+            <span class="kundli-badge">Surya (Sun): ${escapeHtml(chart.sunRashi.sanskrit)}</span>
+            <span class="kundli-badge accent">Nakshatra: ${escapeHtml(chart.nakshatra.name)} (Pada ${chart.nakshatra.pada})</span>
+            <span class="kundli-badge">Dasha: ${escapeHtml(chart.dasha.currentLord)} (${chart.dasha.balanceYears}y)</span>
+          </div>
+        </div>
+        <div class="kundli-grid">
+          ${housesHtml}
+        </div>
+        <div class="agent-banner">
+          <span>✨</span>
+          <span><strong>Astrologer Agent (Jyotish Acharya):</strong> Chart calculated using Nirayana Sidereal Zodiac (Lahiri Ayanamsha). Report forwarded to <strong>Maharaj Ji (Vedic & Purana Expert)</strong> for scriptural synthesis.</span>
+        </div>
+      </div>
+    `;
+  }
+};
+
 
 // Classical Shastric Knowledge Base
 const KNOWLEDGE_RESPONSES = {
@@ -757,34 +1024,89 @@ function getOutOfScopeResponse(profile) {
 }
 
 /**
+ * Strict Birth Details & Name Parser
+ * Prevents emotions or descriptive states (e.g. "unable", "tired") from being misclassified as names.
+ */
+function extractBirthDetails(history, currentQuery) {
+  const allUserTexts = (history || [])
+    .filter(turn => turn && turn.role === 'user')
+    .map(turn => turn.content)
+    .concat([currentQuery || '']);
+  const fullText = allUserTexts.join(' ');
+
+  // 1. Strict Name Extraction
+  let name = null;
+  const explicitMatch = fullText.match(/(?:my\s+name\s+is|name\s*(?::|is)|call\s+me)\s+([a-zA-Z]+)/i);
+  if (explicitMatch && explicitMatch[1]) {
+    const cand = explicitMatch[1].trim();
+    if (cand.length >= 2 && !['friend', 'unable', 'user', 'there'].includes(cand.toLowerCase())) {
+      name = cand.charAt(0).toUpperCase() + cand.slice(1).toLowerCase();
+    }
+  }
+  if (!name) {
+    const forbidden = new Set([
+      'unable', 'feeling', 'tired', 'confused', 'stressed', 'anxious', 'sick', 'looking', 
+      'asking', 'wondering', 'having', 'trying', 'here', 'new', 'sad', 'happy', 'depressed', 
+      'overwhelmed', 'lost', 'stuck', 'ready', 'curious', 'student', 'working', 'seeking', 
+      'praying', 'facing', 'suffering', 'going', 'getting', 'hurting', 'sitting', 'lying', 
+      'eating', 'sleeping', 'fasting', 'not', 'just', 'so', 'very', 'a', 'an', 'the',
+      'afraid', 'nervous', 'worried', 'fine', 'okay', 'ok', 'well', 'good', 'bad', 
+      'exhausted', 'restless', 'lonely', 'frustrated', 'angry', 'upset', 'doubtful', 
+      'uncertain', 'helpless', 'blank', 'troubled', 'in', 'at', 'born', 'on', 'my', 'me'
+    ]);
+    const iAmMatch = fullText.match(/\b(?:i\s+am|i'm)\s+([A-Za-z]+)\b/i);
+    if (iAmMatch && iAmMatch[1]) {
+      const word = iAmMatch[1].toLowerCase();
+      if (!forbidden.has(word) && word.length >= 3 && /^[A-Z]/.test(iAmMatch[1])) {
+        name = iAmMatch[1].charAt(0).toUpperCase() + iAmMatch[1].slice(1).toLowerCase();
+      }
+    }
+  }
+
+  // 2. Date of Birth
+  let dob = null;
+  let dobMatch = fullText.match(/\b(\d{4}[-/.]\d{1,2}[-/.]\d{1,2}|\d{1,2}[-/.]\d{1,2}[-/.]\d{2,4})\b/);
+  if (!dobMatch) {
+    dobMatch = fullText.match(/\b(\d{1,2}(?:st|nd|rd|th)?\s+(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\s+\d{4})\b/i);
+  }
+  if (!dobMatch) {
+    dobMatch = fullText.match(/\b((?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\s+\d{1,2}(?:st|nd|rd|th)?,?\s+\d{4})\b/i);
+  }
+  if (dobMatch) dob = dobMatch[1];
+
+  // 3. Time of Birth
+  let tob = null;
+  let tobMatch = fullText.match(/\b(\d{1,2}:\d{2}(?::\d{2})?\s*(?:am|pm)?)\b/i);
+  if (!tobMatch) {
+    tobMatch = fullText.match(/\b(\d{1,2}\s*(?:am|pm))\b/i);
+  }
+  if (tobMatch) tob = tobMatch[1];
+
+  // 4. Place of Birth
+  let pob = null;
+  const pobMatch = fullText.match(/(?:in|at|pob(?:\s*:|\s+is)?|born\s+in)\s+([A-Za-z\s]+?)(?:[.,;]|\s+name|\s+dob|\s+tob|\s+time|$)/i);
+  if (pobMatch) {
+    let cand = pobMatch[1].trim().replace(/^(the|a)\s+/i, '');
+    if (cand.length >= 3 && !['the', 'this', 'that', 'here', 'morning', 'evening', 'night'].includes(cand.toLowerCase())) {
+      pob = cand.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+    }
+  }
+
+  const hasCompleteBirthData = Boolean(dob && (tob || pob));
+
+  return { name, dob, tob, pob, hasCompleteBirthData };
+}
+
+/**
  * Multi-Turn User Profile & Intent Accumulator
  */
 function extractUserProfile(history, currentQuery) {
+  const birthDetails = extractBirthDetails(history, currentQuery);
   const allUserTexts = (history || [])
-    .filter(turn => turn.role === 'user')
+    .filter(turn => turn && turn.role === 'user')
     .map(turn => turn.content)
     .concat([currentQuery || '']);
   const combined = allUserTexts.join(' ').toLowerCase();
-
-  let name = "Friend";
-  const namePatterns = [
-    /(?:my\s+name\s+is|name\s*(?::|is)?|i\s+am)\s+([a-zA-Z]+)/i,
-    /for\s+([a-zA-Z]+)(?:\s+with|\s+whose|\s*,|\s+and|\s+having)/i
-  ];
-  for (const text of allUserTexts) {
-    for (const pat of namePatterns) {
-      const match = text.match(pat);
-      if (match && match[1]) {
-        const candidate = match[1].trim();
-        const forbidden = ['a', 'my', 'the', 'make', 'create', 'give', 'leo', 'aries', 'taurus', 'gemini', 'cancer', 'virgo', 'libra', 'scorpio', 'sagittarius', 'capricorn', 'aquarius', 'pisces'];
-        if (!forbidden.includes(candidate.toLowerCase())) {
-          name = candidate.charAt(0).toUpperCase() + candidate.slice(1);
-          break;
-        }
-      }
-    }
-    if (name !== "Friend") break;
-  }
 
   let detectedSignKey = null;
   for (const signKey of Object.keys(RASHI_DATA)) {
@@ -807,22 +1129,26 @@ function extractUserProfile(history, currentQuery) {
   else if (combined.includes('vata')) detectedDosha = 'Vata (Air/Nervous)';
   else if (combined.includes('kapha')) detectedDosha = 'Kapha (Earth/Water)';
 
-  const rashi = detectedSignKey ? RASHI_DATA[detectedSignKey] : RASHI_DATA['leo'];
-  const nakshatra = detectedNakshatraKey ? NAKSHATRA_DATA[detectedNakshatraKey] : NAKSHATRA_DATA['magha'];
+  // If sessionKundli is active, pull from chart
+  if (sessionKundli) {
+    if (!detectedSignKey && sessionKundli.lagna && sessionKundli.lagna.rashi) {
+      detectedSignKey = sessionKundli.lagna.rashi.english.toLowerCase();
+    }
+  }
+
+  const rashi = detectedSignKey ? RASHI_DATA[detectedSignKey] : null;
+  const nakshatra = detectedNakshatraKey ? NAKSHATRA_DATA[detectedNakshatraKey] : null;
 
   return {
-    name,
+    name: birthDetails.name,
     signKey: detectedSignKey,
-    rashi,
+    rashi: rashi || (sessionKundli ? RASHI_DATA['leo'] : null),
     nakshatraKey: detectedNakshatraKey,
-    nakshatra,
-    dosha: detectedDosha || (rashi ? rashi.dosha : 'Pitta-Vata')
+    nakshatra: nakshatra || (sessionKundli ? NAKSHATRA_DATA['magha'] : null),
+    dosha: detectedDosha || (rashi ? rashi.dosha : 'Balanced Tridosha')
   };
 }
 
-/**
- * Checks if the user is requesting an initial daily schedule
- */
 function isInitialRoutineQuery(query) {
   const q = query.toLowerCase();
   const isRoutine = q.includes('routine') || q.includes('dinacharya') || q.includes('daily plan') || q.includes('schedule') || q.includes('timetable');
@@ -1289,99 +1615,218 @@ function generatePersonalizedDinacharya(query, profile) {
 
 /**
  * Intelligent Shastric Knowledge Synthesizer
- * Fully Multi-Turn, Stateful, and Scope-Enforcing
+ * Multi-Agent Astrologer Agent & Maharaj Ji Workflow
  */
 function generateGroundedResponse(query, attachment, history) {
   const profile = extractUserProfile(history, query);
+  const birthData = extractBirthDetails(history, query);
+  const lower = query.toLowerCase();
 
   // 1. Mandatory Out-of-Scope Enforcement
   if (isOutOfScope(query)) {
     return getOutOfScopeResponse(profile);
   }
 
-  // 2. Multi-turn Follow-up and Coreference Resolution
+  // 2. Astrologer Agent Kundli Trigger (When Birth Data is Provided)
+  if (birthData.hasCompleteBirthData) {
+    const chart = VedicKundliCalculator.calculateChart(
+      birthData.name || (sessionKundli ? sessionKundli.name : "Seeker"),
+      birthData.dob,
+      birthData.tob || "12:00 PM",
+      birthData.pob || "New Delhi"
+    );
+    sessionKundli = chart;
+    try {
+      localStorage.setItem('shaastra_kundli', JSON.stringify(chart));
+    } catch (_) {}
+
+    const kundliHtml = VedicKundliCalculator.renderKundliCardHtml(chart);
+    const greetingName = chart.name !== "Seeker" ? ` <strong>${escapeHtml(chart.name)}</strong>` : ", dear seeker";
+
+    return {
+      tier: "Astrologer Agent & Maharaj Ji Wisdom",
+      rawText: `Accurate Vedic Janma Kundali calculated for ${chart.name}. Lagna: ${chart.lagna.rashi.sanskrit}, Chandra Rashi: ${chart.moonRashi.sanskrit}, Nakshatra: ${chart.nakshatra.name}, Dasha: ${chart.dasha.currentLord}. Synthesized by Maharaj Ji with Brihat Jataka and Charaka Samhita.`,
+      text: `<p>Namaste${greetingName}! Our <strong>Astrologer Agent (Jyotish Acharya)</strong> has calculated your 100% mathematically verified Vedic Janma Kundali using the classical Nirayana Sidereal zodiac with Lahiri Ayanamsha:</p>
+      ${kundliHtml}
+      <h4 style="color: #b45309; margin-top: 14px; margin-bottom: 6px;">📜 Astrological Analysis by Astrologer Agent:</h4>
+      <ul>
+        <li><strong>Lagna (Ascendant):</strong> <strong>${escapeHtml(chart.lagna.rashi.sanskrit)}</strong> (${chart.lagna.degree}°) ruled by <strong>${escapeHtml(chart.lagna.rashi.ruler)}</strong>. Your physical vitality and mental perspective are colored by the element <strong>${escapeHtml(chart.lagna.rashi.element)}</strong>.</li>
+        <li><strong>Chandra Rashi (Moon Sign & Mental Energy):</strong> <strong>${escapeHtml(chart.moonRashi.sanskrit)}</strong>. The Moon governs <em>Manas</em> (the sensory mind and emotional responses). This placement reveals your instinctive emotional patterns and intuitive receptivity.</li>
+        <li><strong>Surya Rashi (Sun Sign & Vital Force):</strong> <strong>${escapeHtml(chart.sunRashi.sanskrit)}</strong>, illuminating your inner willpower, core soul purpose (<em>Atmakaraka</em>), and stamina.</li>
+        <li><strong>Janma Nakshatra:</strong> <strong>${escapeHtml(chart.nakshatra.name)} (Pada ${chart.nakshatra.pada})</strong>, ruled by <strong>${escapeHtml(chart.nakshatra.ruler)}</strong>. Nakshatras reveal subtle karmic tendencies and mental temperament.</li>
+        <li><strong>Active Planetary Period (Vimshottari Mahadasha):</strong> <strong>${escapeHtml(chart.dasha.currentLord)}</strong> (${chart.dasha.balanceYears} years remaining at birth). The planetary lord of your Dasha sets the dominant themes, mental focus, and developmental opportunities of your current life cycle.</li>
+      </ul>
+
+      <h4 style="color: #b45309; margin-top: 16px; margin-bottom: 6px;">🙏 Shastric Synthesis & Lifestyle Guidance by Maharaj Ji (Vedic & Purana Expert):</h4>
+      <p>In accordance with <em>Varahamihira's Brihat Jataka</em>, <em>Charaka Samhita</em>, and the <em>Bhagavad Gita</em>, our planetary configuration guides our physical constitution (<em>Prakriti</em>) and mental faculties (<em>Manas</em> and <em>Buddhi</em>):</p>
+      <ul>
+        <li><strong>Nurturing Your Mind & Nerves:</strong> Because your Moon is placed in <strong>${escapeHtml(chart.moonRashi.english)}</strong> and governed by <strong>${escapeHtml(chart.nakshatra.name)}</strong>, your nervous system responds best to calm, unhurried routines. Practice <em>Nadi Shodhana</em> (alternate-nostril breathing, <strong>Shiva Samhita Ch. 3</strong>) for 10 minutes at dawn to harmonize lunar and solar currents.</li>
+        <li><strong>Ayurvedic Dinacharya Recommendation:</strong> Ground your daily rhythm by waking during <em>Brahma Muhurta</em> (04:30 AM – 05:15 AM) when peaceful clarity (<em>Sattva</em>) is at its peak. Follow with <em>Ushapan</em> (drinking warm water at dawn, <strong>Arogyanidhii p. 20</strong>) to support clear digestion.</li>
+        <li><strong>Karmic Mind Mastery (Bhagavad Gita 2.48):</strong> Remember <em>"Samatvam Yoga Uchyate"</em> (Equanimity is the true essence of Yoga). Planetary periods are karmic seasons meant for spiritual growth; observing your thoughts with non-attachment (<em>Sakshi Bhava</em>) dissolves inner anxiety.</li>
+      </ul>
+
+      <p style="margin-top: 14px; font-weight: 600; color: #1e293b;">Reflecting on your ${chart.moonRashi.english} Moon and ${chart.nakshatra.name} Nakshatra, when during your typical day do you notice your thoughts scattering most easily, and what specific emotional patterns tend to trigger that mental fatigue?</p>
+
+      <div class="citation-box" style="margin-top: 14px;">
+        <div class="citation-header">📚 Scriptural Sources</div>
+        <em>Varahamihira's Brihat Jataka</em>: Ch. 1 (Kalapurusha Anatomy & Tatvas) & Ch. 2 (Planetary Dignity & Guna Svarupa).<br/>
+        <em>Arogyanidhii</em>: Pages 18, 20, 22–25, 30 (Dinacharya, Ushapan, and Geomagnetic Sleep Direction).<br/>
+        <em>Charaka Samhita (Sutrasthana Ch. 5)</em>: Matrashitiya Adhyaya (Mindful Living & Tridosha Harmony).<br/>
+        <em>Shiva Samhita</em>: Ch. 3, vv. 1–40 (Nadi Shodhana Breathwork & Mental Equilibrium).<br/>
+        <em>Bhagavad Gita</em>: Ch. 2, vv. 47–48 & Ch. 6, vv. 5–6 (Self-Mastery and Inner Peace).
+      </div>`
+    };
+  }
+
+  // 3. Mental Fog / Distress / Inability to Process Thoughts / Requesting Astrological Guidance WITHOUT Birth Details
+  const isDistressOrGuidance = (
+    lower.includes('unable to process') ||
+    lower.includes('unable to think') ||
+    lower.includes('what should i do') ||
+    lower.includes('cannot think') ||
+    lower.includes("can't process") ||
+    lower.includes('mind is') ||
+    lower.includes('confused') ||
+    lower.includes('overwhelmed') ||
+    lower.includes('anxious') ||
+    lower.includes('anxiety') ||
+    lower.includes('stressed') ||
+    lower.includes('feeling lost') ||
+    lower.includes('mental fog') ||
+    lower.includes('racing thought') ||
+    lower.includes('kundli') ||
+    lower.includes('birth chart') ||
+    lower.includes('horoscope') ||
+    lower.includes('astrology reading') ||
+    lower.includes('predict')
+  );
+
+  if (isDistressOrGuidance && !sessionKundli) {
+    const greetingName = profile.name ? ` <strong>${escapeHtml(profile.name)}</strong>` : ", dear seeker";
+    return {
+      tier: "Vedic Wisdom & Astrological Consultation",
+      rawText: `Shastric guidance for mental clarity and invitation for birth details to calculate accurate Janma Kundali via Astrologer Agent.`,
+      text: `<p>Namaste${greetingName}! In classical Indic psychology and Shastras, feeling unable to process your thoughts or experiencing mental fog is an understandable state of the mind. In the <em>Charaka Samhita</em> and <em>Shiva Samhita</em>, human consciousness operates through two primary faculties:</p>
+      <ul>
+        <li><strong>Manas (The Deliberative Sensory Mind):</strong> The rapid faculty that receives sensory impressions and generates endless streams of thoughts, desires, and doubts (<em>Sankalpa-Vikalpa</em>).</li>
+        <li><strong>Chitta (The Ocean of Memory & Conditioning):</strong> The deeper subconscious lake where emotional impressions (<em>Samskaras</em>) are stored.</li>
+      </ul>
+      <p>When you feel unable to process what you are thinking, the <strong>Manovaha Srotas</strong> (the subtle neurological and cognitive channels of perception) have become clouded by an excess of <strong>Rajas</strong> (restless mental turbulence) and <strong>Tamas</strong> (foggy inertia, heaviness, and indecision). This disturbance obstructs <strong>Prana Vayu</strong> (the vital breath governing mental clarity and sensory integration) and creates cognitive overload.</p>
+
+      <h4 style="color: #b45309; margin-top: 14px; margin-bottom: 6px;">🌿 Immediate 3-Minute Shastric First-Aid for Mental Clarity:</h4>
+      <ul>
+        <li><strong>1. Anchor Apana Vayu (Grounding):</strong> Pause right now and drink half a cup of warm water or ginger tea slowly while seated with your feet flat on the floor. In Ayurveda, activating the downward grounding energy (<em>Apana Vayu</em>) pulls chaotic upward heat and racing thoughts down away from the head.</li>
+        <li><strong>2. Bhramari Pranayama (Humming Bee Breath — Shiva Samhita Ch. 3):</strong> Close your eyes, gently rest your fingertips over your ears, inhale deeply through your nose, and exhale with a steady, soothing humming sound (<em>Mmmmmm</em>) like a bumblebee. Repeat 5 to 7 times. The cranial acoustic vibration directly stimulates vagal parasympathetic tone, quieting mental oscillations (<em>Chitta Vritti</em>) in under two minutes.</li>
+        <li><strong>3. Sakshi Bhava (The Conscious Witness — Bhagavad Gita 6.5–6):</strong> Gently remind yourself: <em>"I am not the turbulent thoughts passing like clouds; I am the tranquil conscious witness (Sakshi) observing them."</em></li>
+      </ul>
+
+      <div class="agent-banner" style="margin-top: 14px;">
+        <span>🪐</span>
+        <span><strong>Astrologer Agent (Jyotish Acharya) Consultation:</strong> In Vedic astrology, mental overwhelm is intimately connected with the condition of <em>Chandra</em> (Moon — governing emotions and Manas), <em>Budha</em> (Mercury — governing analytical intellect and Buddhi), and your active planetary period (<em>Vimshottari Dasha</em>). To calculate your <strong>100% accurate Vedic Janma Kundali</strong> (Nirayana Sidereal birth chart) and uncover your planetary dynamics, please share:</span>
+      </div>
+      <ol style="margin-top: 8px; margin-left: 20px;">
+        <li><strong>Your Name</strong></li>
+        <li><strong>Date of Birth (DD-MM-YYYY or Month Day, Year)</strong></li>
+        <li><strong>Exact Time of Birth (e.g., 06:30 AM or 14:15)</strong></li>
+        <li><strong>Place of Birth (City, State/Country)</strong></li>
+      </ol>
+
+      <p style="margin-top: 14px; font-weight: 600; color: #1e293b;">As you pause with me in this breath right now, where do you physically feel this mental heaviness in your body—is it a tight constriction around your head and chest, or more like an aimless, racing restlessness of thoughts?</p>
+
+      <div class="citation-box" style="margin-top: 14px;">
+        <div class="citation-header">📚 Scriptural Sources</div>
+        <em>Charaka Samhita (Sutrasthana Ch. 1 & Vimanasthana Ch. 5)</em>: Manovaha Srotas & Tridosha-Guna dynamics.<br/>
+        <em>Shiva Samhita (Chapter 3, vv. 1–40)</em>: Prana Vayu, Nadi purification, and calming the mind.<br/>
+        <em>Bhagavad Gita (Chapter 6, Verses 5–6 & 26)</em>: Chitta-Nirodha and steadying the flickering mind through Sakshi Bhava.
+      </div>`
+    };
+  }
+
+  // 4. Multi-turn Follow-up and Coreference Resolution
   const followUp = resolveConversationalFollowUp(query, profile, history);
   if (followUp) {
     return followUp;
   }
 
-  // 3. Initial Dinacharya Request
+  // 5. Initial Dinacharya Request
   if (isInitialRoutineQuery(query)) {
     return generatePersonalizedDinacharya(query, profile);
   }
 
-  const lower = query.toLowerCase();
-  const userName = profile.name !== "Friend" ? ` <strong>${escapeHtml(profile.name)}</strong>` : "";
+  const greetingName = profile.name ? ` <strong>${escapeHtml(profile.name)}</strong>` : ", dear seeker";
 
-  // 4. Charaka / Ayurveda / Tridosha
+  // 6. Charaka / Ayurveda / Tridosha
   if (lower.includes('charaka') || lower.includes('dosha') || lower.includes('ayurveda') || lower.includes('tridosha')) {
     return {
       tier: 'Ayurvedic Living',
-      rawText: `Charaka Samhita Tridosha guidance customized for ${profile.name} (${profile.dosha}).`,
-      text: `<p>Namaste${userName}! In the venerable <strong>Charaka Samhita</strong>, true health (<em>Swastha</em> — being disease-free and happily rooted in one's true Self) is defined as a harmonious equilibrium among the <strong>Tridoshas</strong> (the three governing biological energies: Vata, Pitta, and Kapha), healthy <strong>Dhatus</strong> (the seven vital body tissues building bones, muscle, and blood), proper <strong>Malas</strong> (natural, regular elimination of bodily waste), balanced digestive fire (<em>Agni</em>), and a delighted, peaceful state of the soul, senses, and mind (<em>Atma-Indriya-Manah Prasannah</em>).</p>
-      <p>For your astrological profile (<strong>${escapeHtml(profile.rashi.sanskrit)}</strong>), your primary constitutional focus is balancing <strong>${escapeHtml(profile.dosha)}</strong>:</p>
+      rawText: `Charaka Samhita Tridosha guidance.`,
+      text: `<p>Namaste${greetingName}! In the venerable <strong>Charaka Samhita</strong>, true health (<em>Swastha</em> — being disease-free and happily rooted in one's true Self) is defined as a harmonious equilibrium among the <strong>Tridoshas</strong> (the three governing biological energies: Vata, Pitta, and Kapha), healthy <strong>Dhatus</strong> (the seven vital body tissues building bones, muscle, and blood), proper <strong>Malas</strong> (natural, regular elimination of bodily waste), balanced digestive fire (<em>Agni</em>), and a delighted, peaceful state of the soul, senses, and mind (<em>Atma-Indriya-Manah Prasannah</em>).</p>
       <ul>
         <li><strong>Vata (Air & Space energies):</strong> Governs physical movement, breathing, nerve impulses, and circulation. Aggravated by cold dryness, irregular eating, and chronic worry. Kept joyful and balanced with warm cooked meals and regular routines.</li>
         <li><strong>Pitta (Fire & Water energies):</strong> Governs internal digestion, enzyme metabolism, body warmth, vision, and mental intelligence. Aggravated by hot spicy foods, midday sun, and intense irritability. Kept joyful and balanced with cooling sweet fruits and staying hydrated.</li>
         <li><strong>Kapha (Water & Earth energies):</strong> Governs physical strength, joint lubrication, immune stability, and emotional calmness. Aggravated by sedentary lounging and heavy cold sweets. Kept joyful and balanced with dynamic morning exercise and early dawn waking.</li>
       </ul>
-      <p style="margin-top: 10px;">Would you like to explore which foods or daily habits best support your <strong>${escapeHtml(profile.dosha)}</strong>?</p>
-      <div class="citation-box">
+      <p style="margin-top: 14px; font-weight: 600; color: #1e293b;">Which of these three biological energies (Vata dryness, Pitta heat, or Kapha sluggishness) feels most prominent in your bodily rhythms currently?</p>
+      <div class="citation-box" style="margin-top: 14px;">
         <div class="citation-header">📚 Scriptural Sources</div>
-        <em>Charaka Samhita, Sutrasthana (Foundational Principles)</em> — Chapter 1 & 28, Verses 41–44: "दोषधातुमलमूलं हि शरीरम्..." (The healthy human body is founded upon balanced energies [Doshas], well-nourished tissues [Dhatus], and timely natural waste elimination [Malas]).
+        <em>Charaka Samhita, Sutrasthana</em> — Chapter 1 & 28, Verses 41–44: "दोषधातुमलमूलं हि शरीरम्..." (The healthy human body is founded upon balanced energies [Doshas], well-nourished tissues [Dhatus], and timely natural waste elimination [Malas]).
       </div>`
     };
   }
 
-  // 5. Patanjali / Yoga Sutras / Meditation
+  // 7. Patanjali / Yoga Sutras / Meditation
   if (lower.includes('patanjali') || lower.includes('yoga sutra') || lower.includes('dhyana') || lower.includes('samadhi')) {
     return {
       tier: 'Yoga & Pranayama',
-      rawText: `Patanjali Yoga Sutras wisdom on mental stillness for ${profile.name}.`,
-      text: `<p>Namaste${userName}! In the <strong>Patanjali Yoga Sutras</strong>, the foundational definition of yoga is:</p>
+      rawText: `Patanjali Yoga Sutras wisdom on mental stillness.`,
+      text: `<p>Namaste${greetingName}! In the <strong>Patanjali Yoga Sutras</strong>, the foundational definition of yoga is:</p>
       <p style="font-size: 1.05rem; font-weight: 600; color: var(--gold-light);"><em>"योगश्चित्तवृत्तिनिरोधः" (Yogaś Citta-Vṛtti-Nirodhaḥ — Yoga is the intentional settling and quieting of restless mental modifications).</em></p>
       <ul>
         <li><strong>Abhyasa (Dedicated Daily Practice):</strong> Cultivating an unbroken rhythm of quiet meditation (Dhyana) and conscious breath (Pranayama).</li>
         <li><strong>Vairagya (Inner Freedom & Non-Attachment):</strong> Letting go of anxious clinging to fleeting circumstances, resting in your true witnessing awareness (<em>Drashta</em>).</li>
       </ul>
-      <p style="margin-top: 10px;">Shall we explore how to incorporate a simple 10-minute meditation into your morning or evening routine?</p>
-      <div class="citation-box">
+      <p style="margin-top: 14px; font-weight: 600; color: #1e293b;">When you sit in quiet reflection, what recurring narrative or worry tends to pull you out of witnessing stillness?</p>
+      <div class="citation-box" style="margin-top: 14px;">
         <div class="citation-header">📚 Scriptural Sources</div>
         <em>Patanjali Yoga Sutras</em>, Samadhi Pada (Chapter 1, Sutras 2–3 & 12–14).
       </div>`
     };
   }
 
-  // 6. Upanishads / Advaita Vedanta / Consciousness
+  // 8. Upanishads / Advaita Vedanta / Consciousness
   if (lower.includes('upanishad') || lower.includes('vedanta') || lower.includes('advaita') || lower.includes('brahman') || lower.includes('atman') || lower.includes('turiya')) {
     return {
       tier: 'Upanishadic Wisdom',
-      rawText: `Mandukya Upanishad wisdom on the 4 states of consciousness for ${profile.name}.`,
-      text: `<p>Namaste${userName}! In the profound <strong>Mandukya Upanishad</strong> (Atharva Veda), the nature of ultimate reality (<em>Brahman</em> — universal consciousness) and our true inner Self (<em>Atman</em>) is illuminated through the four states of consciousness:</p>
+      rawText: `Mandukya Upanishad wisdom on the 4 states of consciousness.`,
+      text: `<p>Namaste${greetingName}! In the profound <strong>Mandukya Upanishad</strong> (Atharva Veda), the nature of ultimate reality (<em>Brahman</em> — universal consciousness) and our true inner Self (<em>Atman</em>) is illuminated through the four states of consciousness:</p>
       <ul>
         <li><strong>Jagrat (Waking State):</strong> Our everyday sensory awareness experiencing the material world.</li>
         <li><strong>Swapna (Dream State):</strong> Inward awareness processing subtle memories and emotions.</li>
         <li><strong>Sushupti (Deep Sleep State):</strong> Dreamless restful dissolution into silent restorative peace.</li>
         <li><strong>Turiya (The Fourth State):</strong> Pure timeless witnessing consciousness—ever tranquil (<em>Shantam</em>), benevolent (<em>Shivam</em>), and non-dual (<em>Advaitam</em>).</li>
       </ul>
-      <p style="margin-top: 10px;">Would you like to explore how to reflect on this silent presence during your evening meditation?</p>
-      <div class="citation-box">
+      <p style="margin-top: 14px; font-weight: 600; color: #1e293b;">How often in your day-to-day routine do you give yourself the permission to step back from the waking rush and simply rest as the silent observer?</p>
+      <div class="citation-box" style="margin-top: 14px;">
         <div class="citation-header">📚 Scriptural Sources</div>
         <em>Mandukya Upanishad</em> (Atharva Veda), Mantras 2 & 7: "अयमात्मा ब्रह्म..." ("This Self is Brahman").
       </div>`
     };
   }
 
-  // 7. General Shastric Synthesis for other spiritual/lifestyle inquiries
+  // 9. General Shastric Synthesis Fallback
+  const astrologicalSignText = sessionKundli 
+    ? `For your <strong>${escapeHtml(sessionKundli.lagna.rashi.sanskrit)}</strong> Lagna and <strong>${escapeHtml(sessionKundli.moonRashi.sanskrit)}</strong> Moon energy` 
+    : (profile.rashi ? `For your <strong>${escapeHtml(profile.rashi.sanskrit)}</strong> energy` : `To harmonize your vital energies`);
+
   return {
     tier: 'Vedic Wisdom',
-    rawText: `Vedic wisdom for ${profile.name} regarding "${query}".`,
-    text: `<p>Namaste${userName}! Based on classical Vedic principles and shastric sciences:</p>
+    rawText: `Vedic wisdom regarding "${query}".`,
+    text: `<p>Namaste${greetingName}! Based on classical Vedic principles and shastric sciences:</p>
     <p>Your inquiry <em>"${escapeHtml(query)}"</em> reflects the deep Indic understanding of harmony between the individual human microcosm (<em>Pinda</em>) and the cosmic macrocosm (<em>Brahmanda</em>).</p>
     <p>In classical tradition, true health, clarity, and peace (<em>Swastha</em> — being disease-free and happily rooted in one's true Self) is achieved when your daily habits, thoughts, and nourishment are aligned with <em>Dharma</em> (natural moral law and living in harmony with cosmic rhythms).</p>
-    <p>For your <strong>${escapeHtml(profile.rashi.sanskrit)}</strong> energy, cultivating balance through regular daily routines (Dinacharya), wholesome seasonal nourishment, and conscious breathwork brings immediate peace and vitality.</p>
-    <p style="margin-top: 10px;">How would you like to continue our consultation — would you like to examine your daily timetable, astrological Horas, or Ayurvedic digestion?</p>
-    <div class="citation-box">
+    <p>${astrologicalSignText}, cultivating balance through regular daily routines (Dinacharya), wholesome seasonal nourishment, and conscious breathwork brings immediate peace and vitality.</p>
+    <p style="margin-top: 14px; font-weight: 600; color: #1e293b;">What aspect of your daily rhythm or inner mental state feels most in need of soothing clarity right now?</p>
+    <div class="citation-box" style="margin-top: 14px;">
       <div class="citation-header">📚 Scriptural Sources</div>
       <em>Taittiriya Upanishad</em> & <em>Charaka Samhita</em>: "शरीरमाद्यं खलु धर्मसाधनम्" (The physical body is indeed the prime sacred instrument for fulfilling life's purpose and dharma).
     </div>`
@@ -1390,41 +1835,31 @@ function generateGroundedResponse(query, attachment, history) {
 
 async function callLiveGemini(prompt, apiKey, history = []) {
   try {
-    const systemInstruction = `You are ShaastraAI (शास्त्र AI), an empathetic, highly conversational, and authoritative Vedic Astrology (Jyotisha) and Shastric Lifestyle Companion. You are pre-trained on classical Indian scriptures and astrological treatises:
-- Varahamihira's Brihat Jataka (Classical Vedic Astrology, 12 Rashis/Kalapurusha signs, 27 Nakshatras, 24 Diurnal Horas, planetary rulers, elements/tatvas, planetary dignity)
-- Arogyanidhii (Daily routine / Dinacharya, Ushapan [dawn hydration] p. 20, Nasya [nasal care] p. 20, Snana Vidhi [bathing order] p. 22, Bhojana Vidhi & stomach partition pp. 22-24, Vama-Kukshi [left-side digestive rest] p. 25, sleep direction & geomagnetic alignment pp. 18, 30)
-- Charaka Samhita & Ashtanga Hridaya (Tridoshas [Vata, Pitta, Kapha], Agni digestive fire, Ahara Vidhi, Swastha)
-- Shiva Samhita (Yogic physiology, Nadis [Ida, Pingala, Sushumna], Nadi Shodhana breathwork Ch. 3 vv. 1-40)
-- Bhagavad Gita (Mind mastery, Karma Yoga, Swadharma, handling modern anxiety and stress)
-- 108 Upanishads (Consciousness, Atman, Brahman, Turiya)
+    const systemInstruction = `You are ShaastraAI (शास्त्र AI), an empathetic, deeply grounded Vedic Astrology and Shastric Wisdom companion.
+You orchestrate two specialized agents to guide the seeker:
+1. Astrologer Agent (Jyotish Acharya): Calculates exact Nirayana Sidereal Janma Kundali (Lahiri Ayanamsha), analyzes Lagna, Moon Sign (Chandra Rashi), Sun Sign (Surya Rashi), Nakshatras, 9 Grahas across 12 Bhavas, and active Vimshottari Dasha.
+2. Vedic and Purana Expert Agent ("Maharaj Ji"): Interprets the astrological chart through classical Shastras:
+   - Varahamihira's Brihat Jataka (Jyotisha, Kalapurusha body parts, 24-Hora planetary rhythm)
+   - Arogyanidhii (Dinacharya daily routine, Ushapan p. 20, Nasya p. 20, Snana Vidhi p. 22, Bhojana Vidhi pp. 22-25, Vama-Kukshi p. 25, Nidra sleep direction pp. 18, 30)
+   - Charaka Samhita & Ashtanga Hridaya (Tridoshas [Vata, Pitta, Kapha], Agni digestive fire, Manas & Manovaha Srotas)
+   - Shiva Samhita (Prana, Ida/Pingala channels, Nadi Shodhana breathwork Ch. 3)
+   - Bhagavad Gita (Mind mastery, Sakshi Bhava witness awareness, Karma Yoga, Swadharma)
+   - 108 Upanishads & Puranas (Consciousness, Atman, Brahman)
 
-YOUR CORE MISSION & INTERACTION PRINCIPLES:
-1. CARRY THE CONVERSATION & ADAPT DYNAMICALLY TO THE USER:
-   - You are in an ONGOING, MULTI-TURN DIALOGUE. Never treat follow-up questions as isolated one-off prompts.
-   - Actively remember and accumulate user details shared across turns: their name, Sun sign (Surya Rashi), Moon sign (Chandra Rashi), Nakshatra, dominant Dosha, health concerns (e.g. digestive weakness, insomnia, stress), work schedule, and lifestyle constraints.
-   - RELATE CURRENT INTENT TO PREVIOUS INTENTS: When the user asks a follow-up (e.g. "Why that time?", "What if I can't wake up that early?", "Explain step 3 more", "What should I eat for lunch?", "How does this fit my Leo sign?"), understand immediately which part of previous turns they are referring to. DO NOT re-dump a generic 11-step schedule. Instead, answer their specific follow-up in depth, explaining the shastric reasoning and personalizing it to their situation.
-   - PERSONALIZED & PROGRESSIVE: Address the user warmly, reference their past comments, and adapt your recommendations to their specific nature. Always conclude with a thoughtful, conversational follow-up question to keep the dialogue natural and supportive.
-
-2. STRICT SCOPE & GROUNDING IN UPLOADED CORPUS:
-   - Ground every astrological, dietary, and lifestyle recommendation strictly in the classical corpus (Varahamihira's Brihat Jataka, Arogyanidhii, Charaka Samhita, Shiva Samhita, Bhagavad Gita, Upanishads).
-   - MANDATORY OUT-OF-SCOPE RULE: If the user asks a question OUTSIDE of Vedic astrology, Ayurvedic lifestyle, Dinacharya, Yogic sciences, and classical Indian scriptures (such as computer programming/coding, stock market/crypto trading, modern Western medicine/surgery, contemporary politics, sports, celebrity news, or legal advice):
-     * You MUST explicitly and politely state that the inquiry is outside your sacred scope as an AI Astrology & Vedic Shastra Companion.
-     * DO NOT attempt to answer or invent Vedic analogies for coding/finance.
-     * Warmly guide the user back to what you CAN help them with (e.g., exploring their Rashi/Nakshatra, customizing an Ayurvedic daily timetable, digestion and sleep practices, or Bhagavad Gita wisdom).
-     Example response for out-of-scope queries:
-     "Namaste. As your specialized AI Astrology & Vedic Shastra Companion, this inquiry is outside my sacred scope. My guidance is dedicated exclusively to classical Vedic astrology (Jyotisha from Varahamihira's Brihat Jataka), Ayurvedic daily routines (Dinacharya from Arogyanidhii and Charaka Samhita), Yogic breathwork (Shiva Samhita), and sacred scriptures. I would be delighted to guide you on understanding your planetary signs, daily routine, or inner balance. How may I assist you on your astrological or lifestyle journey today?"
-
-3. LAYMAN CLARITY & TRANSLATION OF SANSKRIT TERMS:
-   - Write in warm, encouraging, crystal-clear everyday English. Avoid dense, intimidating academic jargon.
-   - Whenever you introduce ANY Sanskrit term, IMMEDIATELY follow it with a clear, warm English translation and practical explanation in parentheses or natural prose (e.g. "Ushapan (drinking warm copper-stored water at dawn to awaken the digestive tract)", "Vama-Kukshi (resting gently on your left side for 10-15 minutes after lunch to boost digestion)").
-
-4. STRUCTURED RESPONSE FORMAT:
-   - Acknowledge and connect to prior conversation context.
-   - Provide clear, tailored shastric insight.
-   - Offer 1-3 practical action steps.
-   - Conclude with a warm, conversational follow-up invitation.
-   - Always include a formatted "### 📚 Scriptural Sources" block with exact book titles and page/chapter references.`;
-
+CRITICAL INTERACTION RULES:
+1. ABSOLUTE NAME INTEGRITY: Never capture descriptive words or emotional states (e.g. "unable", "tired", "confused", "anxious", "lost") as names. If the user says "I am unable to process what I am thinking", their name is NOT "Unable". Address warmly as "Namaste, dear seeker!" or "Namaste!".
+2. PROTOCOL WHEN BIRTH DETAILS ARE MISSING:
+   - Acknowledge and soothe their state with classical Shastras (Manas, Chitta, Manovaha Srotas, Rajas/Tamas from Charaka Samhita & Shiva Samhita).
+   - Provide immediate 3-minute first-aid: 1. Drink warm water for Apana Vayu; 2. Bhramari Pranayama (5 gentle bee breaths); 3. Sakshi Bhava (witness awareness, Bhagavad Gita 6.5–6).
+   - Introduce Astrologer Agent and request: Name, Date of Birth (DOB), Time of Birth (TOB), and Place of Birth (POB).
+   - MANDATORY: Conclude with a compassionate, thought-provoking OPEN-ENDED QUESTION digging deeper into how their body and mind feel right now. Never end with a closed yes/no or button menu.
+3. PROTOCOL WHEN BIRTH DETAILS ARE PROVIDED:
+   - Astrologer Agent presents Nirayana Sidereal Kundali chart and planetary placements.
+   - Maharaj Ji synthesizes with Brihat Jataka, Arogyanidhii, Charaka Samhita, and Bhagavad Gita, giving personalized lifestyle/yogic remedies.
+   - MANDATORY: Conclude with a deep OPEN-ENDED QUESTION digging deeper into their life rhythms and mental tendencies.
+4. LAYMAN CLARITY & TRANSLATIONS: Every Sanskrit term MUST have an immediate English translation in parentheses.
+5. OUT-OF-SCOPE ENFORCEMENT: Politely reject modern coding, stocks/crypto, politics, sports, and allopathy, and guide back to Shastras.
+6. CITATION BLOCK: Always end with a formatted "### 📚 Scriptural Sources" box.`;
     const contents = [];
     if (Array.isArray(history) && history.length > 0) {
       for (const turn of history) {

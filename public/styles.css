@@ -2533,3 +2533,109 @@ a:hover {
   }
 
 }
+
+/* Vedic Janma Kundali & Multi-Agent Collaboration Styles */
+.kundli-card {
+  background: #ffffff;
+  border: 1.5px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  margin: 14px 0;
+  box-shadow: var(--shadow-md);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.kundli-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  border-bottom: 1px solid var(--border-light);
+  padding-bottom: 10px;
+}
+
+.kundli-title {
+  font-family: var(--font-serif);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #b45309;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.kundli-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.kundli-badge {
+  font-size: 0.78rem;
+  padding: 3px 8px;
+  border-radius: var(--radius-full);
+  background: #fef3c7;
+  color: #92400e;
+  font-weight: 600;
+  border: 1px solid #fde68a;
+}
+
+.kundli-badge.accent {
+  background: #e0f2fe;
+  color: #0369a1;
+  border-color: #bae6fd;
+}
+
+.kundli-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.kundli-house {
+  background: #fcfbfa;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.kundli-house-header {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #0369a1;
+  display: flex;
+  justify-content: space-between;
+}
+
+.kundli-house-rashi {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.kundli-house-planets {
+  font-size: 0.76rem;
+  color: #b45309;
+  font-weight: 500;
+  min-height: 18px;
+}
+
+.agent-banner {
+  background: linear-gradient(135deg, rgba(217, 119, 6, 0.08), rgba(2, 132, 199, 0.08));
+  border: 1px dashed var(--gold-primary);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  font-size: 0.82rem;
+  color: #92400e;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
