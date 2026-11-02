@@ -867,7 +867,7 @@ async function handleSend() {
               responseData = {
                 tier: data.tier || 'Vedic Wisdom',
                 rawText: data.reply,
-                text: `<p>${data.reply.replace(/\n\n/g, '</p><p>').replace(/\n/g, '<br/>')}</p>`
+                text: data.reply
               };
               break;
             }
@@ -928,10 +928,296 @@ function appendUserMessage(text, attachmentName) {
   chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
+/**
+ * Copies response guidance text to clipboard with animated feedback
+ */
+function copyReplyText(btn) {
+  if (!btn) return;
+  const bubble = btn.closest('.bubble-content');
+  if (!bubble) return;
+  const bubbleText = bubble.querySelector('.bubble-text');
+  if (!bubbleText) return;
+
+  const clone = bubbleText.cloneNode(true);
+  const actions = clone.querySelector('.reply-action-bar');
+  if (actions) actions.remove();
+
+  const textToCopy = clone.innerText.trim();
+  const span = btn.querySelector('span');
+  const origText = span ? span.textContent : 'Copy Guidance';
+
+  const onSuccess = () => {
+    if (span) span.textContent = 'Copied! ✓';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      if (span) span.textContent = origText;
+      btn.classList.remove('copied');
+    }, 2000);
+  };
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(textToCopy).then(onSuccess).catch(() => {
+      fallbackCopy(textToCopy, onSuccess);
+    });
+  } else {
+    fallbackCopy(textToCopy, onSuccess);
+  }
+}
+
+function fallbackCopy(text, cb) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.opacity = '0';
+  document.body.appendChild(ta);
+  ta.focus();
+  ta.select();
+  try {
+    document.execCommand('copy');
+    cb();
+  } catch (_) {}
+  document.body.removeChild(ta);
+}
+
+/**
+ * High-Aesthetic Rich Vedic Formatter
+ * Transforms raw text, markdown, or unstructured HTML into visually stunning,
+ * formatted cards with Reflective Inquiries, First-Aid Steps, and Citation Boxes.
+ */
+function formatRichVedicResponse(rawText) {
+  if (!rawText) return '';
+
+  let text = String(rawText).trim();
+
+  // If already contains rich cards and inquiry cards, ensure action bar is attached
+  if (text.includes('class="kundli-card"') || text.includes('class="routine-container"')) {
+    // Upgrade closing question paragraph to inquiry-card if not already converted
+    text = text.replace(
+      /<p[^>]*font-weight:\s*600[^>]*>([\s\S]*?\?)\s*<\/p>/i,
+      (match, qText) => `
+        <div class="inquiry-card">
+          <div class="inquiry-header">
+            <span class="inquiry-icon">🪷</span>
+            <span class="inquiry-badge">Sacred Inquiry for Deeper Clarity</span>
+          </div>
+          <p class="inquiry-question">${qText}</p>
+        </div>
+      `
+    );
+
+    if (!text.includes('class="reply-action-bar"')) {
+      text += `
+        <div class="reply-action-bar">
+          <button class="copy-guidance-btn" onclick="copyReplyText(this)" title="Copy guidance to clipboard">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+            <span>Copy Guidance</span>
+          </button>
+          <span class="verified-shastra-badge">🌿 Shastric Wisdom Verified</span>
+        </div>
+      `;
+    }
+    return `<div class="formatted-reply">${text}</div>`;
+  }
+
+  // 1. Extract Scriptural Sources Block
+  let scripturalSourcesHtml = '';
+  const sourcesMatch = text.match(/(?:###\s*(?:📚|Scriptural Sources).*?$|📚\s*Scriptural Sources[\s\S]*$)([\s\S]*)/i);
+  if (sourcesMatch) {
+    const sourcesContent = sourcesMatch[1].trim();
+    text = text.slice(0, sourcesMatch.index).trim();
+
+    const citationLines = sourcesContent
+      .split('\n')
+      .map(l => l.replace(/^[-*•\d.]\s*/, '').trim())
+      .filter(l => l.length > 0);
+
+    const itemsHtml = citationLines.map(c => {
+      const formatted = c.replace(/\*([^*]+)\*/g, '<strong>$1</strong>');
+      return `<li>${formatted}</li>`;
+    }).join('');
+
+    scripturalSourcesHtml = `
+      <div class="citation-box">
+        <div class="citation-header">
+          <span class="citation-icon">📚</span>
+          <span>Classical Shastric Authorities & Sources</span>
+        </div>
+        <ul class="citation-list">${itemsHtml}</ul>
+      </div>
+    `;
+  }
+
+  // 2. Extract Open-Ended Closing Question
+  let inquiryQuestionHtml = '';
+  const paragraphs = text.split(/\n\s*\n/).map(p => p.trim()).filter(Boolean);
+  if (paragraphs.length > 0) {
+    const lastP = paragraphs[paragraphs.length - 1];
+    if (lastP.includes('?') && (
+      lastP.length > 35 ||
+      /^(as you pause|reflecting on|what aspect|which of|how often|where do you|when during|in what way)/i.test(lastP)
+    )) {
+      paragraphs.pop();
+      const cleanQuestion = lastP
+        .replace(/\*\*([^*]+)\*\*/g, '$1')
+        .replace(/\*([^*]+)\*/g, '$1')
+        .replace(/^>\s*/, '')
+        .trim();
+
+      inquiryQuestionHtml = `
+        <div class="inquiry-card">
+          <div class="inquiry-header">
+            <span class="inquiry-icon">🪷</span>
+            <span class="inquiry-badge">Sacred Inquiry for Deeper Clarity</span>
+          </div>
+          <p class="inquiry-question">${escapeHtml(cleanQuestion)}</p>
+        </div>
+      `;
+    }
+  }
+
+  text = paragraphs.join('\n\n');
+
+  // 3. Process Vedic Janma Kundali Summary Widget
+  text = text.replace(
+    /(?:🪐\s*\*\*Vedic Janma Kundali Summary:\*\*|🪐\s*Vedic Janma Kundali Summary:)([\s\S]*?)(?=(?:🙏|\n\n[A-Z]|\n\n###|$))/i,
+    (match, kundliBody) => {
+      const lines = kundliBody.split('\n').filter(l => l.trim().length > 0);
+      let itemsHtml = '';
+      lines.forEach(l => {
+        const clean = l.replace(/^[-*•]\s*/, '').trim();
+        const parts = clean.split(/:\s*(.*)/s);
+        if (parts.length >= 2) {
+          const label = parts[0].replace(/\*\*/g, '').trim();
+          const val = parts[1].replace(/\*\*/g, '').trim();
+          itemsHtml += `
+            <div class="kundli-summary-item">
+              <span class="summary-label">${escapeHtml(label)}</span>
+              <span class="summary-value">${escapeHtml(val)}</span>
+            </div>
+          `;
+        }
+      });
+      return `
+        <div class="kundli-summary-card">
+          <div class="kundli-summary-header">
+            <span>🪐</span>
+            <strong>Vedic Janma Kundali Parameters (Nirayana Sidereal Zodiac)</strong>
+          </div>
+          <div class="kundli-summary-grid">
+            ${itemsHtml}
+          </div>
+        </div>
+      `;
+    }
+  );
+
+  // 4. Process Astrologer Agent & Maharaj Ji Banners
+  text = text.replace(
+    /🪐\s*\*\*Astrologer Agent \(([^)]+)\)\s*(?:Consultation|Analysis)?:\*\*/gi,
+    '<div class="agent-banner astrologer"><span class="agent-badge-icon">🪐</span><div><strong>Astrologer Agent ($1)</strong><span class="agent-role-sub">Mathematical Nirayana Chart Calculation</span></div></div>'
+  );
+
+  text = text.replace(
+    /🙏\s*\*\*Shastric Synthesis by Maharaj Ji \(([^)]+)\):\*\*/gi,
+    '<div class="agent-banner maharaj"><span class="agent-badge-icon">🕉️</span><div><strong>Maharaj Ji ($1)</strong><span class="agent-role-sub">Classical Shastric & Puranic Synthesis</span></div></div>'
+  );
+
+  // 5. Process Numbered Action Steps (First-Aid Cards)
+  text = text.replace(
+    /(?:(?:🌿\s*)?\*\*Immediate 3-Minute Shastric First-Aid[^*]*\*\*:?\s*\n)([\s\S]*?)(?=(?:\n\n[🪐🙏]|\n\n###|$))/i,
+    (match, stepsBody) => {
+      const stepItems = stepsBody.split(/(?=\b\d+\.\s+\*\*)/).filter(s => s.trim().length > 0);
+      let stepsHtml = '';
+      stepItems.forEach(s => {
+        const stepMatch = s.match(/^\s*(\d+)\.\s+\*\*([^*]+)\*\*:\s*([\s\S]*)$/);
+        if (stepMatch) {
+          const stepNum = stepMatch[1];
+          const stepTitle = stepMatch[2];
+          const stepDesc = stepMatch[3].trim().replace(/\*([^*]+)\*/g, '<em>$1</em>');
+          stepsHtml += `
+            <div class="first-aid-step">
+              <div class="first-aid-num">${stepNum}</div>
+              <div class="first-aid-body">
+                <div class="first-aid-title">${escapeHtml(stepTitle)}</div>
+                <div class="first-aid-desc">${stepDesc}</div>
+              </div>
+            </div>
+          `;
+        } else {
+          stepsHtml += `<p>${s}</p>`;
+        }
+      });
+      return `
+        <div class="first-aid-wrapper">
+          <div class="first-aid-header">
+            <span>🌿</span>
+            <strong>Immediate 3-Minute Shastric First-Aid for Mental Clarity</strong>
+          </div>
+          <div class="first-aid-list">
+            ${stepsHtml}
+          </div>
+        </div>
+      `;
+    }
+  );
+
+  // 6. Markdown Headings & Styling
+  text = text.replace(/^### (.*$)/gim, '<h3 class="shastra-heading">$1</h3>');
+  text = text.replace(/^#### (.*$)/gim, '<h4 class="shastra-subheading">$1</h4>');
+  text = text.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+  text = text.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+
+  // Bullet Lists
+  text = text.replace(/(?:^[-*•]\s+.*$\n?)+/gm, (listBlock) => {
+    const lis = listBlock.split('\n')
+      .map(l => l.replace(/^[-*•]\s+/, '').trim())
+      .filter(Boolean)
+      .map(l => `<li>${l}</li>`)
+      .join('');
+    return `<ul class="shastra-list">${lis}</ul>`;
+  });
+
+  // Paragraphs
+  const remainingParas = text.split(/\n\s*\n/).map(p => {
+    p = p.trim();
+    if (!p) return '';
+    if (p.startsWith('<div') || p.startsWith('<h') || p.startsWith('<ul') || p.startsWith('<ol')) {
+      return p;
+    }
+    return `<p class="shastra-p">${p.replace(/\n/g, '<br/>')}</p>`;
+  }).filter(Boolean);
+
+  const mainHtml = remainingParas.join('\n');
+
+  return `
+    <div class="formatted-reply">
+      ${mainHtml}
+      ${inquiryQuestionHtml}
+      ${scripturalSourcesHtml}
+      <div class="reply-action-bar">
+        <button class="copy-guidance-btn" onclick="copyReplyText(this)" title="Copy guidance to clipboard">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+          <span>Copy Guidance</span>
+        </button>
+        <span class="verified-shastra-badge">🌿 Shastric Wisdom Verified</span>
+      </div>
+    </div>
+  `;
+}
+
 function appendBotMessage(htmlContent, tierLabel = 'Vedic Wisdom') {
   if (!chatMessages) return;
   const row = document.createElement('div');
   row.className = 'chat-bubble-row bot';
+  
+  const formattedHtml = formatRichVedicResponse(htmlContent);
+
   row.innerHTML = `
     <div class="avatar bot-avatar">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -945,7 +1231,7 @@ function appendBotMessage(htmlContent, tierLabel = 'Vedic Wisdom') {
         <span class="mini-pill">${escapeHtml(tierLabel)}</span>
       </div>
       <div class="bubble-text">
-        ${htmlContent}
+        ${formattedHtml}
       </div>
     </div>
   `;
