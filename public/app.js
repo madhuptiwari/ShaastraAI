@@ -8,10 +8,6 @@ let conversationHistory = [];
 let currentAttachment = null;
 let activeMode = 'auto'; // 'auto'
 let sessionKundli = null;
-try {
-  const savedK = localStorage.getItem('shaastra_kundli');
-  if (savedK) sessionKundli = JSON.parse(savedK);
-} catch (_) {}
 
 // Classical Indic Astrological & Ayurvedic Knowledge Data
 const RASHI_DATA = {
@@ -1458,7 +1454,8 @@ function extractUserProfile(history, currentQuery) {
 
   let detectedSignKey = null;
   for (const signKey of Object.keys(RASHI_DATA)) {
-    if (combined.includes(signKey)) {
+    const wordRegex = new RegExp(`\\b${signKey}\\b`, 'i');
+    if (wordRegex.test(combined)) {
       detectedSignKey = signKey;
       break;
     }
@@ -1466,19 +1463,20 @@ function extractUserProfile(history, currentQuery) {
 
   let detectedNakshatraKey = null;
   for (const nakKey of Object.keys(NAKSHATRA_DATA)) {
-    if (combined.includes(nakKey)) {
+    const wordRegex = new RegExp(`\\b${nakKey}\\b`, 'i');
+    if (wordRegex.test(combined)) {
       detectedNakshatraKey = nakKey;
       break;
     }
   }
 
   let detectedDosha = null;
-  if (combined.includes('pitta')) detectedDosha = 'Pitta (Fire/Metabolic)';
-  else if (combined.includes('vata')) detectedDosha = 'Vata (Air/Nervous)';
-  else if (combined.includes('kapha')) detectedDosha = 'Kapha (Earth/Water)';
+  if (/\bpitta\b/i.test(combined)) detectedDosha = 'Pitta (Fire/Metabolic)';
+  else if (/\bvata\b/i.test(combined)) detectedDosha = 'Vata (Air/Nervous)';
+  else if (/\bkapha\b/i.test(combined)) detectedDosha = 'Kapha (Earth/Water)';
 
-  // If sessionKundli is active, pull from chart
-  if (sessionKundli) {
+  // If sessionKundli is active with genuine birth data, pull from chart
+  if (sessionKundli && sessionKundli.hasRealBirthData) {
     if (!detectedSignKey && sessionKundli.lagna && sessionKundli.lagna.rashi) {
       detectedSignKey = sessionKundli.lagna.rashi.english.toLowerCase();
     }
@@ -1490,9 +1488,9 @@ function extractUserProfile(history, currentQuery) {
   return {
     name: birthDetails.name,
     signKey: detectedSignKey,
-    rashi: rashi || (sessionKundli ? RASHI_DATA['leo'] : null),
+    rashi: rashi,
     nakshatraKey: detectedNakshatraKey,
-    nakshatra: nakshatra || (sessionKundli ? NAKSHATRA_DATA['magha'] : null),
+    nakshatra: nakshatra,
     dosha: detectedDosha || (rashi ? rashi.dosha : 'Balanced Tridosha')
   };
 }
@@ -1510,11 +1508,12 @@ function isInitialRoutineQuery(query) {
  */
 function resolveConversationalFollowUp(query, profile, history) {
   const q = query.toLowerCase();
-  const userName = (profile.name && profile.name !== "Friend") ? profile.name : null;
+  const userName = (profile.name && typeof profile.name === 'string' && profile.name.trim() && profile.name.trim().toLowerCase() !== "friend") ? profile.name.trim() : null;
   const greeting = userName ? `Namaste <strong>${escapeHtml(userName)}</strong>!` : `Namaste, dear seeker!`;
-  const rashi = profile.rashi || RASHI_DATA['leo'];
-  const nakshatra = profile.nakshatra || NAKSHATRA_DATA['magha'];
-  const signTitle = profile.signKey && rashi ? rashi.sanskrit : (profile.signKey ? `${profile.signKey.toUpperCase()}` : "Surya Rashi (Solar Vitality)");
+  const hasSign = Boolean(profile.signKey && profile.rashi);
+  const rashi = profile.rashi;
+  const nakshatra = profile.nakshatra;
+  const signTitle = hasSign ? rashi.sanskrit : null;
 
   // 1. Follow-up on Step 1: Waking / Brahma Muhurta / Early vs Late Waking
   if (q.includes('4:30') || q.includes('brahma') || (q.includes('wake') && (q.includes('why') || q.includes('early') || q.includes('late') || q.includes('7') || q.includes('8') || q.includes('cannot') || q.includes("can't") || q.includes('instead') || q.includes('time'))) || q.includes('step 1')) {
@@ -1523,16 +1522,18 @@ function resolveConversationalFollowUp(query, profile, history) {
     
     let advice = "";
     if (isWakingLater) {
+      const constitutionNote = (hasSign && rashi) ? (rashi.element.includes("Agni") ? "Pitta (causing irritability and headaches)" : "Vata (causing restlessness)") : "bodily balance (aggravating Vata or Pitta)";
       advice = `<p>${greeting} Classical Ayurveda is deeply compassionate and realistic. In the <em>Charaka Samhita</em>, when an ideal guideline does not fit your current work or night schedule, you should adopt <strong>Padamshika Krama</strong> (the principle of gradual step-by-step transition):</p>
       <ul>
-        <li><strong>Do not force an abrupt shock:</strong> Shifting instantly from 8:00 AM to 4:30 AM will only aggravate your ${rashi.element.includes("Agni") ? "Pitta (causing irritability and headaches)" : "Vata (causing restlessness)"}. Instead, shift your waking time backward by 15–20 minutes every 4–5 days.</li>
+        <li><strong>Do not force an abrupt shock:</strong> Shifting instantly from 8:00 AM to 4:30 AM will only aggravate ${constitutionNote}. Instead, shift your waking time backward by 15–20 minutes every 4–5 days.</li>
         <li><strong>If your job requires late sleep:</strong> If you must wake at 7:00 AM or 8:00 AM, the most critical rule from <strong>Arogyanidhii (p. 20)</strong> is: <em>never jump straight from bed into high-stress screens or cold foods</em>. Spend your first 15 minutes in quiet hydration (Ushapan) and 5 minutes of gentle diaphragmatic breathing to stabilize your circadian rhythm.</li>
       </ul>`;
     } else {
+      const personalSignMention = hasSign ? `For your constitution (${signTitle}), awakening` : `Awakening`;
       advice = `<p>${greeting} The recommendation to awaken during <strong>Brahma Muhurta (04:30 AM – 05:15 AM)</strong> is grounded in both cosmological rhythm and human physiology:</p>
       <ul>
         <li><strong>Peak Atmospheric Sattva (Purity & Calm):</strong> Approximately 96 minutes (2 Muhurtas) before sunrise, atmospheric turbulence and noise are at their lowest. <em>Ashtanga Hridaya (Sutrasthana Ch. 2)</em> declares: <em>"ब्राह्मे मुहूर्ते उत्तिष्ठेत् स्वस्थो रक्षार्थमायुषः"</em> — awakening at this sacred hour preserves cellular vitality and longevity.</li>
-        <li><strong>Elemental Prana:</strong> Nascent oxygen and pure Prana are at their cleanest before the sun triggers thermal convection. For someone with your <strong>${signTitle}</strong>, awakening in the quiet dawn prevents morning cortisol spikes and anchors deep focus for the entire day.</li>
+        <li><strong>Elemental Prana:</strong> Nascent oxygen and pure Prana are at their cleanest before the sun triggers thermal convection. ${personalSignMention} in the quiet dawn prevents morning cortisol spikes, dissolves mental heaviness (Tamas), and anchors deep focus for the entire day.</li>
       </ul>`;
     }
 
@@ -1550,6 +1551,7 @@ function resolveConversationalFollowUp(query, profile, history) {
 
   // 2. Follow-up on Step 2: Ushapan (Dawn Water) / Copper Vessel / Nasya
   if (q.includes('copper') || q.includes('tamra') || q.includes('ushapan') || q.includes('nasya') || q.includes('nose drop') || q.includes('nostril') || q.includes('step 2')) {
+    const nextStepOil = hasSign ? ` and the ideal therapeutic oil for your ${signTitle}` : ` and how to practice it in 5 minutes`;
     return {
       tier: "Ayurvedic Hygiene",
       rawText: `Guidance for ${userName || "seeker"} on Ushapan (copper water) and Nasya from Arogyanidhii p. 20.`,
@@ -1559,7 +1561,7 @@ function resolveConversationalFollowUp(query, profile, history) {
         <li><strong>What if you don't have a copper vessel?</strong> Pure lukewarm water stored in glass, earthen clay, or stainless steel is completely effective. You can add a pinch of cumin or fennel seeds if your digestion tends to feel sluggish.</li>
         <li><strong>Pratimarsa Nasya (Gentle Nasal Care):</strong> Administering 2 small drops of warm sesame oil or Anu Taila into each nostril lubricates the cranial sinuses, sharpens optical nerve vision (protecting eye health from screen strain), and prevents premature graying (<em>Arogyanidhii p. 20</em>).</li>
       </ul>
-      <p style="margin-top: 10px;">Shall we proceed to <strong>Step 3: Abhyanga (Self-Oil Massage)</strong> and the ideal therapeutic oil for your <strong>${signTitle}</strong>?</p>
+      <p style="margin-top: 10px;">Shall we proceed to <strong>Step 3: Abhyanga (Self-Oil Massage)</strong>${nextStepOil}?</p>
       <div class="citation-box">
         <div class="citation-header">📚 Scriptural Sources</div>
         <em>Arogyanidhii</em>, p. 20 (Ushapan & Pratimarsa Nasya Vidhi) & <em>Charaka Samhita, Sutrasthana Ch. 5</em> (Matrashitiya Adhyaya).
@@ -1569,16 +1571,21 @@ function resolveConversationalFollowUp(query, profile, history) {
 
   // 3. Follow-up on Step 3: Abhyanga (Oil Massage) / Gandusha (Oil Pulling) / Best Oil
   if (q.includes('oil') || q.includes('abhyanga') || q.includes('massage') || q.includes('gandusha') || q.includes('step 3') || q.includes('pulling')) {
+    const headingNote = hasSign ? `tailored to your astrological energy (<strong>${signTitle}</strong>)` : `grounded in classical Shastra`;
+    const oilGuidance = (hasSign && rashi)
+      ? `<strong>${rashi.oil}</strong>. Because your sign is governed by <strong>${rashi.element}</strong>, this oil directly soothes your <strong>${profile.dosha}</strong> tendencies, nourishing the seven bodily tissues (Dhatus) and grounding the nervous system.`
+      : `<strong>Warm unrefined Sesame (Tila) oil</strong> (or cooling coconut oil if you tend towards excess heat/Pitta). In <em>Charaka Samhita</em>, sesame oil is revered as the supreme base oil for grounding Vata, nourishing all seven bodily tissues (Dhatus), and shielding the nervous system.`;
+
     return {
       tier: "Ayurvedic Rejuvenation",
       rawText: `Guidance for ${userName || "seeker"} on Abhyanga oil massage from Charaka Samhita Sutrasthana Ch. 5 and Arogyanidhii p. 21.`,
-      text: `<p>${greeting} Here are the customized guidelines for <strong>Step 3: Abhyanga & Gandusha</strong> tailored to your astrological energy (<strong>${signTitle}</strong>):</p>
+      text: `<p>${greeting} Here are the customized guidelines for <strong>Step 3: Abhyanga & Gandusha</strong> ${headingNote}:</p>
       <ul>
-        <li><strong>Your Prescribed Oil:</strong> <strong>${rashi.oil}</strong>. Because your sign is governed by <strong>${rashi.element}</strong>, this oil directly soothes your <strong>${profile.dosha}</strong> tendencies, nourishing the seven bodily tissues (Dhatus) and grounding the nervous system.</li>
+        <li><strong>Your Prescribed Oil:</strong> ${oilGuidance}</li>
         <li><strong>Quick 5-Minute Routine (Shiro-Karna-Pada):</strong> If a full-body oil massage isn't practical every morning before work, classical shastras prescribe massaging just three key centers: the <strong>crown of the head (Shiro)</strong>, the <strong>ears (Karna)</strong>, and the <strong>soles of the feet (Pada)</strong>. This delivers 80% of the neurological benefits in 5 minutes!</li>
         <li><strong>Gandusha (Oil Pulling):</strong> Swishing warm sesame oil in the mouth for 3–5 minutes strengthens gums, whitens teeth, and prevents dryness of the throat and lips (<em>Arogyanidhii p. 21</em>).</li>
       </ul>
-      <p style="margin-top: 10px;">Would you like to move into <strong>Step 4: Morning Yoga & Shiva Samhita Pranayama</strong> next?</p>
+      <p style="margin-top: 10px;">Would you like to move into <strong>Step 4: Morning Movement & Shiva Samhita Pranayama</strong> next?</p>
       <div class="citation-box">
         <div class="citation-header">📚 Scriptural Sources</div>
         <em>Charaka Samhita, Sutrasthana Ch. 5, Verses 85–90</em> (Benefits of Daily Abhyanga) & <em>Arogyanidhii</em>, p. 21 (Snana-Purva Abhyanga & Gandusha).
@@ -1588,13 +1595,14 @@ function resolveConversationalFollowUp(query, profile, history) {
 
   // 4. Follow-up on Step 4: Vyayama (Exercise), Asanas & Shiva Samhita Pranayama
   if (q.includes('step 4') || q.includes('yoga') || q.includes('pranayama') || q.includes('nadi shodhana') || q.includes('breath') || q.includes('exercise') || q.includes('workout') || q.includes('asana')) {
+    const exerciseGuidance = (hasSign && rashi) ? rashi.exercise : "Mindful Surya Namaskar (Sun Salutations), gentle spinal flexion, and grounding restorative postures";
     return {
       tier: "Yogic Science",
       rawText: `Guidance for ${userName || "seeker"} on Vyayama and Nadi Shodhana from Shiva Samhita Ch. 3 and Arogyanidhii p. 21.`,
       text: `<p>${greeting} Here is how to practice <strong>Step 4: Morning Movement & Pranayama</strong> safely and effectively:</p>
       <ul>
         <li><strong>The Ardha Shakti Rule (Arogyanidhii p. 21):</strong> Exercise only up to <em>half your physiological capacity</em> (stopping when light perspiration beads on your forehead, armpits, and tip of the nose). Never push to extreme breathless exhaustion, which depletes Ojas (vital immunity).</li>
-        <li><strong>Tailored Yoga Movement:</strong> ${rashi.exercise}.</li>
+        <li><strong>Tailored Movement:</strong> ${exerciseGuidance}.</li>
         <li><strong>Shiva Samhita Nadi Shodhana (Ch. 3, vv. 1–40):</strong> Sit upright in Sukhasana or Padmasana. Close the right solar nostril (Pingala) with your thumb and inhale slowly through the left lunar nostril (Ida) for 4 seconds. Gently retain or immediately switch, exhaling through the right nostril for 6–8 seconds. Repeat in reverse for 10–12 gentle cycles. This harmonizes brain hemispheres and dissolves inner tension.</li>
       </ul>
       <p style="margin-top: 10px;">Would you like to explore <strong>Step 5: Snana Vidhi (Bathing Order)</strong>, or shall we jump forward to your peak focus hours?</p>
@@ -1737,30 +1745,31 @@ function resolveConversationalFollowUp(query, profile, history) {
  * Synthesizes Charaka Samhita Sutrasthana Ch. 5 & Ashtanga Hridaya Ch. 2 with Jyotisha Horas
  */
 function generatePersonalizedDinacharya(query, profile) {
-  const userName = (profile.name && profile.name !== "Friend") ? profile.name : null;
-  const isFullyPersonalized = Boolean(profile.signKey || profile.nakshatraKey || userName);
-  const rashi = profile.rashi || RASHI_DATA['leo'];
-  const nakshatra = profile.nakshatra || NAKSHATRA_DATA['magha'];
-  const signTitle = profile.signKey && rashi ? rashi.sanskrit : "Surya Rashi Alignment (Solar Vitality)";
-  const element = rashi.element;
-  const dosha = profile.dosha;
-  const oil = rashi.oil;
-  const exercise = rashi.exercise;
-  const pranayama = rashi.pranayama;
-  const nakName = profile.nakshatraKey ? profile.nakshatraKey.charAt(0).toUpperCase() + profile.nakshatraKey.slice(1) : "Nakshatra Resonance";
-  const nakDosha = nakshatra.dosha;
-  const nakDeity = nakshatra.deity;
+  const userName = (profile.name && typeof profile.name === 'string' && profile.name.trim() && profile.name.trim().toLowerCase() !== "friend") ? profile.name.trim() : null;
+  const hasSign = Boolean(profile.signKey && profile.rashi);
+  const isFullyPersonalized = Boolean(hasSign || profile.nakshatraKey || userName);
+  const rashi = profile.rashi;
+  const nakshatra = profile.nakshatra;
+  const signTitle = hasSign ? rashi.sanskrit : null;
+  const element = hasSign ? rashi.element : "Pancha-Mahabhuta (Five Primal Elements)";
+  const dosha = hasSign ? profile.dosha : "Balanced Tridosha (Vata • Pitta • Kapha)";
+  const oil = hasSign ? rashi.oil : "Warm unrefined Sesame (Tila) oil (or cooling coconut oil for Pitta heat)";
+  const exercise = hasSign ? rashi.exercise : "Mindful Surya Namaskar (Sun Salutations), gentle joint mobilization, and restorative asanas";
+  const pranayama = hasSign ? rashi.pranayama : "Sheetali (cooling breath) and Nadi Shodhana (alternate-nostril breath)";
+  const nakName = (profile.nakshatraKey && nakshatra) ? profile.nakshatraKey.charAt(0).toUpperCase() + profile.nakshatraKey.slice(1) : null;
+  const nakDosha = nakshatra ? nakshatra.dosha : null;
+  const nakDeity = nakshatra ? nakshatra.deity : "Savitr (Radiant Dawn Solar Presence)";
   const greeting = userName ? `Namaste <strong>${escapeHtml(userName)}</strong>!` : `Namaste, dear seeker!`;
 
   let headerHtml = "";
-  if (isFullyPersonalized) {
+  if (isFullyPersonalized && hasSign) {
     headerHtml = `
       <div class="routine-header">
         <h3>🌅 Personalized Vedic Dinacharya (दिनचर्या)${userName ? ` for ${escapeHtml(userName)}` : ''}</h3>
         <div class="routine-badges">
           <span class="badge badge-primary">Rashi: ${signTitle}</span>
           <span class="badge badge-accent">Element: ${element}</span>
-          <span class="badge badge-offline">Nakshatra: ${nakName} (${nakDosha})</span>
+          ${nakName ? `<span class="badge badge-offline">Nakshatra: ${nakName} (${nakDosha})</span>` : ''}
           <span class="badge badge-primary">Deity: ${nakDeity}</span>
         </div>
       </div>
@@ -1772,15 +1781,15 @@ function generatePersonalizedDinacharya(query, profile) {
   } else {
     headerHtml = `
       <div class="routine-header">
-        <h3>🌅 Master Vedic Dinacharya (दिनचर्या) & Astrological Routine Framework</h3>
+        <h3>🌅 Master Vedic Dinacharya (दिनचर्या) & Circadian Framework</h3>
         <div class="routine-badges">
           <span class="badge badge-primary">Charaka Samhita Ch. 5</span>
-          <span class="badge badge-accent">Ashtanga Hridaya Ch. 2</span>
-          <span class="badge badge-offline">Surya Hora Aligned</span>
+          <span class="badge badge-accent">Arogyanidhii pp. 18–30</span>
+          <span class="badge badge-offline">Tridosha Balance</span>
         </div>
       </div>
       <p style="margin-top: 8px;">
-        In classical Shastra, a healthy routine (<strong>Dinacharya</strong>) syncs your biological circadian clock with the cosmic rhythms of the Sun (<em>Surya</em>) and the Five Maha-Tatvas. Below is your <strong>hour-by-hour master schedule</strong>, followed by personalized adjustments based on your <strong>Sun Sign (Rashi)</strong> and <strong>Nakshatra</strong>:
+        ${greeting} In classical Shastra, a healthy routine (<strong>Dinacharya</strong>) syncs your biological circadian clock with the cosmic rhythms of nature. Below is your <strong>master hour-by-hour schedule</strong> grounded directly in <em>Arogyanidhii</em> and <em>Charaka Samhita</em>. <em>(To personalize this timetable to your specific Janma Lagna and Nakshatra, please share your birth date, time, and city.)</em>
       </p>
     `;
   }
@@ -1793,7 +1802,7 @@ function generatePersonalizedDinacharya(query, profile) {
           <strong>1. Brahma Muhurta (ब्राह्मे मुहूर्ते उत्तिष्ठेत् — The sacred dawn hour of pure creative vitality)</strong><br/>
           Awaken 2 Muhurtas (approx. 96 minutes) before sunrise when atmospheric Sattva Guna (pure mental clarity and peace) and cellular Prana (vital oxygen) are at their peak (<em>Ashtanga Hridaya, Sutrasthana Ch. 2</em>). 
           According to <strong>Arogyanidhii (pp. 18, 30)</strong>, awaken facing East or North; never sleep with head towards North due to geomagnetic repulsion.<br/>
-          <em>Personal adjustment:</em> ${element.includes("Agni") ? "Awaken gently with slow deep diaphragmatic breathing to keep morning cortisol and Pitta (metabolic heat) balanced." : element.includes("Prithvi") ? "Rise immediately upon waking to break Kapha (morning sluggishness); avoid lingering in bed." : "Sip lukewarm water and ground your restless Vata (air/nervous energy) with quiet gratitude."}
+          <em>Guideline:</em> ${hasSign && element.includes("Agni") ? "Awaken gently with slow deep diaphragmatic breathing to keep morning cortisol and Pitta (metabolic heat) balanced." : hasSign && element.includes("Prithvi") ? "Rise immediately upon waking to break Kapha (morning sluggishness); avoid lingering in bed." : "Awaken gently, sip warm water (Ushapan), and ground your mind with quiet gratitude before entering the day."}
         </div>
       </div>
 
@@ -1823,7 +1832,7 @@ function generatePersonalizedDinacharya(query, profile) {
           <strong>4. Vyayama (Morning Exercise), Asanas (Yoga Postures) & Shiva Samhita Pranayama (Conscious Breathwork)</strong><br/>
           Exercise up to half of your personal physiological capacity (<em>Ardha Shakti</em> — stopping when a light sweat beads on the forehead and nose, <strong>Arogyanidhii p. 21</strong>, to build strength without depleting energy).<br/>
           <em>Prescribed Practice:</em> ${exercise}.<br/>
-          <em>Pranayama:</em> Practice Nadi Shodhana (<strong>Shiva Samhita Ch. 3, vv. 1–40</strong>) — alternate-nostril breathing to harmonize Ida (cooling lunar channel) and Pingala (heating solar channel): <strong>${pranayama}</strong>, followed by 10 minutes of silent Dhyana (peaceful morning meditation) contemplating <em>${nakDeity}</em>.
+          <em>Pranayama:</em> Practice Nadi Shodhana (<strong>Shiva Samhita Ch. 3, vv. 1–40</strong>) — alternate-nostril breathing to harmonize Ida (cooling lunar channel) and Pingala (heating solar channel): <strong>${pranayama}</strong>, followed by 10 minutes of silent Dhyana (peaceful morning meditation)${nakName ? ` contemplating <em>${nakDeity}</em>` : ''}.
         </div>
       </div>
 
@@ -2051,7 +2060,7 @@ function generateGroundedResponse(query, attachment, history) {
     lower.includes('predict')
   );
 
-  if (isDistressOrGuidance && !sessionKundli) {
+  if (isDistressOrGuidance) {
     const greetingName = (profile.name && profile.name !== "Friend") ? ` <strong>${escapeHtml(profile.name)}</strong>` : ", dear seeker";
     return {
       tier: "Vedic Wisdom & Astrological Consultation",
@@ -2105,7 +2114,80 @@ function generateGroundedResponse(query, attachment, history) {
 
   const greetingName = (profile.name && profile.name !== "Friend") ? ` <strong>${escapeHtml(profile.name)}</strong>` : ", dear seeker";
 
-  // 6. Charaka / Ayurveda / Tridosha
+  // 6. Busy / Time-Constrained Seeker Intent ("hi i m busy", "no time", "quick routine")
+  const isBusy = (
+    lower.includes('busy') ||
+    lower.includes('no time') ||
+    lower.includes('little time') ||
+    lower.includes('quick routine') ||
+    lower.includes('fast routine') ||
+    lower.includes('rushed') ||
+    lower.includes('hectic') ||
+    lower.includes('hurry') ||
+    lower.includes('short routine') ||
+    lower.includes('overworked') ||
+    lower.includes('too much work')
+  );
+
+  if (isBusy) {
+    return {
+      tier: "Shastric Micro-Dinacharya",
+      rawText: `3-Minute Shastric Micro-Routine for busy seekers from Arogyanidhii pp. 20-21 and Bhagavad Gita 2.48-50.`,
+      text: `<p>Namaste${greetingName}! In classical Vedic science and the <em>Bhagavad Gita</em>, having a demanding, fast-paced schedule is never an obstacle to peace, clarity, and vibrant health. When time is tight, classical shastras prescribe <strong>Padamshika Krama (Gradual Micro-Habits)</strong> from the <em>Charaka Samhita</em> and the <strong>3-Minute Shastric Reset</strong> from <em>Arogyanidhii</em>:</p>
+      
+      <h4 style="color: #b45309; margin-top: 14px; margin-bottom: 6px;">🌿 The 3-Minute Shastric Micro-Routine for Busy Lives:</h4>
+      <ul>
+        <li><strong>1. Ushapan Dawn Hydration (30 Seconds — Arogyanidhii p. 20):</strong> Drink 1 glass of warm water stored in a copper or clean vessel immediately upon rising. This triggers natural peristalsis, clears overnight metabolic toxins (<em>Ama</em>), and hydrates cerebral circulation before touching a screen.</li>
+        <li><strong>2. Tri-Sthana Abhyanga (90 Seconds — Arogyanidhii p. 21):</strong> If a full-body oil massage is impractical before work, massage just three vital nerve hubs: the <strong>crown of the head (Shiro)</strong>, the <strong>ears (Karna)</strong>, and the <strong>soles of the feet (Pada)</strong> with 2 drops of warm sesame oil. Classical shastras state this delivers 80% of the neurological grounding benefits in under two minutes!</li>
+        <li><strong>3. 1-Minute Centering Breath (Shiva Samhita Ch. 3):</strong> Take 5 slow, deep breaths with extended exhalations before diving into messages or meetings to reset your autonomic nervous system.</li>
+      </ul>
+
+      <h4 style="color: #b45309; margin-top: 14px; margin-bottom: 6px;">🕉️ Karmic Mindset for Demanding Schedules:</h4>
+      <p>In the <em>Bhagavad Gita (2.50)</em>, Bhagavan Krishna teaches: <em>"योगः कर्मसु कौशलम्" (Yogah Karmasu Kaushalam — Yoga is calm skillfulness and poise in action)</em>. Busyness only causes exhaustion when the mind is frantically projecting into future results. By dedicating yourself wholeheartedly to the task immediately before you (<em>Nishkama Karma</em>), your daily work ceases to drain you and becomes an energizing flow.</p>
+
+      <p style="margin-top: 14px; font-weight: 600; color: #1e293b;">When during your busy day does the sensation of mental rushing or fatigue peak most noticeably—first thing upon waking, or when transitioning between high-pressure tasks?</p>
+
+      <div class="citation-box" style="margin-top: 14px;">
+        <div class="citation-header">📚 Scriptural Sources</div>
+        <em>Arogyanidhii</em>: Pages 20–21 (Ushapan & Tri-Sthana Abhyanga for Busy Householders).<br/>
+        <em>Bhagavad Gita</em>: Chapter 2, Verses 48 & 50 (Yogah Karmasu Kaushalam & Nishkama Karma).<br/>
+        <em>Charaka Samhita (Sutrasthana Ch. 5)</em>: Matrashitiya Adhyaya (Circadian Micro-Habits & Tridosha Protection).
+      </div>`
+    };
+  }
+
+  // 7. Greeting & Introduction Intent ("hi", "hello", "namaste", "hey")
+  const isGreeting = (
+    lower === 'hi' ||
+    lower === 'hello' ||
+    lower === 'hey' ||
+    lower === 'namaste' ||
+    lower === 'pranam' ||
+    lower === 'good morning' ||
+    lower === 'good evening' ||
+    lower === 'greetings' ||
+    (/^(hi|hello|hey|namaste|pranam)\b/i.test(lower.trim()) && lower.trim().split(/\s+/).length <= 3)
+  );
+
+  if (isGreeting) {
+    return {
+      tier: "Vedic Welcome",
+      rawText: `Welcome to ShaastraAI. Astrologer Agent and Maharaj Ji introduction.`,
+      text: `<p>Namaste${greetingName}! Welcome to <strong>ShaastraAI</strong>, your personal sanctuary for classical Vedic wisdom, Ayurvedic living, and astrological clarity.</p>
+      <p>I coordinate two specialized shastric guides to illuminate your path:</p>
+      <ul>
+        <li><strong>🪐 Astrologer Agent (Jyotish Acharya):</strong> Calculates your 100% mathematically verified <strong>Nirayana Sidereal Janma Kundali</strong> with Lahiri Ayanamsha (Lagna, Moon Sign, Sun Sign, 27 Nakshatras, 9 Grahas across 12 Bhavas, and active Vimshottari Dasha). Whenever you are ready, simply share your <strong>Name, Date of Birth, Exact Time of Birth, and Place of Birth</strong>.</li>
+        <li><strong>🕉️ Maharaj Ji (Vedic & Purana Expert):</strong> Guides personalized circadian routines (<em>Dinacharya</em> from <em>Arogyanidhii</em>), Ayurvedic digestion and Dosha harmony (<em>Charaka Samhita</em>), calming breathwork (<em>Shiva Samhita</em>), and mind mastery from the <em>Bhagavad Gita</em> and sacred <em>Puranas</em>.</li>
+      </ul>
+      <p style="margin-top: 14px; font-weight: 600; color: #1e293b;">What brings you to our shastric sanctuary today—would you like to cast your astrological birth chart, optimize your daily routine, or explore a question on wellness and peace of mind?</p>
+      <div class="citation-box" style="margin-top: 14px;">
+        <div class="citation-header">📚 Scriptural Authorities & Scope</div>
+        <em>Varahamihira's Brihat Jataka</em> (Vedic Astrological Science) • <em>Arogyanidhii</em> (Dinacharya & Longevity) • <em>Bhagavad Gita</em> (Equanimity & Self-Mastery)
+      </div>`
+    };
+  }
+
+  // 8. Charaka / Ayurveda / Tridosha
   if (lower.includes('charaka') || lower.includes('dosha') || lower.includes('ayurveda') || lower.includes('tridosha')) {
     return {
       tier: 'Ayurvedic Living',
@@ -2124,7 +2206,7 @@ function generateGroundedResponse(query, attachment, history) {
     };
   }
 
-  // 7. Patanjali / Yoga Sutras / Meditation
+  // 9. Patanjali / Yoga Sutras / Meditation
   if (lower.includes('patanjali') || lower.includes('yoga sutra') || lower.includes('dhyana') || lower.includes('samadhi')) {
     return {
       tier: 'Yoga & Pranayama',
@@ -2143,7 +2225,7 @@ function generateGroundedResponse(query, attachment, history) {
     };
   }
 
-  // 8. Upanishads / Advaita Vedanta / Consciousness
+  // 10. Upanishads / Advaita Vedanta / Consciousness
   if (lower.includes('upanishad') || lower.includes('vedanta') || lower.includes('advaita') || lower.includes('brahman') || lower.includes('atman') || lower.includes('turiya')) {
     return {
       tier: 'Upanishadic Wisdom',
@@ -2163,22 +2245,17 @@ function generateGroundedResponse(query, attachment, history) {
     };
   }
 
-  // 9. General Shastric Synthesis Fallback
-  const astrologicalSignText = sessionKundli 
-    ? `For your <strong>${escapeHtml(sessionKundli.lagna.rashi.sanskrit)}</strong> Lagna and <strong>${escapeHtml(sessionKundli.moonRashi.sanskrit)}</strong> Moon energy` 
-    : (profile.rashi ? `For your <strong>${escapeHtml(profile.rashi.sanskrit)}</strong> energy` : `To harmonize your vital energies`);
-
+  // 11. General Grounded Shastric Synthesis Fallback
   return {
     tier: 'Vedic Wisdom',
-    rawText: `Vedic wisdom regarding "${query}".`,
-    text: `<p>Namaste${greetingName}! Based on classical Vedic principles and shastric sciences:</p>
-    <p>Your inquiry <em>"${escapeHtml(query)}"</em> reflects the deep Indic understanding of harmony between the individual human microcosm (<em>Pinda</em>) and the cosmic macrocosm (<em>Brahmanda</em>).</p>
-    <p>In classical tradition, true health, clarity, and peace (<em>Swastha</em> — being disease-free and happily rooted in one's true Self) is achieved when your daily habits, thoughts, and nourishment are aligned with <em>Dharma</em> (natural moral law and living in harmony with cosmic rhythms).</p>
-    <p>${astrologicalSignText}, cultivating balance through regular daily routines (Dinacharya), wholesome seasonal nourishment, and conscious breathwork brings immediate peace and vitality.</p>
-    <p style="margin-top: 14px; font-weight: 600; color: #1e293b;">What aspect of your daily rhythm or inner mental state feels most in need of soothing clarity right now?</p>
+    rawText: `Classical shastric guidance grounded in Arogyanidhii and Charaka Samhita.`,
+    text: `<p>Namaste${greetingName}! In classical Vedic tradition, true health, clarity, and peace (<em>Swastha</em> — being disease-free and happily rooted in one's true Self) is achieved when your daily habits, thoughts, and nourishment are aligned with <em>Dharma</em> (natural moral law and living in harmony with cosmic rhythms).</p>
+    <p>To cultivate lasting balance without feeling overwhelmed, the <em>Charaka Samhita</em> and <em>Arogyanidhii</em> recommend grounding your daily rhythm through regular seasonal nourishment, dawn hydration (<em>Ushapan</em>), and conscious breathwork (<em>Pranayama</em>).</p>
+    <p style="margin-top: 14px; font-weight: 600; color: #1e293b;">What specific aspect of your daily rhythm or inner mental state feels most in need of soothing clarity right now?</p>
     <div class="citation-box" style="margin-top: 14px;">
       <div class="citation-header">📚 Scriptural Sources</div>
-      <em>Taittiriya Upanishad</em> & <em>Charaka Samhita</em>: "शरीरमाद्यं खलु धर्मसाधनम्" (The physical body is indeed the prime sacred instrument for fulfilling life's purpose and dharma).
+      <em>Taittiriya Upanishad</em> & <em>Charaka Samhita</em>: "शरीरमाद्यं खलु धर्मसाधनम्" (The physical body is indeed the prime sacred instrument for fulfilling life's purpose and dharma).<br/>
+      <em>Arogyanidhii</em>: Pages 18–30 (Dinacharya, Mindful Living, and Longevity Principles).
     </div>`
   };
 }

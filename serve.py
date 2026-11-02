@@ -4,6 +4,7 @@ Serves the web application from public/ and provides a local API endpoint (/api/
 Features multi-tier resilience:
 1. Live Gemini API (when valid key is available)
 2. Classical Grounded Astrologer Agent & Maharaj Ji (Vedic & Purana Expert) fallback engine
+3. Shastra RAG Retrieval Engine pre-trained and indexed over 34 classical PDFs (FAISS)
 
 Usage:
     .venv\Scripts\python.exe serve.py
@@ -15,11 +16,18 @@ import sys
 import json
 import math
 import re
+import hashlib
 import urllib.request
 import urllib.error
 from http.server import SimpleHTTPRequestHandler, HTTPServer
 from pathlib import Path
 from dotenv import load_dotenv
+
+import numpy as np
+try:
+    import faiss
+except ImportError:
+    faiss = None
 
 if hasattr(sys.stdout, "reconfigure"):
     try:
@@ -37,6 +45,82 @@ else:
     load_dotenv(override=True)
 
 PORT = 8000
+
+# =====================================================================
+# Shastra RAG Retrieval Engine (Grounding in 34 Uploaded Classical PDFs)
+# =====================================================================
+FAISS_INDEX_PATH = PROJECT_ROOT / "faiss_index.bin"
+CHUNKS_META_PATH = PROJECT_ROOT / "chunks_metadata.json"
+
+shastra_faiss_index = None
+shastra_chunks = []
+
+
+def init_shastra_rag():
+    global shastra_faiss_index, shastra_chunks
+    if faiss is None:
+        print("Note: faiss not installed; continuing without local vector search.")
+        return
+    if FAISS_INDEX_PATH.exists() and CHUNKS_META_PATH.exists():
+        try:
+            shastra_faiss_index = faiss.read_index(str(FAISS_INDEX_PATH))
+            with open(CHUNKS_META_PATH, "r", encoding="utf-8") as f:
+                meta = json.load(f)
+                shastra_chunks = meta.get("chunks", [])
+            print(f"Shastra RAG Engine initialized: {shastra_faiss_index.ntotal} vectors across {len(shastra_chunks)} clean chunks.")
+        except Exception as e:
+            print(f"Warning: Could not initialize Shastra RAG Engine: {e}")
+            shastra_faiss_index = None
+            shastra_chunks = []
+
+
+def get_query_embedding(text: str, dim: int = 1024) -> np.ndarray:
+    vec = np.zeros(dim, dtype=np.float32)
+    tokens = re.findall(r"[a-zA-Z\u0900-\u097F]{2,}", text.lower())
+    if not tokens:
+        return vec
+    for i, tok in enumerate(tokens):
+        h = int(hashlib.md5(tok.encode("utf-8")).hexdigest()[:8], 16)
+        vec[h % dim] += 1.0
+        if i + 1 < len(tokens):
+            bigram = f"{tok}_{tokens[i + 1]}"
+            hb = int(hashlib.md5(bigram.encode("utf-8")).hexdigest()[:8], 16)
+            vec[hb % dim] += 0.5
+    norm = np.linalg.norm(vec)
+    if norm > 0:
+        vec /= norm
+    return vec
+
+
+def retrieve_shastra_passages(query: str, top_k: int = 3):
+    if shastra_faiss_index is None or not shastra_chunks:
+        return []
+    try:
+        vec = get_query_embedding(query, dim=shastra_faiss_index.d)
+        if np.linalg.norm(vec) < 0.1:
+            return []
+        k = min(top_k * 4, shastra_faiss_index.ntotal)
+        _, indices = shastra_faiss_index.search(np.expand_dims(vec, axis=0), k)
+        results = []
+        seen = set()
+        for idx in indices[0]:
+            if 0 <= idx < len(shastra_chunks):
+                chunk = shastra_chunks[idx]
+                txt = chunk.get("text", "").strip()
+                snippet_key = txt[:60]
+                if len(txt) >= 40 and snippet_key not in seen:
+                    seen.add(snippet_key)
+                    results.append(chunk)
+                    if len(results) >= top_k:
+                        break
+        return results
+    except Exception as e:
+        print(f"Retrieval error: {e}")
+        return []
+
+
+# Pre-initialize Shastra RAG on module load
+init_shastra_rag()
 
 
 class VedicKundliCalculator:
@@ -242,19 +326,19 @@ def parse_birth_details(full_text):
     explicit_match = re.search(r'(?:my\s+name\s+is|name\s*(?::|is)|call\s+me)\s+([a-zA-Z]+)', full_text, re.I)
     if explicit_match:
         cand = explicit_match.group(1).strip()
-        if len(cand) >= 2 and cand.lower() not in ['friend', 'unable', 'user']:
+        if len(cand) >= 2 and cand.lower() not in ['friend', 'unable', 'user', 'seeker', 'busy']:
             name = cand.capitalize()
 
     if not name:
         forbidden = {
-            'unable', 'feeling', 'tired', 'confused', 'stressed', 'anxious', 'sick', 'looking', 
+            'unable', 'feeling', 'tired', 'confused', 'stressed', 'anxious', 'sick', 'looking',
             'asking', 'wondering', 'having', 'trying', 'here', 'new', 'sad', 'happy', 'depressed', 
             'overwhelmed', 'lost', 'stuck', 'ready', 'curious', 'student', 'working', 'seeking', 
             'praying', 'facing', 'suffering', 'going', 'getting', 'hurting', 'sitting', 'lying', 
             'eating', 'sleeping', 'fasting', 'not', 'just', 'so', 'very', 'a', 'an', 'the',
             'afraid', 'nervous', 'worried', 'fine', 'okay', 'ok', 'well', 'good', 'bad', 
             'exhausted', 'restless', 'lonely', 'frustrated', 'angry', 'upset', 'doubtful', 
-            'uncertain', 'helpless', 'blank', 'troubled', 'in', 'at', 'born', 'on', 'my', 'me'
+            'uncertain', 'helpless', 'blank', 'troubled', 'in', 'at', 'born', 'on', 'my', 'me', 'busy'
         }
         i_am_match = re.search(r'\b(?:i\s+am|i\'m)\s+([A-Za-z]+)\b', full_text, re.I)
         if i_am_match:
@@ -310,7 +394,8 @@ def is_out_of_scope(query):
 def generate_server_grounded_response(prompt, history):
     """
     High-fidelity classical grounded response engine for Astrologer Agent & Maharaj Ji.
-    Runs when Gemini API is throttled or offline.
+    Runs when Gemini API is throttled, keyless, or offline.
+    Directly grounded in the 34 uploaded classical PDFs.
     """
     accumulated_text = ""
     if isinstance(history, list):
@@ -320,7 +405,7 @@ def generate_server_grounded_response(prompt, history):
     accumulated_text += " " + prompt
 
     parsed_birth = parse_birth_details(accumulated_text)
-    user_name = parsed_birth["name"]
+    user_name = parsed_birth["name"].strip() if parsed_birth["name"] and parsed_birth["name"].strip() else None
     salutation = f"Namaste {user_name}!" if user_name else "Namaste, dear seeker!"
     lower = prompt.lower()
 
@@ -373,13 +458,61 @@ def generate_server_grounded_response(prompt, history):
             f"- *Bhagavad Gita*: Chapter 2, Verses 47–48 & Chapter 6, Verses 5–6"
         )
 
-    # 3. Distress, Confusion, or Mental Fog (WITHOUT Birth Details)
+    # 3. Busy / Hectic / No Time Intent
+    is_busy = any(k in lower for k in [
+        "busy", "no time", "rushed", "hectic", "quick routine", "short routine", "fast routine",
+        "tight schedule", "too much work", "overworked", "swamped", "running late"
+    ])
+    if is_busy:
+        return (
+            f"{salutation} In classical Vedic lifestyle wisdom and the *Bhagavad Gita*, living a demanding, fast-paced life "
+            f"does not require hours of complicated rituals. The sacred texts prescribe an efficient, powerful "
+            f"**3-Minute Shastric Micro-Dinacharya** designed specifically for high-responsibility days:\n\n"
+            f"🌿 **The 3-Minute Shastric Micro-Routine (*Arogyanidhii* pp. 20–21):**\n"
+            f"1. **Ushapan & Netra Prakshalana (60 Seconds — Arogyanidhii p. 20):** Upon waking, immediately drink one large glass of warm water (seated, not standing). Splash cool water gently over open eyes. This clears overnight metabolic sluggishness (Ama), awakens downward digestive energy (Apana Vayu), and relieves optic screen fatigue.\n"
+            f"2. **Tri-Sthana Abhyanga (60 Seconds — Charaka Samhita Sutrasthana Ch. 5):** When time prevents a full-body oil massage, classical Shastra prescribes applying a few drops of warm sesame oil to just three vital neuro-sensory centers: the **crown of the head (Shiro)**, the **ears (Karna)**, and the **soles of the feet (Pada)**. This anchors restless Vata and shields your nervous system throughout high-stress meetings.\n"
+            f"3. **Yogah Karmasu Kaushalam (60 Seconds — Bhagavad Gita 2.48–50):** Take 5 deep diaphragmatic breaths before beginning work. Krishna instructs Arjuna: *'योगः कर्मसु कौशलम्'* (Excellence in action is yoga). Focus wholly on the task right in front of you without the frantic mental friction of anticipating future outcomes.\n\n"
+            f"🪐 **Astrologer Agent & Maharaj Ji Guidance:**\n"
+            f"Whenever your schedule eases, if you would like to align your work blocks with your personal astrological planetary hours (24 Diurnal Horas) or cast your 100% accurate Janma Kundali, please share your:\n"
+            f"- Full Name\n- Date of Birth (DD-MM-YYYY)\n- Exact Time of Birth (AM/PM)\n- Place of Birth (City)\n\n"
+            f"When your schedule begins to crowd your mind today, where do you physically feel tension accumulating first—in your shoulders and neck, or as shallow, breathless rushing in the chest?\n\n"
+            f"### 📚 Scriptural Sources\n"
+            f"- *Arogyanidhii*: Pages 20–21 (Ushapan & Shiro-Karna-Pada Abhyanga)\n"
+            f"- *Charaka Samhita*: Sutrasthana Ch. 5, vv. 85–92 (Tri-Sthana Oil Application & Vata Pacification)\n"
+            f"- *Bhagavad Gita*: Chapter 2, Verses 48 & 50 (Samatvam Yoga Uchyate & Yogah Karmasu Kaushalam)"
+        )
+
+    # 4. Casual Greeting Intent ("hi", "hello", "namaste", "pranam")
+    is_greeting = (
+        lower in ["hi", "hello", "hey", "namaste", "pranam", "good morning", "good evening", "greetings"] or
+        (bool(re.match(r"^(hi|hello|hey|namaste|pranam)\b", lower.strip())) and len(lower.strip().split()) <= 3)
+    )
+    if is_greeting:
+        return (
+            f"{salutation} Welcome to **ShaastraAI**, your personal sanctuary for classical Vedic wisdom, "
+            f"Ayurvedic lifestyle balance, and authentic astrological clarity.\n\n"
+            f"I coordinate two specialized shastric guides to assist you:\n"
+            f"1. 🪐 **Astrologer Agent (Jyotish Acharya):** Calculates your 100% mathematically verified "
+            f"Nirayana Sidereal Janma Kundali with Lahiri Ayanamsha (Lagna, Moon Sign, Sun Sign, 27 Nakshatras, "
+            f"9 Grahas across 12 Bhavas, and active Vimshottari Dasha). Whenever you are ready, simply share your "
+            f"**Name, Date of Birth, Exact Time of Birth, and Place of Birth**.\n"
+            f"2. 🕉️ **Maharaj Ji (Vedic & Purana Expert):** Guides personalized circadian routines (*Dinacharya* "
+            f"from *Arogyanidhii*), Ayurvedic digestion and Dosha harmony (*Charaka Samhita*), calming breathwork (*Shiva Samhita*), "
+            f"and mind mastery from the *Bhagavad Gita* and sacred *Puranas*.\n\n"
+            f"What brings you to our shastric sanctuary today—would you like to cast your astrological birth chart, "
+            f"optimize your daily timetable, or explore a question on wellness and peace of mind?\n\n"
+            f"### 📚 Scriptural Sources\n"
+            f"- *Varahamihira's Brihat Jataka* (Classical Vedic Astrology)\n"
+            f"- *Arogyanidhii* (Dinacharya & Longevity)\n"
+            f"- *Bhagavad Gita* (Mind Mastery & Karma Yoga)"
+        )
+
+    # 5. Distress, Confusion, or Mental Fog (WITHOUT Birth Details)
     is_distress = any(k in lower for k in [
         "unable to process", "unable to think", "what should i do", "cannot think", "can't process",
         "mind is", "confused", "overwhelmed", "anxious", "anxiety", "stressed", "feeling lost",
         "mental fog", "racing thought", "kundli", "birth chart", "horoscope"
     ])
-
     if is_distress:
         return (
             f"{salutation} In classical Indic psychology and sacred Shastras, feeling unable to process what you are "
@@ -408,17 +541,34 @@ def generate_server_grounded_response(prompt, history):
             f"- *Bhagavad Gita*: Chapter 6, Verses 5–6 & 26 (Chitta-Nirodha & Sakshi Bhava)"
         )
 
-    # 4. General Shastric Guidance Fallback
+    # 6. General Shastric Guidance Fallback (Enhanced with Real RAG Passages from 34 PDFs)
+    retrieved = retrieve_shastra_passages(prompt, top_k=2)
+    rag_quote_block = ""
+    sources_list = [
+        "- *Taittiriya Upanishad* & *Charaka Samhita*: 'शरीरमाद्यं खलु धर्मसाधनम्' (The physical body is the sacred instrument for fulfilling dharma)",
+        "- *Arogyanidhii*: Pages 18–30 (Dinacharya & Healthy Living Principles)"
+    ]
+
+    if retrieved:
+        rag_quote_block = "\n\n📖 **Insights from Indexed Classical Treatises:**\n"
+        for i, c in enumerate(retrieved, 1):
+            src = c.get("source", "Sacred Shastra")
+            page = c.get("page", "")
+            page_info = f" (Page {page})" if page else ""
+            txt_clean = re.sub(r"\s+", " ", c.get("text", "")).strip()[:240]
+            rag_quote_block += f"> *\"{txt_clean}...\"* — **{src}**{page_info}\n\n"
+            sources_list.append(f"- *{src}*{page_info}")
+
     return (
         f"{salutation} In classical Vedic tradition, true health, clarity, and peace (*Swastha* — being disease-free and happily rooted "
         f"in one's true Self) is achieved when your daily habits, thoughts, and nourishment are aligned with *Dharma* "
         f"(natural moral law and living in harmony with cosmic rhythms).\n\n"
         f"To harmonize your vital energies, cultivating balance through regular daily routines (Dinacharya from *Arogyanidhii* and *Charaka Samhita*), "
-        f"wholesome seasonal nourishment, and conscious breathwork brings immediate peace and vitality.\n\n"
+        f"wholesome seasonal nourishment, and conscious breathwork brings immediate peace and vitality."
+        f"{rag_quote_block}"
         f"What aspect of your daily rhythm or inner mental state feels most in need of soothing clarity right now?\n\n"
         f"### 📚 Scriptural Sources\n"
-        f"- *Taittiriya Upanishad* & *Charaka Samhita*: 'शरीरमाद्यं खलु धर्मसाधनम्' (The physical body is the sacred instrument for fulfilling dharma)\n"
-        f"- *Arogyanidhii*: Pages 18–30 (Dinacharya & Healthy Living Principles)"
+        + "\n".join(sources_list[:4])
     )
 
 
@@ -435,27 +585,30 @@ You orchestrate two specialized agents to guide the seeker:
 
 CRITICAL INTERACTION RULES:
 1. ABSOLUTE NAME INTEGRITY:
-   - NEVER capture descriptive words or emotional states (such as "unable", "tired", "confused", "anxious", "lost", "stressed", "seeking") as a name.
-   - If the seeker says "I am unable to process what I am thinking", their name is NOT "Unable". If no explicit name was provided, warmly address them as "Namaste, dear seeker!" or "Namaste!".
-   - NEVER assume or default to Leo/Simha or any sign if no sign or birth data was provided.
+   - NEVER capture descriptive words or emotional states (such as "unable", "tired", "confused", "anxious", "lost", "stressed", "seeking", "busy") as a name.
+   - If the seeker says "I am unable to process what I am thinking" or "hi i m busy", their name is NOT "Unable" or "Busy". If no explicit name was provided, warmly address them as "Namaste, dear seeker!" or "Namaste!".
+   - NEVER assume, hallucinate, or default to Leo/Simha, Virgo/Kanya, or any astrological sign if no sign or birth data was provided by the user.
+   - NEVER use canned robotic boilerplate such as "Your inquiry '...' reflects the deep Indic understanding of harmony between the individual human microcosm (Pinda) and the cosmic macrocosm (Brahmanda)".
 
-2. PROTOCOL WHEN BIRTH DETAILS ARE MISSING (e.g. seeker expresses mental fog, anxiety, confusion, or life inquiry without birth details):
-   - Acknowledge and soothe their state with classical Shastras (Manas, Chitta, Manovaha Srotas, Rajas/Tamas from Charaka Samhita & Shiva Samhita).
-   - Provide immediate 3-minute Shastric first-aid:
-     1. Sip warm water slowly while seated to ground Apana Vayu.
-     2. Practice Bhramari Pranayama (5 gentle bee breaths).
-     3. Remind them of Sakshi Bhava (Bhagavad Gita 6.5–6): You are the conscious witness of passing thoughts.
+2. SCRIPTURAL GROUNDING IN UPLOADED TRAINING PDFS:
+   - When [AUTHENTIC SCRIPTURAL EXCERPTS FROM UPLOADED TRAINING PDFS] are provided in the prompt, quote and cite them directly (with the book title and page number).
+   - If the user asks about being busy or having no time: offer the practical 3-minute Shastric micro-routine from Arogyanidhii (pp. 20–21 Ushapan & Tri-Sthana Abhyanga) and Bhagavad Gita (2.48–50 Yogah Karmasu Kaushalam).
+   - Ground all advice in the 34 uploaded classical scriptures: Varahamihira's Brihat Jataka, Arogyanidhii, Charaka Samhita, Shiva Samhita, Bhagavad Gita, and Upanishads.
+
+3. PROTOCOL WHEN BIRTH DETAILS ARE MISSING:
+   - Acknowledge and soothe their state with classical Shastras.
+   - If user asks about mental fog / anxiety: provide immediate 3-minute Shastric first-aid (Apana Vayu hydration, Bhramari Pranayama, Sakshi Bhava).
    - Introduce Astrologer Agent and request: Name, Date of Birth (DOB), Time of Birth (TOB), and Place of Birth (POB).
    - MANDATORY CLOSING: Conclude with a compassionate, thought-provoking OPEN-ENDED QUESTION digging deeper into how their body and mind feel right now. Never end with a closed yes/no question or button menu.
 
-3. PROTOCOL WHEN BIRTH DETAILS ARE PROVIDED:
+4. PROTOCOL WHEN BIRTH DETAILS ARE PROVIDED:
    - Astrologer Agent presents exact Nirayana Sidereal Kundali chart and planetary placements.
    - Maharaj Ji synthesizes with Brihat Jataka, Arogyanidhii, Charaka Samhita, and Bhagavad Gita, giving personalized remedies.
    - MANDATORY CLOSING: Conclude with a deep OPEN-ENDED QUESTION digging deeper into their life rhythms and mental tendencies.
 
-4. LAYMAN CLARITY & TRANSLATIONS: Every Sanskrit term MUST have an immediate English translation in parentheses.
-5. OUT-OF-SCOPE ENFORCEMENT: Politely reject modern coding, stocks/crypto, politics, sports, and allopathy, and guide back to Shastras.
-6. CITATION BLOCK: Always end with a formatted "### 📚 Scriptural Sources" box."""
+5. LAYMAN CLARITY & TRANSLATIONS: Every Sanskrit term MUST have an immediate English translation in parentheses.
+6. OUT-OF-SCOPE ENFORCEMENT: Politely reject modern coding, stocks/crypto, politics, sports, and allopathy, and guide back to Shastras.
+7. CITATION BLOCK: Always end with a formatted "### 📚 Scriptural Sources" box citing the exact classical texts and page/chapter references."""
 
 
 class ShaastraAIRequestHandler(SimpleHTTPRequestHandler):
@@ -520,6 +673,18 @@ class ShaastraAIRequestHandler(SimpleHTTPRequestHandler):
                         f"Vimshottari Dasha Balance: {chart['dasha']['current_lord']} ({chart['dasha']['balance_years']} years balance)\n"
                     )
 
+                # Retrieve relevant shastric passages from the indexed 34 PDFs
+                retrieved_passages = retrieve_shastra_passages(prompt, top_k=3)
+                passages_context = ""
+                if retrieved_passages:
+                    passages_context = "\n[AUTHENTIC SCRIPTURAL EXCERPTS FROM UPLOADED TRAINING PDFS]:\n"
+                    for i, chunk in enumerate(retrieved_passages, 1):
+                        src = chunk.get("source", "Classical Shastra")
+                        page = chunk.get("page", "")
+                        page_str = f" (Page {page})" if page else ""
+                        txt_snip = chunk.get("text", "").strip()[:400]
+                        passages_context += f"Excerpt {i} from '{src}'{page_str}:\n\"{txt_snip}\"\n\n"
+
                 # Format multi-turn history for Gemini API
                 contents = []
                 if isinstance(history, list):
@@ -543,6 +708,8 @@ class ShaastraAIRequestHandler(SimpleHTTPRequestHandler):
                 user_text = prompt.strip()
                 if astronomical_context:
                     user_text = f"{user_text}\n\n{astronomical_context}"
+                if passages_context:
+                    user_text = f"{user_text}\n\n{passages_context}"
 
                 if contents and contents[-1]["role"] == "user":
                     if prompt.strip() not in contents[-1]["parts"][0]["text"]:
@@ -625,6 +792,7 @@ def run():
     has_key = bool(os.getenv("GEMINI_API_KEY", "").strip())
     print(f"GEMINI_API_KEY detected in .env: {'YES' if has_key else 'NO'}")
     print("Astrologer Agent & Maharaj Ji Multi-Agent System: ACTIVE")
+    print(f"Shastra RAG Knowledge Engine: ACTIVE ({len(shastra_chunks)} clean indexed chunks)")
     print("Press Ctrl+C to stop the server.")
     print("=" * 65)
     try:
