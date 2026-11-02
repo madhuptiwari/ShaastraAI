@@ -989,22 +989,81 @@ function formatRichVedicResponse(rawText) {
 
   let text = String(rawText).trim();
 
-  // If already contains rich cards and inquiry cards, ensure action bar is attached
-  if (text.includes('class="kundli-card"') || text.includes('class="routine-container"')) {
-    // Upgrade closing question paragraph to inquiry-card if not already converted
+  // Detect if the incoming text is already formatted HTML
+  const isHtml = /<\s*(?:p|div|ul|ol|table|h[1-6]|section|article)\b[^>]*>/i.test(text);
+
+  if (isHtml) {
+    // 1. Clean up empty or broken greetings
+    text = text.replace(/Namaste\s*<strong>\s*(?:null|undefined|friend)?\s*<\/strong>\s*!/gi, 'Namaste, dear seeker!');
+    text = text.replace(/Namaste\s*<strong>\s*<\/strong>\s*!/gi, 'Namaste, dear seeker!');
+    text = text.replace(/<strong>\s*<\/strong>/gi, '');
+
+    // 2. Transform the closing inquiry question into .inquiry-card if not already converted
+    if (!text.includes('class="inquiry-card"')) {
+      let inquiryConverted = false;
+
+      // Pattern A: A question paragraph immediately before <div class="citation-box">
+      text = text.replace(
+        /<p(?:\s+[^>]*)?>((?:(?!<p\b)[\s\S])*?\?)\s*<\/p>\s*(?=<div class="citation-box">)/i,
+        (match, qContent) => {
+          inquiryConverted = true;
+          return `
+            <div class="inquiry-card">
+              <div class="inquiry-header">
+                <span class="inquiry-icon">🪷</span>
+                <span class="inquiry-badge">Sacred Inquiry for Deeper Clarity</span>
+              </div>
+              <p class="inquiry-question">${qContent.trim()}</p>
+            </div>
+          `;
+        }
+      );
+
+      // Pattern B: A styled question paragraph (e.g. font-weight: 600 or margin-top: 10px / 14px)
+      if (!inquiryConverted) {
+        text = text.replace(
+          /<p\s+style="[^"]*(?:font-weight:\s*600|margin-top:\s*(?:10|14)px)[^"]*"[^>]*>((?:(?!<p\b)[\s\S])*?\?)\s*<\/p>/i,
+          (match, qContent) => {
+            inquiryConverted = true;
+            return `
+              <div class="inquiry-card">
+                <div class="inquiry-header">
+                  <span class="inquiry-icon">🪷</span>
+                  <span class="inquiry-badge">Sacred Inquiry for Deeper Clarity</span>
+                </div>
+                <p class="inquiry-question">${qContent.trim()}</p>
+              </div>
+            `;
+          }
+        );
+      }
+
+      // Pattern C: The last paragraph ending in '?'
+      if (!inquiryConverted) {
+        const lastPRegex = /<p(?:\s+[^>]*)?>((?:(?!<p\b)[\s\S])*?\?)\s*<\/p>(?:\s*<\/div>)*$/i;
+        if (lastPRegex.test(text)) {
+          text = text.replace(lastPRegex, (match, qContent) => {
+            return `
+              <div class="inquiry-card">
+                <div class="inquiry-header">
+                  <span class="inquiry-icon">🪷</span>
+                  <span class="inquiry-badge">Sacred Inquiry for Deeper Clarity</span>
+                </div>
+                <p class="inquiry-question">${qContent.trim()}</p>
+              </div>
+            `;
+          });
+        }
+      }
+    }
+
+    // 3. Format citation box header if present
     text = text.replace(
-      /<p[^>]*font-weight:\s*600[^>]*>([\s\S]*?\?)\s*<\/p>/i,
-      (match, qText) => `
-        <div class="inquiry-card">
-          <div class="inquiry-header">
-            <span class="inquiry-icon">🪷</span>
-            <span class="inquiry-badge">Sacred Inquiry for Deeper Clarity</span>
-          </div>
-          <p class="inquiry-question">${qText}</p>
-        </div>
-      `
+      /<div class="citation-header">\s*(?:📚\s*)?([^<]+)<\/div>/gi,
+      '<div class="citation-header"><span class="citation-icon">📚</span><span>$1</span></div>'
     );
 
+    // 4. Attach reply action bar if not present
     if (!text.includes('class="reply-action-bar"')) {
       text += `
         <div class="reply-action-bar">
@@ -1019,8 +1078,11 @@ function formatRichVedicResponse(rawText) {
         </div>
       `;
     }
+
     return `<div class="formatted-reply">${text}</div>`;
   }
+
+  // --- RAW MARKDOWN PROCESSING ---
 
   // 1. Extract Scriptural Sources Block
   let scripturalSourcesHtml = '';
@@ -1448,10 +1510,11 @@ function isInitialRoutineQuery(query) {
  */
 function resolveConversationalFollowUp(query, profile, history) {
   const q = query.toLowerCase();
-  const userName = profile.name !== "Friend" ? profile.name : "Friend";
-  const rashi = profile.rashi;
-  const nakshatra = profile.nakshatra;
-  const signTitle = profile.signKey ? rashi.sanskrit : "Surya Rashi";
+  const userName = (profile.name && profile.name !== "Friend") ? profile.name : null;
+  const greeting = userName ? `Namaste <strong>${escapeHtml(userName)}</strong>!` : `Namaste, dear seeker!`;
+  const rashi = profile.rashi || RASHI_DATA['leo'];
+  const nakshatra = profile.nakshatra || NAKSHATRA_DATA['magha'];
+  const signTitle = profile.signKey && rashi ? rashi.sanskrit : (profile.signKey ? `${profile.signKey.toUpperCase()}` : "Surya Rashi (Solar Vitality)");
 
   // 1. Follow-up on Step 1: Waking / Brahma Muhurta / Early vs Late Waking
   if (q.includes('4:30') || q.includes('brahma') || (q.includes('wake') && (q.includes('why') || q.includes('early') || q.includes('late') || q.includes('7') || q.includes('8') || q.includes('cannot') || q.includes("can't") || q.includes('instead') || q.includes('time'))) || q.includes('step 1')) {
@@ -1460,13 +1523,13 @@ function resolveConversationalFollowUp(query, profile, history) {
     
     let advice = "";
     if (isWakingLater) {
-      advice = `<p>Namaste <strong>${escapeHtml(userName)}</strong>! Classical Ayurveda is deeply compassionate and realistic. In the <em>Charaka Samhita</em>, when an ideal guideline does not fit your current work or night schedule, you should adopt <strong>Padamshika Krama</strong> (the principle of gradual step-by-step transition):</p>
+      advice = `<p>${greeting} Classical Ayurveda is deeply compassionate and realistic. In the <em>Charaka Samhita</em>, when an ideal guideline does not fit your current work or night schedule, you should adopt <strong>Padamshika Krama</strong> (the principle of gradual step-by-step transition):</p>
       <ul>
         <li><strong>Do not force an abrupt shock:</strong> Shifting instantly from 8:00 AM to 4:30 AM will only aggravate your ${rashi.element.includes("Agni") ? "Pitta (causing irritability and headaches)" : "Vata (causing restlessness)"}. Instead, shift your waking time backward by 15–20 minutes every 4–5 days.</li>
         <li><strong>If your job requires late sleep:</strong> If you must wake at 7:00 AM or 8:00 AM, the most critical rule from <strong>Arogyanidhii (p. 20)</strong> is: <em>never jump straight from bed into high-stress screens or cold foods</em>. Spend your first 15 minutes in quiet hydration (Ushapan) and 5 minutes of gentle diaphragmatic breathing to stabilize your circadian rhythm.</li>
       </ul>`;
     } else {
-      advice = `<p>Namaste <strong>${escapeHtml(userName)}</strong>! The recommendation to awaken during <strong>Brahma Muhurta (04:30 AM – 05:15 AM)</strong> is grounded in both cosmological rhythm and human physiology:</p>
+      advice = `<p>${greeting} The recommendation to awaken during <strong>Brahma Muhurta (04:30 AM – 05:15 AM)</strong> is grounded in both cosmological rhythm and human physiology:</p>
       <ul>
         <li><strong>Peak Atmospheric Sattva (Purity & Calm):</strong> Approximately 96 minutes (2 Muhurtas) before sunrise, atmospheric turbulence and noise are at their lowest. <em>Ashtanga Hridaya (Sutrasthana Ch. 2)</em> declares: <em>"ब्राह्मे मुहूर्ते उत्तिष्ठेत् स्वस्थो रक्षार्थमायुषः"</em> — awakening at this sacred hour preserves cellular vitality and longevity.</li>
         <li><strong>Elemental Prana:</strong> Nascent oxygen and pure Prana are at their cleanest before the sun triggers thermal convection. For someone with your <strong>${signTitle}</strong>, awakening in the quiet dawn prevents morning cortisol spikes and anchors deep focus for the entire day.</li>
@@ -1475,7 +1538,7 @@ function resolveConversationalFollowUp(query, profile, history) {
 
     return {
       tier: "Dinacharya Adaptation",
-      rawText: `Guidance for ${userName} on Brahma Muhurta and morning waking from Arogyanidhii p. 18 and Ashtanga Hridaya Sutrasthana Ch. 2.`,
+      rawText: `Guidance for ${userName || "seeker"} on Brahma Muhurta and morning waking from Arogyanidhii p. 18 and Ashtanga Hridaya Sutrasthana Ch. 2.`,
       text: `${advice}
       <p style="margin-top: 10px;">Would you like me to adjust <strong>Step 2 (Ushapan & Nasya)</strong> to match your personal morning routine, or shall we explore your daytime focus hours?</p>
       <div class="citation-box">
@@ -1489,8 +1552,8 @@ function resolveConversationalFollowUp(query, profile, history) {
   if (q.includes('copper') || q.includes('tamra') || q.includes('ushapan') || q.includes('nasya') || q.includes('nose drop') || q.includes('nostril') || q.includes('step 2')) {
     return {
       tier: "Ayurvedic Hygiene",
-      rawText: `Guidance for ${userName} on Ushapan (copper water) and Nasya from Arogyanidhii p. 20.`,
-      text: `<p>Namaste <strong>${escapeHtml(userName)}</strong>! Let's explore <strong>Step 2 of your morning routine: Ushapan & Nasya</strong> in detail:</p>
+      rawText: `Guidance for ${userName || "seeker"} on Ushapan (copper water) and Nasya from Arogyanidhii p. 20.`,
+      text: `<p>${greeting} Let's explore <strong>Step 2 of your morning routine: Ushapan & Nasya</strong> in detail:</p>
       <ul>
         <li><strong>Why Copper-Stored Water (Tamra Jal)?</strong> According to <strong>Arogyanidhii (p. 20)</strong>, drinking 500–1000 ml of pure water stored overnight in a clean copper vessel naturally ionizes the water with trace minerals. This stimulates natural gastrointestinal peristalsis, clears overnight Ama (digestive toxins), and cools excess heat.</li>
         <li><strong>What if you don't have a copper vessel?</strong> Pure lukewarm water stored in glass, earthen clay, or stainless steel is completely effective. You can add a pinch of cumin or fennel seeds if your digestion tends to feel sluggish.</li>
@@ -1508,8 +1571,8 @@ function resolveConversationalFollowUp(query, profile, history) {
   if (q.includes('oil') || q.includes('abhyanga') || q.includes('massage') || q.includes('gandusha') || q.includes('step 3') || q.includes('pulling')) {
     return {
       tier: "Ayurvedic Rejuvenation",
-      rawText: `Guidance for ${userName} on Abhyanga oil massage from Charaka Samhita Sutrasthana Ch. 5 and Arogyanidhii p. 21.`,
-      text: `<p>Namaste <strong>${escapeHtml(userName)}</strong>! Here are the customized guidelines for <strong>Step 3: Abhyanga & Gandusha</strong> tailored to your astrological energy (<strong>${signTitle}</strong>):</p>
+      rawText: `Guidance for ${userName || "seeker"} on Abhyanga oil massage from Charaka Samhita Sutrasthana Ch. 5 and Arogyanidhii p. 21.`,
+      text: `<p>${greeting} Here are the customized guidelines for <strong>Step 3: Abhyanga & Gandusha</strong> tailored to your astrological energy (<strong>${signTitle}</strong>):</p>
       <ul>
         <li><strong>Your Prescribed Oil:</strong> <strong>${rashi.oil}</strong>. Because your sign is governed by <strong>${rashi.element}</strong>, this oil directly soothes your <strong>${profile.dosha}</strong> tendencies, nourishing the seven bodily tissues (Dhatus) and grounding the nervous system.</li>
         <li><strong>Quick 5-Minute Routine (Shiro-Karna-Pada):</strong> If a full-body oil massage isn't practical every morning before work, classical shastras prescribe massaging just three key centers: the <strong>crown of the head (Shiro)</strong>, the <strong>ears (Karna)</strong>, and the <strong>soles of the feet (Pada)</strong>. This delivers 80% of the neurological benefits in 5 minutes!</li>
@@ -1527,8 +1590,8 @@ function resolveConversationalFollowUp(query, profile, history) {
   if (q.includes('step 4') || q.includes('yoga') || q.includes('pranayama') || q.includes('nadi shodhana') || q.includes('breath') || q.includes('exercise') || q.includes('workout') || q.includes('asana')) {
     return {
       tier: "Yogic Science",
-      rawText: `Guidance for ${userName} on Vyayama and Nadi Shodhana from Shiva Samhita Ch. 3 and Arogyanidhii p. 21.`,
-      text: `<p>Namaste <strong>${escapeHtml(userName)}</strong>! Here is how to practice <strong>Step 4: Morning Movement & Pranayama</strong> safely and effectively:</p>
+      rawText: `Guidance for ${userName || "seeker"} on Vyayama and Nadi Shodhana from Shiva Samhita Ch. 3 and Arogyanidhii p. 21.`,
+      text: `<p>${greeting} Here is how to practice <strong>Step 4: Morning Movement & Pranayama</strong> safely and effectively:</p>
       <ul>
         <li><strong>The Ardha Shakti Rule (Arogyanidhii p. 21):</strong> Exercise only up to <em>half your physiological capacity</em> (stopping when light perspiration beads on your forehead, armpits, and tip of the nose). Never push to extreme breathless exhaustion, which depletes Ojas (vital immunity).</li>
         <li><strong>Tailored Yoga Movement:</strong> ${rashi.exercise}.</li>
@@ -1546,8 +1609,8 @@ function resolveConversationalFollowUp(query, profile, history) {
   if (q.includes('step 5') || q.includes('snana') || q.includes('bath') || q.includes('shower') || q.includes('head first') || q.includes('pour water')) {
     return {
       tier: "Ayurvedic Lifestyle",
-      rawText: `Guidance for ${userName} on Snana Vidhi bathing order from Arogyanidhii p. 22.`,
-      text: `<p>Namaste <strong>${escapeHtml(userName)}</strong>! <strong>Snana Vidhi (Mindful Bathing Order)</strong> from <strong>Arogyanidhii (p. 22)</strong> contains profound neurological wisdom:</p>
+      rawText: `Guidance for ${userName || "seeker"} on Snana Vidhi bathing order from Arogyanidhii p. 22.`,
+      text: `<p>${greeting} <strong>Snana Vidhi (Mindful Bathing Order)</strong> from <strong>Arogyanidhii (p. 22)</strong> contains profound neurological wisdom:</p>
       <ul>
         <li><strong>Why Pour Water on the Head First?</strong> According to classical Shastra, pouring cool or lukewarm water over the crown of the head first immediately cools cranial vascular centers and protects the delicate optic nerve network of the eyes.</li>
         <li><strong>Why Wetting Feet First Causes Harm:</strong> Wetting the feet and lower limbs first drives bodily metabolic heat (Pitta) upward into the brain and eyes, inducing headaches, mental restlessness, and visual fatigue.</li>
@@ -1565,8 +1628,8 @@ function resolveConversationalFollowUp(query, profile, history) {
   if (q.includes('step 7') || q.includes('lunch') || q.includes('bhojana') || q.includes('digest') || q.includes('eat') || q.includes('food') || q.includes('vama-kukshi') || q.includes('left side') || q.includes('ginger') || q.includes('stomach') || q.includes('diet')) {
     return {
       tier: "Ayurvedic Digestion",
-      rawText: `Guidance for ${userName} on Bhojana Vidhi and Vama-Kukshi from Arogyanidhii pp. 22-25.`,
-      text: `<p>Namaste <strong>${escapeHtml(userName)}</strong>! Here is the complete breakdown of <strong>Step 7: Madhyahna Bhojana Vidhi (Midday Meal) & Vama-Kukshi</strong> from <strong>Arogyanidhii (pp. 22–25)</strong>:</p>
+      rawText: `Guidance for ${userName || "seeker"} on Bhojana Vidhi and Vama-Kukshi from Arogyanidhii pp. 22-25.`,
+      text: `<p>${greeting} Here is the complete breakdown of <strong>Step 7: Madhyahna Bhojana Vidhi (Midday Meal) & Vama-Kukshi</strong> from <strong>Arogyanidhii (pp. 22–25)</strong>:</p>
       <ul>
         <li><strong>Kindling Digestive Fire (Adrak-Sendha Namak, p. 22):</strong> Chew a thin slice of fresh ginger sprinkled with a pinch of rock salt 5 minutes before eating. This immediately stimulates gastric enzymes and cleanses the tongue palate.</li>
         <li><strong>The Stomach Partition Rule (Tri-bhaga, p. 23):</strong> Fill <strong>1/2</strong> of your stomach with wholesome solid food, <strong>1/4</strong> with warm liquid (like dal broth or spiced buttermilk), and <strong>leave 1/4 completely empty</strong> so digestive enzymes and Tridoshas have room to circulate freely.</li>
@@ -1586,8 +1649,8 @@ function resolveConversationalFollowUp(query, profile, history) {
   if (q.includes('step 6') || q.includes('step 8') || q.includes('hora') || q.includes('planetary hour') || q.includes('work') || q.includes('study') || q.includes('timing') || q.includes('productivity')) {
     return {
       tier: "Vedic Astrology (Jyotisha)",
-      rawText: `Guidance for ${userName} on 24 Horas from Varahamihira's Brihat Jataka Ch. 1 v. 9.`,
-      text: `<p>Namaste <strong>${escapeHtml(userName)}</strong>! In classical Vedic astrology, scheduling high-priority activities with the <strong>24 Diurnal Horas (Planetary Hours)</strong> connects your work to cosmic rhythms:</p>
+      rawText: `Guidance for ${userName || "seeker"} on 24 Horas from Varahamihira's Brihat Jataka Ch. 1 v. 9.`,
+      text: `<p>${greeting} In classical Vedic astrology, scheduling high-priority activities with the <strong>24 Diurnal Horas (Planetary Hours)</strong> connects your work to cosmic rhythms:</p>
       <ul>
         <li><strong>The 24-Hora Order (Varahamihira's Brihat Jataka Ch. 1, v. 9):</strong> The planetary hours follow a continuous cyclic sequence based on relative planetary speeds: <em>Sun → Venus → Mercury → Moon → Saturn → Jupiter → Mars</em>.</li>
         <li><strong>Surya Hora (Sun Hour — Willpower & Decision-Making):</strong> Optimal for decisive leadership, setting strategic priorities, and high-visibility presentations.</li>
@@ -1607,8 +1670,8 @@ function resolveConversationalFollowUp(query, profile, history) {
   if (q.includes('step 11') || q.includes('sleep') || q.includes('north') || q.includes('direction') || q.includes('bed') || q.includes('insomnia') || q.includes('padabhyanga') || q.includes('foot massage') || q.includes('nidra')) {
     return {
       tier: "Ayurvedic Sleep Science",
-      rawText: `Guidance for ${userName} on sleep direction and Padabhyanga from Arogyanidhii pp. 18, 30.`,
-      text: `<p>Namaste <strong>${escapeHtml(userName)}</strong>! The science of <strong>Nidra (Restorative Sleep)</strong> in <strong>Arogyanidhii (pp. 18, 30)</strong> explains why your sleeping orientation is so crucial:</p>
+      rawText: `Guidance for ${userName || "seeker"} on sleep direction and Padabhyanga from Arogyanidhii pp. 18, 30.`,
+      text: `<p>${greeting} The science of <strong>Nidra (Restorative Sleep)</strong> in <strong>Arogyanidhii (pp. 18, 30)</strong> explains why your sleeping orientation is so crucial:</p>
       <ul>
         <li><strong>Why NEVER Sleep with Head Facing North (p. 18, 30):</strong> The Earth operates as a massive dipolar magnet with positive polarity concentrated at the geographic North Pole. The human body also possesses positive magnetic polarity concentrated at the crown of the head. Pointing your head North produces continuous magnetic repulsion throughout the night, causing cerebral vascular tension, elevated blood pressure, restless tossing, and chronic morning fatigue.</li>
         <li><strong>East Orientation (Optimal for Learning & Vitality):</strong> Pointing your head East aligns with the Earth's rotational electromagnetic flow, enhancing mental clarity, memory retention, and spiritual peace.</li>
@@ -1627,8 +1690,8 @@ function resolveConversationalFollowUp(query, profile, history) {
   if (q.includes('my sign') || q.includes('my rashi') || q.includes('my nakshatra') || q.includes('tell me about my') || (profile.signKey && q.includes(profile.signKey))) {
     return {
       tier: "Vedic Astrology (Jyotisha)",
-      rawText: `Astrological profile for ${userName} (${signTitle}) from Varahamihira's Brihat Jataka.`,
-      text: `<p>Namaste <strong>${escapeHtml(userName)}</strong>! According to <strong>Varahamihira's Brihat Jataka (Ch. 1–2)</strong>, here is the astrological essence of your profile:</p>
+      rawText: `Astrological profile for ${userName || "seeker"} (${signTitle}) from Varahamihira's Brihat Jataka.`,
+      text: `<p>${greeting} According to <strong>Varahamihira's Brihat Jataka (Ch. 1–2)</strong>, here is the astrological essence of your profile:</p>
       <ul>
         <li><strong>Rashi (Zodiac Sign):</strong> <strong>${signTitle}</strong></li>
         <li><strong>Primary Element (Tatva):</strong> ${rashi.element}</li>
@@ -1650,8 +1713,8 @@ function resolveConversationalFollowUp(query, profile, history) {
   if (q.includes('anxiety') || q.includes('stress') || q.includes('peace') || q.includes('gita') || q.includes('karma') || q.includes('swadharma') || q.includes('mind') || q.includes('overwhelm')) {
     return {
       tier: "Bhagavad Gita Wisdom",
-      rawText: `Guidance for ${userName} on anxiety and peace from Bhagavad Gita 2.47-48 and 3.35.`,
-      text: `<p>Namaste <strong>${escapeHtml(userName)}</strong>! The <strong>Bhagavad Gita</strong> offers timeless, practical psychology for soothing anxiety and finding unshakable inner calm:</p>
+      rawText: `Guidance for ${userName || "seeker"} on anxiety and peace from Bhagavad Gita 2.47-48 and 3.35.`,
+      text: `<p>${greeting} The <strong>Bhagavad Gita</strong> offers timeless, practical psychology for soothing anxiety and finding unshakable inner calm:</p>
       <ul>
         <li><strong>Nishkama Karma (BG 2.47 — The Art of Dedicated Effort):</strong> <em>"कर्मण्येवाधिकारस्ते मा फलेषु कदाचन"</em> — Your noble domain is to direct your full heart and sincere effort into your duty, but never to obsess over controlling the fruits or outcome. When you release anxiety over results, your mind naturally returns to peaceful clarity.</li>
         <li><strong>Samatvam Yoga Uchyate (BG 2.48 — Calm Equanimity):</strong> Equanimity in both victory and delay, praise and criticism, is the true definition of Yoga.</li>
@@ -1674,11 +1737,11 @@ function resolveConversationalFollowUp(query, profile, history) {
  * Synthesizes Charaka Samhita Sutrasthana Ch. 5 & Ashtanga Hridaya Ch. 2 with Jyotisha Horas
  */
 function generatePersonalizedDinacharya(query, profile) {
-  const userName = profile.name;
-  const isFullyPersonalized = profile.signKey || profile.nakshatraKey || userName !== "Friend";
-  const rashi = profile.rashi;
-  const nakshatra = profile.nakshatra;
-  const signTitle = profile.signKey ? rashi.sanskrit : "Surya Rashi Alignment (Solar Vitality)";
+  const userName = (profile.name && profile.name !== "Friend") ? profile.name : null;
+  const isFullyPersonalized = Boolean(profile.signKey || profile.nakshatraKey || userName);
+  const rashi = profile.rashi || RASHI_DATA['leo'];
+  const nakshatra = profile.nakshatra || NAKSHATRA_DATA['magha'];
+  const signTitle = profile.signKey && rashi ? rashi.sanskrit : "Surya Rashi Alignment (Solar Vitality)";
   const element = rashi.element;
   const dosha = profile.dosha;
   const oil = rashi.oil;
@@ -1687,12 +1750,13 @@ function generatePersonalizedDinacharya(query, profile) {
   const nakName = profile.nakshatraKey ? profile.nakshatraKey.charAt(0).toUpperCase() + profile.nakshatraKey.slice(1) : "Nakshatra Resonance";
   const nakDosha = nakshatra.dosha;
   const nakDeity = nakshatra.deity;
+  const greeting = userName ? `Namaste <strong>${escapeHtml(userName)}</strong>!` : `Namaste, dear seeker!`;
 
   let headerHtml = "";
   if (isFullyPersonalized) {
     headerHtml = `
       <div class="routine-header">
-        <h3>🌅 Personalized Vedic Dinacharya (दिनचर्या) for ${escapeHtml(userName)}</h3>
+        <h3>🌅 Personalized Vedic Dinacharya (दिनचर्या)${userName ? ` for ${escapeHtml(userName)}` : ''}</h3>
         <div class="routine-badges">
           <span class="badge badge-primary">Rashi: ${signTitle}</span>
           <span class="badge badge-accent">Element: ${element}</span>
@@ -1701,7 +1765,7 @@ function generatePersonalizedDinacharya(query, profile) {
         </div>
       </div>
       <p style="margin-top: 8px;">
-        Namaste <strong>${escapeHtml(userName)}</strong>! According to classical <em>Charaka Samhita</em> and <em>Ashtanga Hridaya</em>, 
+        ${greeting} According to classical <em>Charaka Samhita</em> and <em>Ashtanga Hridaya</em>, 
         your daily routine is optimized to balance your <strong>${element}</strong> tatva and pacify <strong>${dosha}</strong> dosha tendencies.
       </p>
     `;
@@ -1988,7 +2052,7 @@ function generateGroundedResponse(query, attachment, history) {
   );
 
   if (isDistressOrGuidance && !sessionKundli) {
-    const greetingName = profile.name ? ` <strong>${escapeHtml(profile.name)}</strong>` : ", dear seeker";
+    const greetingName = (profile.name && profile.name !== "Friend") ? ` <strong>${escapeHtml(profile.name)}</strong>` : ", dear seeker";
     return {
       tier: "Vedic Wisdom & Astrological Consultation",
       rawText: `Shastric guidance for mental clarity and invitation for birth details to calculate accurate Janma Kundali via Astrologer Agent.`,
@@ -2039,7 +2103,7 @@ function generateGroundedResponse(query, attachment, history) {
     return generatePersonalizedDinacharya(query, profile);
   }
 
-  const greetingName = profile.name ? ` <strong>${escapeHtml(profile.name)}</strong>` : ", dear seeker";
+  const greetingName = (profile.name && profile.name !== "Friend") ? ` <strong>${escapeHtml(profile.name)}</strong>` : ", dear seeker";
 
   // 6. Charaka / Ayurveda / Tridosha
   if (lower.includes('charaka') || lower.includes('dosha') || lower.includes('ayurveda') || lower.includes('tridosha')) {
