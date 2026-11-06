@@ -1468,8 +1468,25 @@ a:hover {
 
 .footer-copy {
   color: var(--text-muted);
-  font-size: 0.78rem;
+  font-size: 0.85rem;
   margin-top: 10px;
+}
+
+.footer-author-link {
+  color: #b45309;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 0.2s ease;
+}
+
+.footer-author-link:hover {
+  color: #78350f;
+  text-decoration: underline;
+}
+
+#settings-btn {
+  display: none !important;
 }
 
 /* ==========================================================================

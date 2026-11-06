@@ -752,7 +752,7 @@ function closeMobileDrawer() {
 
 function updateTierBadge() {
   if (!activeTierBadge) return;
-  activeTierBadge.textContent = '🌿 ShaastraAI • Ready to guide you';
+  activeTierBadge.textContent = '🌿 ShaastraAI • Vedic Wisdom Companion';
   activeTierBadge.style.color = '#059669';
 }
 
