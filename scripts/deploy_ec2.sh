@@ -56,7 +56,11 @@ fi
 DEPLOY_DIR="/opt/shaastra-ai"
 echo "Setting up application directory at: $DEPLOY_DIR"
 
-# 4. Pull or clone repository
+# 4. Pull or clone repository (safely preserving existing .env)
+if [ -f "$DEPLOY_DIR/.env" ]; then
+    $SUDO cp "$DEPLOY_DIR/.env" /tmp/shaastra_env.backup
+fi
+
 if [ -d "$DEPLOY_DIR/.git" ]; then
     echo "Existing git repository found. Pulling latest master branch..."
     cd "$DEPLOY_DIR"
@@ -67,6 +71,11 @@ else
     $SUDO rm -rf "$DEPLOY_DIR"
     git clone https://github.com/madhuptiwari/ShaastraAI.git "$DEPLOY_DIR"
     cd "$DEPLOY_DIR"
+fi
+
+if [ -f /tmp/shaastra_env.backup ]; then
+    $SUDO cp /tmp/shaastra_env.backup "$DEPLOY_DIR/.env"
+    $SUDO rm -f /tmp/shaastra_env.backup
 fi
 
 # Ensure user owns the files
