@@ -4,6 +4,7 @@
 [![Live Web Portal](https://img.shields.io/badge/Netlify_Edge-Live_Portal-00c7b7?style=flat&logo=netlify)](https://shaastraai.netlify.app/)
 [![Python](https://img.shields.io/badge/Python-3.10+-3776ab?style=flat&logo=python)](https://python.org)
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.40+-ff4b4b?style=flat&logo=streamlit)](https://streamlit.io)
+[![AWS App Runner](https://img.shields.io/badge/AWS-App_Runner-ff9900?style=flat&logo=amazon-aws)](AWS_DEPLOYMENT.md)
 [![AWS Bedrock](https://img.shields.io/badge/AWS-Bedrock_Nova-ff9900?style=flat&logo=amazon-aws)](https://aws.amazon.com/bedrock/)
 [![Google Gemini](https://img.shields.io/badge/Google-Gemini_2.5_Flash-4285f4?style=flat&logo=google)](https://ai.google.dev/)
 
@@ -18,14 +19,19 @@
 
 ShaastraAI offers two complementary access modalities:
 
-1. **Netlify Edge Web Portal ([https://shaastraai.netlify.app/](https://shaastraai.netlify.app/))**:
+1. **AWS Cloud Web Application (App Runner / EC2 Docker)**:
+   - Complete step-by-step instructions available in **[AWS_DEPLOYMENT.md](AWS_DEPLOYMENT.md)**.
+   - Run the production-grade multi-threaded portal (`serve.py`) with zero server maintenance on **AWS App Runner** or 24/7 on the **AWS Free Tier** with **Amazon EC2**.
+   - Containerized with Docker, featuring automated health checks (`/health`), CORS headers, and multi-tier AI failover (Amazon Bedrock -> Google Gemini -> Local Shastra RAG).
+
+2. **Netlify Edge Web Portal ([https://shaastraai.netlify.app/](https://shaastraai.netlify.app/))**:
    - Hosted globally on Netlify Edge CDN.
    - Interactive multi-turn chat interface with live query synthesis, multimodal attachment simulation, and 1-click prompt chips.
    - **Personalized Vedic Dinacharya (दिनचर्या) & Jyotisha Engine**: Generates hour-by-hour schedules based on the user's name, Sun Sign (Surya Rashi), and Nakshatra.
    - **Netlify Serverless Function** (`netlify/functions/chat.js`): Secure serverless edge proxy calling Google Gemini 2.5 Flash when `GEMINI_API_KEY` is configured.
    - Clean, serene, and distraction-free interface designed for everyday users to communicate directly with ShaastraAI without developer jargon, terminal commands, or cloud infrastructure complexity.
 
-2. **Full Local / Cloud Python Streamlit Backend (`app.py`)**:
+3. **Full Local / Cloud Python Streamlit Backend (`app.py`)**:
    - Runs the complete deep RAG engine with local FAISS vector search, PyMuPDF extraction, and Amazon Bedrock Converse API.
    - Scanned PDF Vision OCR reader rendering archival Sanskrit/Hindi manuscript pages at 150-DPI for vision analysis.
    - Amazon Transcribe audio processing and OpenCV video keyframe extraction.

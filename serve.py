@@ -44,7 +44,7 @@ if ENV_PATH.exists():
 else:
     load_dotenv(override=True)
 
-PORT = 8000
+PORT = int(os.getenv("PORT", "8000"))
 
 # =====================================================================
 # Shastra RAG Retrieval Engine (Grounding in 34 Uploaded Classical PDFs)
@@ -61,6 +61,21 @@ def init_shastra_rag():
     if faiss is None:
         print("Note: faiss not installed; continuing without local vector search.")
         return
+
+    # Auto-fetch from S3 bucket if missing locally (for AWS container deployments)
+    s3_bucket = os.getenv("S3_BUCKET_NAME", "").strip()
+    if not FAISS_INDEX_PATH.exists() and s3_bucket:
+        try:
+            import boto3
+            print(f"faiss_index.bin missing locally. Attempting download from S3 bucket '{s3_bucket}'...")
+            s3 = boto3.client("s3")
+            s3.download_file(s3_bucket, "faiss_index.bin", str(FAISS_INDEX_PATH))
+            if not CHUNKS_META_PATH.exists():
+                s3.download_file(s3_bucket, "chunks_metadata.json", str(CHUNKS_META_PATH))
+            print("Successfully downloaded RAG index files from S3.")
+        except Exception as s3_err:
+            print(f"Notice: S3 download attempted but failed: {s3_err}")
+
     if FAISS_INDEX_PATH.exists() and CHUNKS_META_PATH.exists():
         try:
             shastra_faiss_index = faiss.read_index(str(FAISS_INDEX_PATH))
@@ -72,6 +87,8 @@ def init_shastra_rag():
             print(f"Warning: Could not initialize Shastra RAG Engine: {e}")
             shastra_faiss_index = None
             shastra_chunks = []
+    else:
+        print("Notice: faiss_index.bin or chunks_metadata.json not found in project root. Running in lightweight Shastric Mode.")
 
 
 def get_query_embedding(text: str, dim: int = 1024) -> np.ndarray:
@@ -572,6 +589,69 @@ def generate_server_grounded_response(prompt, history):
     )
 
 
+
+
+def try_call_bedrock(prompt, history, system_instruction, astronomical_context="", passages_context=""):
+    """
+    Attempts to invoke Amazon Bedrock if AWS credentials or IAM task role is active.
+    Supports amazon.nova-lite-v1:0, anthropic.claude-3-haiku, or amazon.titan.
+    """
+    try:
+        import boto3
+        from botocore.config import Config as BotoConfig
+
+        region = os.getenv("AWS_DEFAULT_REGION", os.getenv("AWS_REGION", "us-east-1"))
+        model_id = os.getenv("BEDROCK_MODEL_ID", "us.amazon.nova-lite-v1:0")
+
+        session = boto3.Session()
+        credentials = session.get_credentials()
+        if not credentials:
+            return None, None
+
+        client = session.client(
+            "bedrock-runtime",
+            region_name=region,
+            config=BotoConfig(retries={"max_attempts": 1}, connect_timeout=3, read_timeout=15)
+        )
+
+        messages = []
+        if isinstance(history, list):
+            for turn in history:
+                if not turn or not turn.get("content"):
+                    continue
+                role = "assistant" if turn.get("role") in ("assistant", "model") else "user"
+                clean_text = re.sub(r"<[^>]+>", " ", str(turn.get("content", ""))).strip()
+                if clean_text:
+                    messages.append({
+                        "role": role,
+                        "content": [{"text": clean_text}]
+                    })
+
+        full_user_text = prompt.strip()
+        if astronomical_context:
+            full_user_text = f"{full_user_text}\n\n{astronomical_context}"
+        if passages_context:
+            full_user_text = f"{full_user_text}\n\n{passages_context}"
+
+        messages.append({
+            "role": "user",
+            "content": [{"text": full_user_text}]
+        })
+
+        response = client.converse(
+            modelId=model_id,
+            messages=messages,
+            system=[{"text": system_instruction}],
+            inferenceConfig={
+                "maxTokens": 1400,
+                "temperature": 0.3
+            }
+        )
+        output_text = response["output"]["message"]["content"][0]["text"]
+        return output_text, f"ShaastraAI Amazon Bedrock ({model_id})"
+    except Exception:
+        return None, None
+
 SYSTEM_INSTRUCTION = """You are ShaastraAI (शास्त्र AI), an empathetic, deeply grounded Vedic Astrology and Shastric Wisdom companion.
 You orchestrate two specialized agents to guide the seeker:
 1. Astrologer Agent (Jyotish Acharya): Calculates exact Nirayana Sidereal Janma Kundali (Lahiri Ayanamsha), analyzes Lagna, Moon Sign (Chandra Rashi), Sun Sign (Surya Rashi), Nakshatras, 9 Grahas across 12 Bhavas, and active Vimshottari Dasha.
@@ -615,6 +695,32 @@ class ShaastraAIRequestHandler(SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=str(PUBLIC_DIR), **kwargs)
 
+    def do_OPTIONS(self):
+        """Handle CORS preflight requests for cloud API access."""
+        self.send_response(204)
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization")
+        self.end_headers()
+
+    def do_GET(self):
+        """Handle health check endpoints for AWS App Runner, ECS, and ALB probes."""
+        if self.path in ("/health", "/api/health", "/healthz"):
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.end_headers()
+            self.wfile.write(json.dumps({
+                "status": "healthy",
+                "service": "ShaastraAI",
+                "port": PORT,
+                "rag_chunks": len(shastra_chunks),
+                "gemini_api_configured": bool(os.getenv("GEMINI_API_KEY", "").strip()),
+                "aws_region": os.getenv("AWS_DEFAULT_REGION", os.getenv("AWS_REGION", "us-east-1"))
+            }).encode("utf-8"))
+            return
+        super().do_GET()
+
     def do_POST(self):
         if self.path == "/api/chat":
             content_length = int(self.headers.get("Content-Length", 0))
@@ -636,6 +742,7 @@ class ShaastraAIRequestHandler(SimpleHTTPRequestHandler):
                 reply = generate_server_grounded_response(prompt, history)
                 self.send_response(200)
                 self.send_header("Content-Type", "application/json")
+                self.send_header("Access-Control-Allow-Origin", "*")
                 self.end_headers()
                 self.wfile.write(json.dumps({
                     "reply": reply,
@@ -723,44 +830,50 @@ class ShaastraAIRequestHandler(SimpleHTTPRequestHandler):
                 while contents and contents[0]["role"] != "user":
                     contents.pop(0)
 
-                # Try calling Gemini API with modern model names
-                candidate_text = None
-                for model_name in ["gemini-1.5-flash", "gemini-2.0-flash"]:
-                    try:
-                        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={api_key}"
-                        payload = {
-                            "systemInstruction": {"parts": [{"text": SYSTEM_INSTRUCTION}]},
-                            "contents": contents,
-                            "generationConfig": {
-                                "maxOutputTokens": 1400,
-                                "temperature": 0.3
+                # Tier 1: Try Amazon Bedrock (if on AWS with credentials or IAM task role)
+                candidate_text, tier_label = try_call_bedrock(
+                    prompt, history, SYSTEM_INSTRUCTION, astronomical_context, passages_context
+                )
+
+                # Tier 2: Try calling Gemini API (if Bedrock not configured or throttled)
+                if not candidate_text and api_key:
+                    for model_name in ["gemini-1.5-flash", "gemini-2.0-flash"]:
+                        try:
+                            url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={api_key}"
+                            payload = {
+                                "systemInstruction": {"parts": [{"text": SYSTEM_INSTRUCTION}]},
+                                "contents": contents,
+                                "generationConfig": {
+                                    "maxOutputTokens": 1400,
+                                    "temperature": 0.3
+                                }
                             }
-                        }
 
-                        req = urllib.request.Request(
-                            url,
-                            data=json.dumps(payload).encode("utf-8"),
-                            headers={"Content-Type": "application/json"}
-                        )
+                            req = urllib.request.Request(
+                                url,
+                                data=json.dumps(payload).encode("utf-8"),
+                                headers={"Content-Type": "application/json"}
+                            )
 
-                        with urllib.request.urlopen(req, timeout=15) as resp:
-                            resp_data = json.loads(resp.read().decode("utf-8"))
-                            candidate_text = resp_data.get("candidates", [{}])[0].get("content", {}).get("parts", [{}])[0].get("text", "")
-                            if candidate_text:
-                                break
-                    except Exception:
-                        continue
+                            with urllib.request.urlopen(req, timeout=15) as resp:
+                                resp_data = json.loads(resp.read().decode("utf-8"))
+                                candidate_text = resp_data.get("candidates", [{}])[0].get("content", {}).get("parts", [{}])[0].get("text", "")
+                                if candidate_text:
+                                    break
+                        except Exception:
+                            continue
 
-                # If cloud API succeeded, use it; otherwise seamlessly fall back to grounded engine
+                # Tier 3: Seamless fallback to Local Shastra RAG & Astrologer Engine
                 if candidate_text:
                     reply_text = candidate_text
-                    tier_label = "ShaastraAI Astrologer & Maharaj Ji Wisdom (Cloud AI)"
+                    tier_label = tier_label or "ShaastraAI Astrologer & Maharaj Ji Wisdom (Cloud AI)"
                 else:
                     reply_text = generate_server_grounded_response(prompt, history)
                     tier_label = "ShaastraAI Astrologer & Maharaj Ji Engine"
 
                 self.send_response(200)
                 self.send_header("Content-Type", "application/json")
+                self.send_header("Access-Control-Allow-Origin", "*")
                 self.end_headers()
                 self.wfile.write(json.dumps({
                     "reply": reply_text,
@@ -772,6 +885,7 @@ class ShaastraAIRequestHandler(SimpleHTTPRequestHandler):
                 reply_fallback = generate_server_grounded_response(prompt, history)
                 self.send_response(200)
                 self.send_header("Content-Type", "application/json")
+                self.send_header("Access-Control-Allow-Origin", "*")
                 self.end_headers()
                 self.wfile.write(json.dumps({
                     "reply": reply_fallback,
@@ -782,17 +896,25 @@ class ShaastraAIRequestHandler(SimpleHTTPRequestHandler):
 
 
 def run():
-    server_address = ("", PORT)
-    httpd = HTTPServer(server_address, ShaastraAIRequestHandler)
+    server_address = ("0.0.0.0", PORT)
+    try:
+        from http.server import ThreadingHTTPServer
+        httpd = ThreadingHTTPServer(server_address, ShaastraAIRequestHandler)
+    except Exception:
+        httpd = HTTPServer(server_address, ShaastraAIRequestHandler)
+
     print("=" * 65)
-    print("ShaastraAI Local Web Portal running at:")
+    print("ShaastraAI Web Portal & API running at:")
+    print(f"--> http://0.0.0.0:{PORT}")
     print(f"--> http://localhost:{PORT}")
-    print(f"--> http://127.0.0.1:{PORT}")
     print("Serving files from: public/")
     has_key = bool(os.getenv("GEMINI_API_KEY", "").strip())
-    print(f"GEMINI_API_KEY detected in .env: {'YES' if has_key else 'NO'}")
+    has_aws = bool(os.getenv("AWS_ACCESS_KEY_ID", "").strip() or os.getenv("AWS_CONTAINER_CREDENTIALS_RELATIVE_URI", "").strip())
+    print(f"AWS Bedrock / IAM detected: {'YES' if has_aws else 'NO (or using IAM task role)'}")
+    print(f"GEMINI_API_KEY detected in env: {'YES' if has_key else 'NO'}")
     print("Astrologer Agent & Maharaj Ji Multi-Agent System: ACTIVE")
     print(f"Shastra RAG Knowledge Engine: ACTIVE ({len(shastra_chunks)} clean indexed chunks)")
+    print(f"Health check endpoint: http://localhost:{PORT}/health")
     print("Press Ctrl+C to stop the server.")
     print("=" * 65)
     try:

@@ -846,9 +846,10 @@ async function handleSend() {
 
     // First try backend API (local python serve.py or Netlify function)
     try {
-      const endpoints = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-        ? ['/api/chat', '/.netlify/functions/chat']
-        : ['/.netlify/functions/chat', '/api/chat'];
+      const isNetlifyHost = window.location.hostname.includes('netlify.app');
+      const endpoints = isNetlifyHost
+        ? ['/.netlify/functions/chat', '/api/chat']
+        : ['/api/chat', '/.netlify/functions/chat'];
 
       for (const endpoint of endpoints) {
         try {

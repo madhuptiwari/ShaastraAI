@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  shaastra-portal:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: shaastra-ai:latest
+    container_name: shaastra-ai-portal
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-}
+      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-us-east-1}
+      - BEDROCK_MODEL_ID=${BEDROCK_MODEL_ID:-us.amazon.nova-lite-v1:0}
+      - S3_BUCKET_NAME=${S3_BUCKET_NAME:-}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s

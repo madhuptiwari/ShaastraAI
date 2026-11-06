@@ -1,0 +1,27 @@
+# Git and IDE files
+.git/
+.github/
+.gitignore
+.idea/
+.vscode/
+
+# Python Virtual Environments & Bytecode
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Raw Training PDFs (Already compiled into faiss_index.bin & chunks_metadata.json)
+training_pdfs/
+training_pdf/
+
+# Local Secrets (Pass these as AWS Environment Variables instead)
+.env
+.env.local
+
+# Temporary files and logs
+*.log
+*.tmp
+scratch/

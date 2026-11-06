@@ -1,0 +1,15 @@
+version: 1.0
+runtime: python311
+build:
+  commands:
+    build:
+      - pip install --upgrade pip
+      - pip install -r requirements.txt
+run:
+  command: python serve.py
+  network:
+    port: 8000
+    env: PORT
+  env:
+    - name: PORT
+      value: "8000"
