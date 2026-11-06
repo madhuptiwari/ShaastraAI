@@ -104,14 +104,18 @@ echo "Stopping any existing container..."
 $SUDO docker stop shaastra-ai-portal 2>/dev/null || true
 $SUDO docker rm shaastra-ai-portal 2>/dev/null || true
 
-echo "Starting ShaastraAI on port 80 and 8000 with auto-restart..."
+echo "Starting ShaastraAI on internal port 127.0.0.1:8000 with auto-restart..."
 $SUDO docker run -d \
     --name shaastra-ai-portal \
     --restart always \
-    -p 80:8000 \
-    -p 8000:8000 \
+    -p 127.0.0.1:8000:8000 \
     --env-file .env \
     shaastra-ai:latest
+
+# 7. Setup Nginx Reverse Proxy with HTTPS & SSL (ports 80 & 443)
+if [ -f "scripts/setup_ssl.sh" ]; then
+    bash scripts/setup_ssl.sh
+fi
 
 # Fetch public IP address
 PUBLIC_IP=$(curl -s --connect-timeout 2 https://checkip.amazonaws.com || curl -s --connect-timeout 2 http://169.254.169.254/latest/meta-data/public-ipv4 || echo "YOUR_EC2_PUBLIC_IP")
