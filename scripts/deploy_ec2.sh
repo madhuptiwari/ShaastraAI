@@ -31,20 +31,22 @@ if ! swapon --show | grep -q "/swapfile"; then
         echo '/swapfile none swap sw 0 0' | $SUDO tee -a /etc/fstab
     fi
     echo "Swap memory active."
+else
+    echo "Swap memory already active."
 fi
 
 # 2. Detect OS and install Docker & Git
 if command -v dnf &> /dev/null; then
     echo "Detected Amazon Linux 2023 / Fedora / RHEL..."
     $SUDO dnf update -y
-    $SUDO dnf install -y docker git curl
+    $SUDO dnf install -y --allowerasing docker git
     $SUDO systemctl start docker
     $SUDO systemctl enable docker
     $SUDO usermod -aG docker "$CURRENT_USER" || true
 elif command -v apt-get &> /dev/null; then
     echo "Detected Ubuntu / Debian..."
     $SUDO apt-get update -y
-    $SUDO apt-get install -y docker.io git curl
+    $SUDO apt-get install -y docker.io git
     $SUDO systemctl start docker
     $SUDO systemctl enable docker
     $SUDO usermod -aG docker "$CURRENT_USER" || true
@@ -53,17 +55,18 @@ fi
 # 3. Setup project directory with correct user permissions
 DEPLOY_DIR="/opt/shaastra-ai"
 echo "Setting up application directory at: $DEPLOY_DIR"
-$SUDO mkdir -p "$DEPLOY_DIR"
-$SUDO chown -R "$CURRENT_USER:$CURRENT_USER" "$DEPLOY_DIR"
-cd "$DEPLOY_DIR"
 
 # 4. Pull or clone repository
 if [ -d "$DEPLOY_DIR/.git" ]; then
     echo "Existing git repository found. Pulling latest master branch..."
-    git pull origin master
+    cd "$DEPLOY_DIR"
+    git fetch origin master
+    git reset --hard origin/master
 else
     echo "Cloning repository..."
-    git clone https://github.com/madhuptiwari/ShaastraAI.git .
+    $SUDO rm -rf "$DEPLOY_DIR"
+    git clone https://github.com/madhuptiwari/ShaastraAI.git "$DEPLOY_DIR"
+    cd "$DEPLOY_DIR"
 fi
 
 # Ensure user owns the files
@@ -71,14 +74,17 @@ $SUDO chown -R "$CURRENT_USER:$CURRENT_USER" "$DEPLOY_DIR"
 
 # 5. Create or verify .env file
 if [ ! -f .env ]; then
-    echo "Creating .env template..."
+    echo "Creating .env configuration..."
     cat <<EOT > .env
 PORT=8000
-GEMINI_API_KEY=
-AWS_DEFAULT_REGION=us-east-1
-BEDROCK_MODEL_ID=us.amazon.nova-lite-v1:0
+AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-us-east-1}
+S3_BUCKET_NAME=${S3_BUCKET_NAME:-claude-pdf-audio-madhup-2026}
+BEDROCK_MODEL_ID=${BEDROCK_MODEL_ID:-us.amazon.nova-pro-v1:0}
+BEDROCK_EMBEDDING_ID=${BEDROCK_EMBEDDING_ID:-amazon.titan-embed-text-v2:0}
+AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-}
+AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-}
+GEMINI_API_KEY=${GEMINI_API_KEY:-}
 EOT
-    echo "Notice: Please add your GEMINI_API_KEY to $DEPLOY_DIR/.env"
 fi
 
 # 6. Build and run Docker container
