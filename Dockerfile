@@ -29,10 +29,9 @@ COPY serve.py .
 COPY app.py .
 COPY public/ ./public/
 
-# Copy pre-indexed classical Shastra vector database and metadata
-# (Allows 100% offline zero-latency RAG on AWS without re-indexing)
-COPY chunks_metadata.json .
-COPY faiss_index.bin .
+# Copy pre-indexed classical Shastra vector database and metadata (if present)
+# Wildcard syntax ensures docker build succeeds even if vector cache is pulled from S3 at runtime
+COPY chunks_metadata.jso[n] faiss_index.bi[n] ./
 
 # Expose web portal port
 EXPOSE 8000
